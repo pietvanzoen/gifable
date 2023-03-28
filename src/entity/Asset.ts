@@ -12,7 +12,7 @@ import {
 @Entity()
 export class Asset {
   @PrimaryGeneratedColumn()
-  id?: number;
+  id: number;
 
   @Column({ unique: true })
   @IsUrl()
@@ -22,10 +22,10 @@ export class Asset {
   comment?: string;
 
   @CreateDateColumn()
-  createdAt?: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt?: Date;
+  updatedAt: Date;
 
   @BeforeInsert()
   @BeforeUpdate()

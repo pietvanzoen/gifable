@@ -13,4 +13,8 @@ export class AssetService {
     const asset = this.assetRepository.create(data);
     return this.assetRepository.save(asset);
   }
+
+  async getAll() {
+    return this.assetRepository.find();
+  }
 }

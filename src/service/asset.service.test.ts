@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { initTestDataSource } from '../data-source';
 import { AssetService } from './asset.service';
-import { chance } from '../test-helpers';
+import { Fixtures, chance } from '../test-helpers';
 
 describe('AssetService', () => {
   let dataSource: DataSource;
@@ -9,8 +9,8 @@ describe('AssetService', () => {
   beforeAll(async () => {
     dataSource = await initTestDataSource();
   });
-
   afterAll(async () => dataSource.destroy());
+  beforeEach(async () => dataSource.synchronize(true));
 
   let assetService: AssetService;
   beforeEach(() => {
@@ -39,6 +39,15 @@ describe('AssetService', () => {
           },
         }),
       ]);
+    });
+  });
+
+  describe('getAll', () => {
+    it('returns all assets', async () => {
+      await assetService.create(Fixtures.Asset());
+      await assetService.create(Fixtures.Asset());
+      const assets = await assetService.getAll();
+      expect(assets.length).toBe(2);
     });
   });
 });
