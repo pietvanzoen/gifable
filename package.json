@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "npx nodemon",
     "start": "yarn build && node build/index.js",
-    "build": "rm -rf ./build && tsc"
+    "build": "rm -rf ./build && tsc",
+    "fmt": "prettier --write ."
   },
   "dependencies": {
     "reflect-metadata": "^0.1.13",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^18.15.10",
     "nodemon": "^2.0.22",
+    "prettier": "^2.8.7",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2"
   }
