@@ -1,16 +1,35 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { IsUrl, validateOrReject } from 'class-validator';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 
 @Entity()
 export class Asset {
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
-  @Column()
-  firstName: string;
+  @Column({ unique: true })
+  @IsUrl()
+  url: string;
 
-  @Column()
-  lastName: string;
+  @Column('text')
+  comment?: string;
 
-  @Column()
-  age: number;
+  @CreateDateColumn()
+  createdAt?: Date;
+
+  @UpdateDateColumn()
+  updatedAt?: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async validate() {
+    await validateOrReject(this);
+  }
 }
