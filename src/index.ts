@@ -1,22 +1,33 @@
-import { AppDataSource } from './data-source';
-import { Asset } from './entity/Asset';
+import { PrismaClient } from '@prisma/client';
+import * as dotenv from 'dotenv'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+import server from './server';
+dotenv.config();
 
-AppDataSource.initialize()
-  .then(async () => {
-    console.log('Inserting a new asset into the database...');
-    const asset = new Asset();
-    asset.firstName = 'Timber';
-    asset.lastName = 'Saw';
-    asset.age = 25;
-    await AppDataSource.manager.save(asset);
-    console.log('Saved a new asset with id: ' + asset.id);
+const { PORT = 3000 } = process.env;
 
-    console.log('Loading assets from the database...');
-    const assets = await AppDataSource.manager.find(Asset);
-    console.log('Loaded assets: ', assets);
+export default async function main() {
+  const db = new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'],
+  });
 
-    console.log(
-      'Here you can setup and run express / fastify / any other framework.'
-    );
-  })
-  .catch((error) => console.log(error));
+  const fastify = server({ db });
+
+  return fastify;
+}
+
+if (require.main === module) {
+  main()
+    .then((fastify) => {
+      fastify.listen({ port: Number(PORT) }, (err) => {
+        if (err) {
+          fastify.log.error(err);
+          process.exit(1);
+        }
+        fastify.log.info(`Server started`);
+      });
+    })
+    .catch((err) => {
+      console.error('failed to start server.', err);
+      process.exit(1);
+    });
+}

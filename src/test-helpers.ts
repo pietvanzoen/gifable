@@ -1,10 +1,11 @@
 import Chance from 'chance';
-import { Asset } from './entity/Asset';
+import fs from 'node:fs/promises';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 export const chance = new Chance();
 
 export const Fixtures = {
-  Asset(options?: Partial<Asset>): Partial<Asset> {
+  Asset(options?: Partial<Prisma.AssetCreateInput>): Prisma.AssetCreateInput {
     return {
       url: chance.url(),
       comment: chance.sentence(),
@@ -12,3 +13,7 @@ export const Fixtures = {
     };
   },
 };
+
+export function createTestDB() {
+  return new PrismaClient({ datasources: { db: { url: 'file:./test.db' } } });
+}
