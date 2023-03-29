@@ -1,5 +1,4 @@
 import Chance from 'chance';
-import fs from 'node:fs/promises';
 import { Prisma, PrismaClient } from '@prisma/client';
 
 export const chance = new Chance();
