@@ -14,7 +14,7 @@ export default async function server({ db }: ServerOptions) {
 
   fastify.decorate<PrismaClient>('db', db);
 
-  fastify.register(api, { db });
+  fastify.register(api, { db, prefix: 'api' });
 
   return fastify;
 }
