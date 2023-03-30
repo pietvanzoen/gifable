@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    <title>Gifme</title>
+    <style>
+      figure {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Gifme</h1>
+      <nav>
+        <a href="/">Search</a>
+        <a class="current" href="/add">Add</a>
+      </nav>
+    </header>
+
+    <main>
+      <figure>
+        <img id="img" />
+        <figcaption><a id="link"></a></figcaption>
+      </figure>
+      <form id="add-form" name="add">
+        <label for="comment">Comment</label>
+        <textarea id="comment" name="comment"></textarea>
+        <div id="message"></div>
+        <button type="reset">Reset</button>
+        <button type="submit">Save</button>
+      </form>
+    </main>
+
+    <script type="module">
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const resp = await fetch(`/api/assets/${id}`);
+      let asset = await resp.json();
+
+      const comment = document.getElementById('comment');
+      comment.value = asset.comment;
+      document.getElementById('img').setAttribute('src', asset.url);
+      const link = document.getElementById('link');
+      link.setAttribute('href', asset.url);
+      link.textContent = asset.url;
+
+      const form = document.getElementById('add-form');
+
+      form.addEventListener('reset', (event) => {
+        event.preventDefault();
+        comment.value = asset.comment;
+      });
+
+      const message = document.getElementById('message');
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        fetch('/api/assets/' + asset.id, {
+          method: 'POST',
+          body: JSON.stringify(serializeForm(event.target)),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        })
+          .then(async (response) => {
+            const json = await response.json();
+            if (response.ok) {
+              return json;
+            }
+            throw json;
+          })
+          .then((data) => {
+            asset = data;
+            comment.value = data.comment;
+            window.alert('Saved');
+          })
+          .catch((error) => {
+            setMessage(error.message);
+            console.warn(error);
+          });
+      });
+
+      function setMessage(str) {
+        message.lastChild?.remove();
+
+        const p = document.createElement('p');
+        p.classList.add('notice');
+        p.textContent = str;
+        message.appendChild(p);
+      }
+
+      function serializeForm(form) {
+        const obj = {};
+        const formData = new FormData(form);
+        for (const key of formData.keys()) {
+          obj[key] = formData.get(key);
+        }
+        return obj;
+      }
+    </script>
+  </body>
+</html>

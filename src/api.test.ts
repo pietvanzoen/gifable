@@ -74,6 +74,20 @@ describe('/api', () => {
       });
     });
 
+    it('url is not required', async () => {
+      const data = Fixtures.Asset();
+      const response = await app
+        .inject()
+        .post(`/api/assets/${asset.id}`)
+        .payload({ comment: 'wibble' });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({
+        id: asset.id,
+        comment: 'wibble',
+      });
+    });
+
     it('returns error when asset does not exist', async () => {
       const response = await app
         .inject()
@@ -113,6 +127,18 @@ describe('/api', () => {
         { id: asset1.id },
         { id: asset2.id },
       ]);
+    });
+
+    it('searches comments', async () => {
+      const [asset1, asset2] = await Promise.all([
+        db.asset.create({ data: Fixtures.Asset({ comment: 'foo, bar' }) }),
+        db.asset.create({ data: Fixtures.Asset({ comment: 'baz, qux' }) }),
+      ]);
+
+      const response = await app.inject().get('/api/assets?search=foo');
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject([{ id: asset1.id }]);
     });
   });
 });

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    <title>Gifme</title>
+  </head>
+  <body>
+    <header>
+      <h1>Gifme</h1>
+      <nav>
+        <a href="/">Search</a>
+        <a class="current" href="/add">Add</a>
+      </nav>
+    </header>
+
+    <main>
+      <form id="add-form" name="add">
+        <label for="url">URL</label>
+        <input id="url" name="url" type="text" />
+        <label for="comment">Comment</label>
+        <textarea id="comment" name="comment"></textarea>
+        <div id="message"></div>
+        <button type="reset">Reset</button>
+        <button type="submit">Submit</button>
+      </form>
+    </main>
+
+    <script type="module">
+      const form = document.getElementById('add-form');
+      const message = document.getElementById('message');
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        fetch('/api/assets', {
+          method: 'POST',
+          body: JSON.stringify(serializeForm(event.target)),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        })
+          .then(async (response) => {
+            const json = await response.json();
+            if (response.ok) {
+              return json;
+            }
+            throw json;
+          })
+          .then((data) => {
+            window.location = '/';
+          })
+          .catch((error) => {
+            setMessage(error.message);
+            console.warn(error);
+          });
+      });
+
+      form.addEventListener('reset', () => message.lastChild?.remove());
+
+      function setMessage(str) {
+        message.lastChild?.remove();
+
+        const p = document.createElement('p');
+        p.classList.add('notice');
+        p.textContent = str;
+        message.appendChild(p);
+      }
+
+      function serializeForm(form) {
+        const obj = {};
+        const formData = new FormData(form);
+        for (const key of formData.keys()) {
+          obj[key] = formData.get(key);
+        }
+        return obj;
+      }
+    </script>
+  </body>
+</html>

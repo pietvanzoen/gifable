@@ -1,13 +1,18 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { FastifyInstance } from 'fastify';
 import {
   AssetCreate,
   AssetCreateType,
+  AssetSearch,
+  AssetSearchType,
   AssetType,
+  AssetUpdate,
+  AssetUpdateType,
   UpdateParams,
   UpdateParamsType,
 } from './api.types';
 import { errorHandler } from './error-handler';
+import createHttpError from 'http-errors';
 
 type ApiOptions = {
   db: PrismaClient;
@@ -29,12 +34,12 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
   );
 
   app.post<{
-    Body: AssetCreateType;
+    Body: AssetUpdateType;
     Params: UpdateParamsType;
     Reply: AssetType;
   }>(
     '/assets/:id',
-    { schema: { params: UpdateParams, body: AssetCreate } },
+    { schema: { params: UpdateParams, body: AssetUpdate } },
     async (request, reply) => {
       const asset = await db.asset.update({
         where: { id: request.params.id },
@@ -47,9 +52,29 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
     }
   );
 
-  app.get<{ Reply: AssetType[] }>(
+  app.get<{
+    Params: UpdateParamsType;
+    Reply: AssetType;
+  }>('/assets/:id', { schema: { params: UpdateParams } }, async (request) => {
+    const asset = await db.asset.findUnique({
+      where: { id: request.params.id },
+    });
+    if (!asset) throw createHttpError.NotFound();
+
+    return asset;
+  });
+
+  app.get<{ Reply: AssetType[]; Querystring: AssetSearchType }>(
     '/assets',
-    async () => await db.asset.findMany({ orderBy: { createdAt: 'desc' } })
+    { schema: { querystring: AssetSearch } },
+    async (request) => {
+      const { search } = request.query;
+      const where: Prisma.AssetWhereInput = {};
+      if (search) {
+        where.comment = { contains: search };
+      }
+      return db.asset.findMany({ where, orderBy: { createdAt: 'desc' } });
+    }
   );
 
   app.setErrorHandler(errorHandler);
