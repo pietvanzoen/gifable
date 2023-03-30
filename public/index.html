@@ -10,6 +10,7 @@
         grid-template-columns: 1fr 1fr 1fr;
       }
       figure {
+        position: relative;
         display: inline-block;
         margin: 0.5em;
         text-align: center;
@@ -18,10 +19,21 @@
         grid-template-columns: 1fr min(60em, 90%) 1fr;
       }
       .copy-button {
+        position: absolute;
+        font-size: 0.8em;
+        top: 0.2em;
+        right: 0.5em;
         padding: 0;
         border-radius: 100%;
         width: 2em;
         height: 2em;
+      }
+      figure > a > img {
+        border: 1px solid transparent;
+        width: 100%;
+      }
+      figure > a:hover > img {
+        border-color: var(--accent);
       }
     </style>
     <title>Gifme</title>
@@ -84,9 +96,25 @@
 
       function Asset(props) {
         return html`<figure>
-          <a href="/view?id=${props.id}"><img src="${props.url}" /></a>
+          <a href="/view?id=${props.id}">
+            <img src="${props.url}" alt=${props.comment} />
+            <${CopyButton} url="${props.url}" />
+          </a>
           <figcaption>${props.comment}</figcaption>
         </figure>`;
+      }
+
+      function CopyButton(props) {
+        return html`<button
+          classList="copy-button"
+          title="Copy url"
+          onClick=${(event) => {
+            event.preventDefault();
+            navigator.clipboard.writeText(props.url);
+          }}
+        >
+          🔗
+        </button>`;
       }
 
       function debounce(callback, wait) {
