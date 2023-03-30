@@ -33,63 +33,73 @@
         <a class="current" href="/">Search</a>
         <a href="/add">Add</a>
       </nav>
-      <form id="form-search" method="get" action="/" name="search">
-        <input id="search-input" name="q" type="search" placeholder="Search" />
-      </form>
     </header>
 
-    <main>
-      <div id="results"></div>
-    </main>
+    <main id="main"></main>
 
-    <script type="module">
-      const searchInput = document.getElementById('search-input');
+    <script type="module" defer>
+      import { render } from 'https://esm.sh/preact';
+      import { html } from 'https://esm.sh/htm/preact';
+      import { useState, useEffect } from 'https://esm.sh/preact/hooks';
+
       const params = new URLSearchParams(window.location.search);
       const q = params.get('q');
-      if (q) {
-        searchInput.value = q;
-      }
 
-      document
-        .getElementById('form-search')
-        .addEventListener('reset', () => (window.location = '/'));
+      function App(props) {
+        const [assets, setAssets] = useState([]);
+        const [search, setSearch] = useState(q || '');
 
-      loadResults(q);
-      async function loadResults(search) {
-        let params = '';
-        if (search) {
-          params = new URLSearchParams({ search });
-        }
-        const resp = await fetch('/api/assets?' + params);
-        const assets = await resp.json();
-        const resultsEl = document.getElementById('results');
-
-        assets.forEach((asset) => {
-          const figure = document.createElement('figure');
-          const anchor = document.createElement('a');
-          anchor.setAttribute('href', `/view?id=${asset.id}`);
-          const img = document.createElement('img');
-          img.setAttribute('src', asset.url);
-          img.setAttribute('loading', 'lazy');
-          anchor.appendChild(img);
-          figure.appendChild(anchor);
-          const caption = document.createElement('figcaption');
-          if (asset.comment) {
-            caption.textContent = asset.comment + ' ';
+        useEffect(async () => {
+          let params = '';
+          if (search) {
+            params = new URLSearchParams({ search });
           }
-          const button = document.createElement('button');
-          button.classList.add('copy-button');
-          button.setAttribute('title', 'copy url');
-          button.addEventListener('click', (event) => {
-            event.preventDefault();
-            navigator.clipboard.writeText(asset.url);
-          });
-          button.textContent = '📋';
-          caption.appendChild(button);
-          figure.appendChild(caption);
-          results.appendChild(figure);
-        });
+          const resp = await fetch('/api/assets?' + params);
+          setAssets(await resp.json());
+          window.history.pushState(null, '', '/?' + params);
+        }, [search]);
+
+        return html`<div>
+          <${Search} setSearch=${setSearch} search=${search} />
+          <${Results} assets=${assets} />
+        </div>`;
       }
+
+      function Search(props) {
+        return html`<search
+          ><input
+            type="search"
+            value=${props.search}
+            placeholder="Search"
+            onInput=${debounce(
+              (event) => props.setSearch(event.target.value),
+              500
+            )}
+        /></search>`;
+      }
+
+      function Results(props) {
+        return html`<div id="results">${props.assets.map(Asset)}</div>`;
+      }
+
+      function Asset(props) {
+        return html`<figure>
+          <a href="/view?id=${props.id}"><img src="${props.url}" /></a>
+          <figcaption>${props.comment}</figcaption>
+        </figure>`;
+      }
+
+      function debounce(callback, wait) {
+        let timeoutId = null;
+        return (...args) => {
+          window.clearTimeout(timeoutId);
+          timeoutId = window.setTimeout(() => {
+            callback.apply(null, args);
+          }, wait);
+        };
+      }
+
+      render(html`<${App} />`, document.getElementById('main'));
     </script>
   </body>
 </html>
