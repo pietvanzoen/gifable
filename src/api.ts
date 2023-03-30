@@ -49,7 +49,7 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
 
   app.get<{ Reply: AssetType[] }>(
     '/assets',
-    async () => await db.asset.findMany()
+    async () => await db.asset.findMany({ orderBy: { createdAt: 'desc' } })
   );
 
   app.setErrorHandler(errorHandler);
