@@ -1,0 +1,37 @@
+@import url('https://cdn.simplecss.org/simple.min.css');
+
+nav a.current {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+#results {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+#results figure {
+  position: relative;
+  display: inline-block;
+  margin: 0.5em;
+  text-align: center;
+}
+body.search {
+  grid-template-columns: 1fr min(60em, 90%) 1fr;
+}
+.copy-button {
+  position: absolute;
+  font-size: 0.8em;
+  top: 0.2em;
+  right: 0.5em;
+  padding: 0;
+  border-radius: 100%;
+  width: 2em;
+  height: 2em;
+}
+figure > a > img {
+  border: 1px solid transparent;
+  width: 100%;
+}
+figure > a:hover > img {
+  border-color: var(--accent);
+}
