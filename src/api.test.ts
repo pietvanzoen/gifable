@@ -141,4 +141,15 @@ describe('/api', () => {
       expect(response.json()).toMatchObject([{ id: asset1.id }]);
     });
   });
+
+  describe('DELETE /assets/:id', () => {
+    it('deletes asset', async () => {
+      const asset = await db.asset.create({ data: Fixtures.Asset() });
+
+      const response = await app.inject().delete(`/api/assets/${asset.id}`);
+
+      expect(response.statusCode).toBe(204);
+      expect(response.json()).toBe(null);
+    });
+  });
 });

@@ -29,9 +29,17 @@
         <label for="comment">Comment</label>
         <textarea id="comment" name="comment"></textarea>
         <div id="message"></div>
-        <button type="reset">Reset</button>
-        <button type="submit">Save</button>
+
+        <center>
+          <button type="reset">Reset</button>
+          <button type="submit">Save</button>
+        </center>
       </form>
+      <hr />
+
+      <center>
+        <button type="button" id="btn-delete">🗑️ Delete this asset</button>
+      </center>
     </main>
 
     <script type="module">
@@ -80,6 +88,31 @@
           })
           .catch((error) => {
             setMessage(error.message);
+            console.warn(error);
+          });
+      });
+
+      const btnDelete = document.getElementById('btn-delete');
+      btnDelete.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        if (!window.confirm('Are you sure?')) {
+          return;
+        }
+
+        fetch('/api/assets/' + asset.id, {
+          method: 'DELETE',
+        })
+          .then((response) => {
+            if (response.ok) return;
+            throw json;
+          })
+          .then(() => {
+            window.location.href = '/';
+          })
+          .catch(async (error) => {
+            const data = await response.json();
+            setMessage(data.message);
             console.warn(error);
           });
       });

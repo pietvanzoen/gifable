@@ -77,5 +77,22 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
     }
   );
 
+  app.delete<{
+    Params: UpdateParamsType;
+    Reply: null;
+  }>(
+    '/assets/:id',
+    { schema: { params: UpdateParams } },
+    async (request, reply) => {
+      const asset = await db.asset.delete({
+        where: { id: request.params.id },
+      });
+      if (!asset) throw createHttpError.NotFound();
+
+      reply.status(204);
+      return null;
+    }
+  );
+
   app.setErrorHandler(errorHandler);
 }
