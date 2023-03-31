@@ -21,5 +21,12 @@ export function errorHandler(
       : createHttpError(500, 'Something went wrong', { error: originalError });
   }
 
-  reply.send(parsedError || originalError);
+  const error = parsedError || originalError;
+
+  const { statusCode } = error;
+  if (!statusCode || statusCode >= 500) {
+    request.log.error(error);
+  }
+
+  reply.send(error);
 }
