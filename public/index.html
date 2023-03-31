@@ -99,7 +99,13 @@
       function Asset(props) {
         return html`<figure>
           <a href="/view?id=${props.id}">
-            <img src="${props.url}" alt=${props.comment} />
+            <img
+              src="${props.url}"
+              alt=${props.comment}
+              loading="lazy"
+              height="300"
+              width="300"
+            />
             <${CopyButton} url="${props.url}" />
           </a>
           <figcaption>${props.comment}</figcaption>
