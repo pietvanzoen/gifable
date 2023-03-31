@@ -10,6 +10,8 @@ export default async function main() {
     log: ['query', 'info', 'warn', 'error'],
   });
 
+  await db.$connect();
+
   const fastify = server({ db });
 
   return fastify;
@@ -18,7 +20,7 @@ export default async function main() {
 if (require.main === module) {
   main()
     .then((fastify) => {
-      fastify.listen({ port: Number(PORT) }, (err) => {
+      fastify.listen({ port: Number(PORT), host: '0.0.0.0' }, (err) => {
         if (err) {
           fastify.log.error(err);
           process.exit(1);
