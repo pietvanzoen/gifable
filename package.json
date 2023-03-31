@@ -15,7 +15,8 @@
     "test": "jest",
     "predev": "prisma generate",
     "migrate": "prisma migrate deploy",
-    "start:docker": "yarn migrate && node build/main.js"
+    "start:docker": "yarn migrate && node build/main.js",
+    "deploy": "docker build -t pietvanzoen/gifme:latest . && docker push pietvanzoen/gifme:latest"
   },
   "dependencies": {
     "@fastify/static": "^6.9.0",
