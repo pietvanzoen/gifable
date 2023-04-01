@@ -51,6 +51,18 @@ describe('/api', () => {
         message: expect.stringMatching(/url/),
       });
     });
+
+    it('returns error if url is already in use', async () => {
+      const data = Fixtures.Asset();
+      await db.asset.create({ data });
+
+      const response = await app.inject().post('/api/assets').payload(data);
+
+      expect(response.statusCode).toBe(409);
+      expect(response.json()).toMatchObject({
+        message: expect.stringMatching(/url/),
+      });
+    });
   });
 
   describe('POST /assets/:id', () => {

@@ -1,19 +1,24 @@
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { FastifyError, FastifyRequest, FastifyReply } from 'fastify';
 import createHttpError, { HttpError } from 'http-errors';
 
-type ErrorHandler = (error: FastifyError) => HttpError;
+type ErrorHandler = (error: PrismaClientKnownRequestError) => HttpError;
 const errorHandlers: { [code: string]: ErrorHandler } = {
   P2025: () => createHttpError.NotFound('Resource not found'),
+  P2002: (error) =>
+    createHttpError.Conflict(
+      `Unique constraint failed on field ${error.meta?.target}`
+    ),
 };
 
 export function errorHandler(
-  originalError: FastifyError,
+  originalError: FastifyError | PrismaClientKnownRequestError | HttpError,
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   let parsedError: HttpError | null = null;
 
-  if (originalError.constructor.name.startsWith('Prisma')) {
+  if (originalError instanceof PrismaClientKnownRequestError) {
     const handler = errorHandlers[originalError.code];
 
     parsedError = handler
@@ -21,12 +26,5 @@ export function errorHandler(
       : createHttpError(500, 'Something went wrong', { error: originalError });
   }
 
-  const error = parsedError || originalError;
-
-  const { statusCode } = error;
-  if (!statusCode || statusCode >= 500) {
-    request.log.error(error);
-  }
-
-  reply.send(error);
+  reply.send(parsedError || originalError);
 }
