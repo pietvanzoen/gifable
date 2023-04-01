@@ -4,6 +4,7 @@ import api from './api';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import path from 'path';
 import fastifyStatic from '@fastify/static';
+import createHttpError from 'http-errors';
 
 type ServerOptions = {
   db: PrismaClient;
@@ -23,6 +24,15 @@ export default async function server({ db, options }: ServerOptions) {
   });
 
   await fastify.register(api, { db, prefix: 'api' });
+
+  fastify.get('/health', async () => {
+    try {
+      await db.$connect();
+      return { status: 'ok' };
+    } catch (error) {
+      throw createHttpError.ServiceUnavailable();
+    }
+  });
 
   return fastify;
 }

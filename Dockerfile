@@ -23,3 +23,5 @@ WORKDIR /usr/app
 COPY --from=ts-remover /usr/app ./
 USER 1000
 CMD ["yarn", "start:docker"]
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl -f http://0.0.0.0:3000/health || exit 1
