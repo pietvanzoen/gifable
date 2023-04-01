@@ -29,8 +29,8 @@ export default async function server({ db, options }: ServerOptions) {
     try {
       await db.$connect();
       return { status: 'ok' };
-    } catch (error) {
-      throw createHttpError.ServiceUnavailable();
+    } catch (error: any) {
+      throw createHttpError.ServiceUnavailable(error?.message);
     }
   });
 
