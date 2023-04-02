@@ -2,8 +2,10 @@
 
 Self hosted gif library
 
-Features:
+TODO:
 
-- Upload gifs to your library
-- Search gifs by name or tags
-- Quick copy link to gif
+- [ ] Upload gifs to your library
+- [x] Search gifs by comment
+- [ ] Search gifs by tag
+- [ ] Basic user auth
+- [x] Quick copy link to gif
