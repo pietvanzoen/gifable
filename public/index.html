@@ -91,7 +91,7 @@
       function CopyButton(props) {
         return html`<button
           classList="copy-button"
-          title="Copy url"
+          title=${`Copy ${props.url} to clipboard`}
           onClick=${(event) => {
             event.preventDefault();
             navigator.clipboard.writeText(props.url);
