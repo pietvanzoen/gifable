@@ -126,8 +126,11 @@ describe('/api', () => {
   });
 
   describe('GET /assets', () => {
+    const sleep = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
     it('returns all asset', async () => {
       const asset1 = await db.asset.create({ data: Fixtures.Asset() });
+      await sleep(0);
       const asset2 = await db.asset.create({ data: Fixtures.Asset() });
 
       const response = await app.inject().get('/api/assets');
