@@ -11,6 +11,12 @@ type ServerOptions = {
   options?: FastifyServerOptions;
 };
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    db: PrismaClient;
+  }
+}
+
 export default async function server({ db, options }: ServerOptions) {
   const fastify = Fastify({
     logger: true,
@@ -23,7 +29,7 @@ export default async function server({ db, options }: ServerOptions) {
     root: path.join(__dirname, '../public'),
   });
 
-  await fastify.register(api, { db, prefix: 'api' });
+  await fastify.register(api, { prefix: 'api' });
 
   fastify.get('/health', async () => {
     try {

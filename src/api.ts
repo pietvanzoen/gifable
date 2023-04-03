@@ -14,16 +14,12 @@ import {
 import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
 
-type ApiOptions = {
-  db: PrismaClient;
-};
-
-export default async function api(app: FastifyInstance, { db }: ApiOptions) {
+export default async function api(app: FastifyInstance) {
   app.post<{ Body: AssetCreateType; Reply: AssetType }>(
     '/assets',
     { schema: { body: AssetCreate } },
     async (request, reply) => {
-      const asset = await db.asset.create({
+      const asset = await app.db.asset.create({
         data: request.body,
       });
 
@@ -41,7 +37,7 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
     '/assets/:id',
     { schema: { params: UpdateParams, body: AssetUpdate } },
     async (request, reply) => {
-      const asset = await db.asset.update({
+      const asset = await app.db.asset.update({
         where: { id: request.params.id },
         data: request.body,
       });
@@ -56,7 +52,7 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
     Params: UpdateParamsType;
     Reply: AssetType;
   }>('/assets/:id', { schema: { params: UpdateParams } }, async (request) => {
-    const asset = await db.asset.findUnique({
+    const asset = await app.db.asset.findUnique({
       where: { id: request.params.id },
     });
     if (!asset) throw createHttpError.NotFound();
@@ -73,7 +69,10 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
       if (search) {
         where.comment = { contains: search.trim() };
       }
-      return db.asset.findMany({ where, orderBy: { createdAt: 'desc' } });
+      return app.db.asset.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+      });
     }
   );
 
@@ -84,7 +83,7 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
     '/assets/:id',
     { schema: { params: UpdateParams } },
     async (request, reply) => {
-      const asset = await db.asset.delete({
+      const asset = await app.db.asset.delete({
         where: { id: request.params.id },
       });
       if (!asset) throw createHttpError.NotFound();
