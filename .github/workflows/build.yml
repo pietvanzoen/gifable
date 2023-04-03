@@ -29,9 +29,9 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
+    needs: [build, test]
     steps:
       - name: Login to GitHub Container Registry
-        needs: [build, test]
         uses: docker/login-action@v1
         with:
           registry: docker.pkg.github.com
