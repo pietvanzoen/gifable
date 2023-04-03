@@ -127,17 +127,15 @@ describe('/api', () => {
 
   describe('GET /assets', () => {
     it('returns all asset', async () => {
-      const [asset1, asset2] = await Promise.all([
-        db.asset.create({ data: Fixtures.Asset() }),
-        db.asset.create({ data: Fixtures.Asset() }),
-      ]);
+      const asset1 = await db.asset.create({ data: Fixtures.Asset() });
+      const asset2 = await db.asset.create({ data: Fixtures.Asset() });
 
       const response = await app.inject().get('/api/assets');
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toMatchObject([
-        { id: asset1.id },
         { id: asset2.id },
+        { id: asset1.id },
       ]);
     });
 
