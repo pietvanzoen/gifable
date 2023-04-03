@@ -22,15 +22,11 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag docker.pkg.github.com/pietvanzoen/gifme/gifme:latest
-
-  publish:
-    runs-on: ubuntu-latest
-    needs: [build, test]
-    steps:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
