@@ -71,7 +71,7 @@ export default async function api(app: FastifyInstance, { db }: ApiOptions) {
       const { search } = request.query;
       const where: Prisma.AssetWhereInput = {};
       if (search) {
-        where.comment = { contains: search };
+        where.comment = { contains: search.trim() };
       }
       return db.asset.findMany({ where, orderBy: { createdAt: 'desc' } });
     }
