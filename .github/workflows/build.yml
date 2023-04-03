@@ -7,6 +7,19 @@ on:
     branches: [main]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: yarn install
+      - name: Run tests
+        run: yarn test
+
   build:
     runs-on: ubuntu-latest
     steps:
