@@ -18,7 +18,9 @@
     <main>
       <form id="add-form" name="add">
         <label for="url">URL</label>
-        <input id="url" name="url" type="text" />
+        <input id="url" name="url" type="text" required />
+        <label for="name">File name</label>
+        <input id="filename" name="filename" type="text" required />
         <label for="comment">Comment</label>
         <textarea id="comment" name="comment"></textarea>
         <div id="message"></div>
@@ -31,33 +33,43 @@
       const form = document.getElementById('add-form');
       const message = document.getElementById('message');
 
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
+        const formData = serializeForm(event.target);
 
-        fetch('/api/assets', {
-          method: 'POST',
-          body: JSON.stringify(serializeForm(event.target)),
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        })
-          .then(async (response) => {
-            const json = await response.json();
-            if (response.ok) {
-              return json;
-            }
-            throw json;
-          })
-          .then((data) => {
-            window.location = '/';
-          })
-          .catch((error) => {
-            setMessage(error.message);
-            console.warn(error);
-          });
+        try {
+          const data = await request('POST', '/api/upload', formData);
+          formData.url = data.url;
+        } catch (error) {
+          setMessage(error.message);
+          return;
+        }
+
+        try {
+          const response = await request('POST', '/api/assets', formData);
+          window.location = '/view?id=' + response.id;
+        } catch (error) {
+          setMessage(error.message);
+        }
       });
 
       form.addEventListener('reset', () => message.lastChild?.remove());
+
+      function request(method, url, data) {
+        return fetch(url, {
+          method,
+          body: JSON.stringify(data),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        }).then(async (response) => {
+          const json = await response.json();
+          if (response.ok) {
+            return json;
+          }
+          throw json;
+        });
+      }
 
       function setMessage(str) {
         message.lastChild?.remove();

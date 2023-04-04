@@ -1,13 +1,15 @@
-import { Asset, Prisma, PrismaClient } from '@prisma/client';
-import { Fixtures, createTestDB } from './test-helpers';
+import { Asset, PrismaClient } from '@prisma/client';
+import { Fixtures, createFileStorageMock, createTestDB } from './test-helpers';
 import server from './server';
 import { FastifyInstance } from 'fastify';
+import FileStorage from './file-storage';
 
 describe('/api', () => {
-  let db: PrismaClient, app: FastifyInstance;
+  let db: PrismaClient, app: FastifyInstance, storage: FileStorage;
   beforeAll(async () => {
     db = createTestDB();
-    app = await server({ db, options: { logger: false } });
+    storage = createFileStorageMock();
+    app = await server({ db, storage, options: { logger: false } });
   });
 
   afterAll(async () => Promise.all([db.$disconnect(), app.close()]));
@@ -164,5 +166,22 @@ describe('/api', () => {
       expect(response.statusCode).toBe(204);
       expect(response.json()).toBe(null);
     });
+  });
+
+  describe('POST /upload', () => {
+    it.skip('uploads url to storage', async () => {
+      const data = Fixtures.Upload();
+      const response = await app.inject().post('/api/upload').payload(data);
+
+      expect(response.statusCode).toBe(200);
+      expect(storage.uploadURL).toHaveBeenCalledWith(
+        data.url,
+        expect.any(String)
+      );
+    });
+
+    it.todo('returns error if file already exists');
+    it.todo('returns error if file is too large');
+    it.todo('returns error if file is not an image');
   });
 });

@@ -10,6 +10,9 @@ import {
   AssetUpdateType,
   UpdateParams,
   UpdateParamsType,
+  Upload,
+  UploadResponseType,
+  UploadType,
 } from './api.types';
 import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
@@ -90,6 +93,19 @@ export default async function api(app: FastifyInstance) {
 
       reply.status(204);
       return null;
+    }
+  );
+
+  app.post<{ Body: UploadType; Reply: UploadResponseType }>(
+    '/upload',
+    { schema: { body: Upload } },
+    async (request, reply) => {
+      if (await app.storage.exists(request.body.filename)) {
+        throw createHttpError.Conflict(
+          `File with name "${request.body.filename}" already exists`
+        );
+      }
+      return app.storage.uploadURL(request.body.url, request.body.filename);
     }
   );
 
