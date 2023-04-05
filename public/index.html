@@ -73,7 +73,7 @@
       }
 
       function Asset(props) {
-        return html`<figure title=${props.url}>
+        return html`<figure key=${props.id} title=${props.url}>
           <a href="/view?id=${props.id}">
             <img
               src="${props.url}"
