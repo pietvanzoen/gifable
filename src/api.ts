@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { FastifyInstance } from 'fastify';
+import { FastifyError, FastifyInstance } from 'fastify';
 import {
   AssetCreate,
   AssetCreateType,
@@ -110,4 +110,10 @@ export default async function api(app: FastifyInstance) {
   );
 
   app.setErrorHandler(errorHandler);
+
+  app.addHook('onError', async (request, reply, error: FastifyError) => {
+    if (!error.statusCode || error.statusCode >= 500) {
+      request.log.error(error, error.message);
+    }
+  });
 }
