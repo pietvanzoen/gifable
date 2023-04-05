@@ -3,6 +3,7 @@ import * as Minio from 'minio';
 import { Readable } from 'node:stream';
 import { debug } from 'debug';
 import path from 'node:path';
+import assert from 'node:assert';
 const debugLog = debug('file-storage');
 
 type FileStorageOptions = {
@@ -11,6 +12,15 @@ type FileStorageOptions = {
   basePath: string;
   storage: Minio.ClientOptions;
 };
+
+const EXTENSION_TO_MIME_TYPE: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+};
+
+export const FILENAME_REGEX = /^[a-z0-9-]+\.(gif|jpg|png|jpeg)$/;
 
 export type UploadResponse = Minio.UploadedObjectInfo & { url: string };
 
@@ -38,6 +48,8 @@ export default class FileStorage {
   }
 
   async uploadURL(url: string, filename: string): Promise<UploadResponse> {
+    assert(FILENAME_REGEX.test(filename), 'Invalid filename');
+
     const filePath = this.makeFilePath(filename);
     debugLog('uploadURL', url, filePath);
 
@@ -45,11 +57,16 @@ export default class FileStorage {
 
     debugLog('uploading file', filePath);
 
+    const metaData = {
+      'Content-Type': EXTENSION_TO_MIME_TYPE[path.extname(filename).slice(1)],
+    };
+
     const data = await this.minioClient.putObject(
       this.bucket,
       filePath,
       fileStream,
-      fileStream.readableLength
+      fileStream.readableLength,
+      metaData
     );
 
     return {

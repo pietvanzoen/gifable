@@ -1,4 +1,5 @@
 import { Static, Type, TSchema } from '@sinclair/typebox';
+import { FILENAME_REGEX } from './file-storage';
 
 export const Nullable = <T extends TSchema>(schema: T) =>
   Type.Union([schema, Type.Null()]);
@@ -38,7 +39,7 @@ export type AssetSearchType = Static<typeof AssetSearch>;
 export const Upload = Type.Object(
   {
     url: Type.String({ format: 'uri' }),
-    filename: Type.String(),
+    filename: Type.RegEx(FILENAME_REGEX),
   },
   { additionalProperties: false }
 );
