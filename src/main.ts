@@ -17,8 +17,10 @@ export default async function main() {
     storageBaseURL: env.require('S3_STORAGE_BASE_URL'),
     storage: {
       endPoint: env.require('S3_ENDPOINT'),
-      port: Number(env.require('S3_PORT')),
-      useSSL: env.require('S3_USE_SSL') === 'true',
+      port: Number(env.get('S3_PORT')) || undefined,
+      useSSL: env.get('S3_USE_SSL')
+        ? env.get('S3_USE_SSL') === 'true'
+        : undefined,
       accessKey: env.require('S3_ACCESS_KEY'),
       secretKey: env.require('S3_SECRET_KEY'),
       region: env.get('S3_REGION'),
