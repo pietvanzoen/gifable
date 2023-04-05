@@ -20,7 +20,13 @@
         <label for="url">URL</label>
         <input id="url" name="url" type="text" required />
         <label for="name">File name</label>
-        <input id="filename" name="filename" type="text" required />
+        <input
+          id="filename"
+          name="filename"
+          type="text"
+          pattern="^[a-z0-9]+\.(gif|jpg|png)$"
+          required
+        />
         <label for="comment">Comment</label>
         <textarea id="comment" name="comment"></textarea>
         <div id="message"></div>
