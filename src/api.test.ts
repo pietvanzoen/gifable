@@ -5,7 +5,8 @@ import { FastifyInstance } from 'fastify';
 import FileStorage from './file-storage';
 
 describe('/api', () => {
-  let db: PrismaClient, app: FastifyInstance, storage: FileStorage;
+  let db: PrismaClient, app: FastifyInstance, storage: jest.Mocked<FileStorage>;
+
   beforeAll(async () => {
     db = createTestDB();
     storage = createFileStorageMock();
@@ -27,9 +28,6 @@ describe('/api', () => {
       expect(response.json()).toMatchObject({
         id: expect.any(Number),
         ...data,
-        // FIXME: Fastify serialization returns dates as objects
-        // createdAt: expect.any(Date),
-        // updatedAt: expect.any(Date),
       });
     });
 
@@ -169,7 +167,7 @@ describe('/api', () => {
   });
 
   describe('POST /upload', () => {
-    it.skip('uploads url to storage', async () => {
+    it('uploads url to storage', async () => {
       const data = Fixtures.Upload();
       const response = await app.inject().post('/api/upload').payload(data);
 
@@ -180,8 +178,16 @@ describe('/api', () => {
       );
     });
 
-    it.todo('returns error if file already exists');
-    it.todo('returns error if file is too large');
-    it.todo('returns error if file is not an image');
+    it('returns error if file already exists', async () => {
+      const data = Fixtures.Upload();
+      storage.exists.mockResolvedValue(true);
+
+      const response = await app.inject().post('/api/upload').payload(data);
+
+      expect(response.statusCode).toBe(409);
+      expect(response.json()).toMatchObject({
+        message: expect.stringMatching(/already exists/),
+      });
+    });
   });
 });

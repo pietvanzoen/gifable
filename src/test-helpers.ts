@@ -2,6 +2,7 @@ import Chance from 'chance';
 import { Prisma, PrismaClient } from '@prisma/client';
 import FileStorage, { UploadResponse } from './file-storage';
 import { UploadType } from './api.types';
+jest.mock('./file-storage');
 
 export const chance = new Chance();
 
@@ -17,19 +18,15 @@ export const Fixtures = {
   Upload(options?: Partial<UploadType>): UploadType {
     return {
       url: chance.url(),
-      filename: chance.word(),
+      filename: chance.word() + '.jpg',
       ...options,
     };
   },
 };
 
-export function createFileStorageMock() {
-  return {
-    uploadURL: jest.fn().mockResolvedValue({
-      etag: 'etag',
-      url: chance.url(),
-    } as UploadResponse),
-  } as unknown as FileStorage;
+export function createFileStorageMock(): jest.Mocked<FileStorage> {
+  // @ts-ignore - Mocking a class
+  return new FileStorage({});
 }
 
 export function createTestDB() {
