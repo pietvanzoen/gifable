@@ -1,11 +1,15 @@
-# gifme
+# Gifme
 
-Self hosted gif library
+Self hosted gif library.
 
-TODO:
+- Add gifs to your library with comments.
+- Find your perfect gif quickly.
+- Upload gifs to your S3 compatible bucket.
+
+## TODO:
 
 - [ ] Upload gifs to your library
+- [x] Host gifs in your s3 bucket
 - [x] Search gifs by comment
 - [ ] Search gifs by tag
-- [ ] Basic user auth
 - [x] Quick copy link to gif
