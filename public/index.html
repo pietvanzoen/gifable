@@ -24,12 +24,12 @@
       import { useState, useEffect } from 'https://esm.sh/preact/hooks';
 
       const params = new URLSearchParams(window.location.search);
-      const q = params.get('q');
+      const searchQuery = params.get('search');
 
       function App(props) {
         const [loading, setLoading] = useState(true);
         const [assets, setAssets] = useState([]);
-        const [search, setSearch] = useState(q || '');
+        const [search, setSearch] = useState(searchQuery || '');
 
         useEffect(async () => {
           setLoading(true);
