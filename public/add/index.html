@@ -17,37 +17,43 @@
 
     <main>
       <form id="add-form" name="add">
-        <label for="url">URL</label>
-        <input id="url" name="url" type="text" required />
-        <label for="name">File name</label>
-        <input
-          id="filename"
-          name="filename"
-          type="text"
-          pattern="^[a-z0-9]+\.(gif|jpg|png)$"
-          required
-        />
-        <label for="comment">Comment</label>
-        <textarea id="comment" name="comment"></textarea>
-        <div id="message"></div>
-        <button type="reset">Reset</button>
-        <button type="submit">Submit</button>
+        <fieldset id="add-fieldset">
+          <legend><h3>Add a file</h3></legend>
+          <label for="url">URL</label>
+          <input id="url" name="url" type="text" required />
+          <label for="name">File name</label>
+          <input
+            id="filename"
+            name="filename"
+            type="text"
+            pattern="^[a-z0-9]+\.(gif|jpg|png)$"
+            required
+          />
+          <label for="comment">Comment</label>
+          <textarea id="comment" name="comment"></textarea>
+          <div id="message"></div>
+          <button type="reset">Reset</button>
+          <button type="submit">Save</button>
+        </fieldset>
       </form>
     </main>
 
     <script type="module">
       const form = document.getElementById('add-form');
+      const fieldset = document.getElementById('add-fieldset');
       const message = document.getElementById('message');
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const formData = serializeForm(event.target);
+        setLoading(true);
 
         try {
           const data = await request('POST', '/api/upload', formData);
           formData.url = data.url;
         } catch (error) {
           setMessage(error.message);
+          setLoading(false);
           return;
         }
 
@@ -56,6 +62,7 @@
           window.location = '/view?id=' + response.id;
         } catch (error) {
           setMessage(error.message);
+          setLoading(false);
         }
       });
 
@@ -75,6 +82,17 @@
           }
           throw json;
         });
+      }
+
+      function setLoading(loading) {
+        if (!loading) {
+          fieldset.disabled = false;
+          fieldset.querySelector('button[type="submit"]').textContent = 'Save';
+          return;
+        }
+        fieldset.disabled = true;
+        fieldset.querySelector('button[type="submit"]').textContent =
+          'Saving...';
       }
 
       function setMessage(str) {
