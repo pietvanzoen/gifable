@@ -66,12 +66,13 @@ export default async function api(app: FastifyInstance) {
   app.get<{ Reply: AssetType[]; Querystring: AssetSearchType }>(
     '/assets',
     { schema: { querystring: AssetSearch } },
-    async (request) => {
+    async (request, reply) => {
       const { search } = request.query;
       const where: Prisma.AssetWhereInput = {};
       if (search) {
         where.comment = { contains: search.trim() };
       }
+      reply.header('Cache-Control', 'private, max-age=60');
       return app.db.asset.findMany({
         where,
         orderBy: { createdAt: 'desc' },
