@@ -66,7 +66,7 @@
         }
       });
 
-      form.addEventListener('reset', () => message.lastChild?.remove());
+      form.addEventListener('reset', () => setMessage(''));
 
       function request(method, url, data) {
         return fetch(url, {
@@ -98,6 +98,7 @@
       function setMessage(str) {
         message.lastChild?.remove();
 
+        if (!str) return;
         const p = document.createElement('p');
         p.classList.add('notice');
         p.textContent = str;
