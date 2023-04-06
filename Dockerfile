@@ -18,6 +18,9 @@ COPY --from=ts-compiler /usr/app/prisma ./prisma
 RUN yarn --production
 
 FROM --platform=linux/amd64 node:18-alpine
+LABEL org.opencontainers.image.source=https://github.com/pietvanzoen/gifme
+LABEL org.opencontainers.image.description="Gifme: A simple gif libary."
+LABEL org.opencontainers.image.licenses=MIT
 RUN apk add --update openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/app
 COPY --from=ts-remover /usr/app ./
