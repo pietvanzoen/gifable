@@ -45,8 +45,7 @@
     <script type="module">
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
-      const resp = await fetch(`/api/assets/${id}`);
-      let asset = await resp.json();
+      let asset = await request('GET', `/api/assets/${id}`);
 
       const comment = document.getElementById('comment');
       comment.value = asset.comment;
@@ -64,32 +63,26 @@
 
       const message = document.getElementById('message');
 
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        fetch('/api/assets/' + asset.id, {
-          method: 'POST',
-          body: JSON.stringify(serializeForm(event.target)),
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        })
-          .then(async (response) => {
-            const json = await response.json();
-            if (response.ok) {
-              return json;
-            }
-            throw json;
-          })
-          .then((data) => {
-            asset = data;
-            comment.value = data.comment;
-            window.alert('Saved');
-          })
-          .catch((error) => {
-            setMessage(error.message);
-            console.warn(error);
-          });
+        try {
+          const data = serializeForm(event.target);
+          if (data.comment === asset.comment) return;
+          const newAsset = await request(
+            'POST',
+            '/api/assets/' + asset.id,
+            data
+          );
+          comment.value = newAsset.comment;
+          asset = newAsset;
+          setMessage('Saved');
+          setTimeout(() => setMessage(''), 2000);
+        } catch (error) {
+          setMessage(error.message);
+          console.error(error);
+          return;
+        }
       });
 
       const btnDelete = document.getElementById('btn-delete');
@@ -117,8 +110,26 @@
           });
       });
 
+      function request(method, url, data) {
+        return fetch(url, {
+          method,
+          body: data && JSON.stringify(data),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        }).then(async (response) => {
+          const json = await response.json();
+          if (response.ok) {
+            return json;
+          }
+          throw json;
+        });
+      }
+
       function setMessage(str) {
         message.lastChild?.remove();
+
+        if (!str) return;
 
         const p = document.createElement('p');
         p.classList.add('notice');
