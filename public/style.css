@@ -59,6 +59,7 @@ body.search {
   height: 2em;
 }
 figure > a > img {
+  background-color: var(--accent-bg);
   border: 1px solid transparent;
   width: 100%;
 }
