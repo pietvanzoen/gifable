@@ -76,9 +76,9 @@
         return html`<figure key=${props.id} title=${props.url}>
           <a href="/view?id=${props.id}">
             <img
+              loading="lazy"
               src="${props.url}"
               alt=${props.comment}
-              loading="lazy"
               height="300"
               width="300"
             />
