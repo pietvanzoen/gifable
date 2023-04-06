@@ -43,6 +43,7 @@
       const form = document.getElementById('add-form');
       const fieldset = document.getElementById('add-fieldset');
       const message = document.getElementById('message');
+      const inputs = document.querySelectorAll('input, select, textarea');
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -66,8 +67,6 @@
           setLoading(false);
         }
       });
-
-      const inputs = document.querySelectorAll('input, select, textarea');
 
       inputs.forEach((input) => {
         input.addEventListener('invalid', (event) => {
@@ -99,14 +98,10 @@
       }
 
       function setLoading(loading) {
-        if (!loading) {
-          fieldset.disabled = false;
-          fieldset.querySelector('button[type="submit"]').textContent = 'Save';
-          return;
-        }
-        fieldset.disabled = true;
-        fieldset.querySelector('button[type="submit"]').textContent =
-          'Saving...';
+        fieldset.disabled = loading;
+        fieldset.querySelector('button[type="submit"]').textContent = loading
+          ? 'Saving...'
+          : 'Save';
       }
 
       function setMessage(str) {
