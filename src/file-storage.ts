@@ -9,7 +9,7 @@ const debugLog = debug('file-storage');
 type FileStorageOptions = {
   bucket: string;
   storageBaseURL: string;
-  basePath: string;
+  basePath?: string;
   storage: Minio.ClientOptions;
 };
 

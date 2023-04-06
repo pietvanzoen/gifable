@@ -13,7 +13,7 @@ export default async function main() {
 
   const storage = new FileStorage({
     bucket: env.require('S3_BUCKET'),
-    basePath: env.require('S3_BASE_PATH'),
+    basePath: env.get('S3_BASE_PATH'),
     storageBaseURL: env.require('S3_STORAGE_BASE_URL'),
     storage: {
       endPoint: env.require('S3_ENDPOINT'),
