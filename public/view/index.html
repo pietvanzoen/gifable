@@ -68,14 +68,15 @@
 
         try {
           const data = serializeForm(event.target);
-          if (data.comment === asset.comment) return;
-          const newAsset = await request(
-            'POST',
-            '/api/assets/' + asset.id,
-            data
-          );
-          comment.value = newAsset.comment;
-          asset = newAsset;
+          if (data.comment !== asset.comment) {
+            const newAsset = await request(
+              'POST',
+              '/api/assets/' + asset.id,
+              data
+            );
+            comment.value = newAsset.comment;
+            asset = newAsset;
+          }
           setMessage('Saved');
           setTimeout(() => setMessage(''), 2000);
         } catch (error) {
