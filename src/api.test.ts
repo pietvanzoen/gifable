@@ -3,6 +3,9 @@ import { Fixtures, createFileStorageMock, createTestDB } from './test-helpers';
 import server from './server';
 import { FastifyInstance } from 'fastify';
 import FileStorage from './file-storage';
+import { getImageData } from './image-service';
+
+jest.mock('./image-service');
 
 describe('/api', () => {
   let db: PrismaClient, app: FastifyInstance, storage: jest.Mocked<FileStorage>;
@@ -187,6 +190,46 @@ describe('/api', () => {
       expect(response.statusCode).toBe(409);
       expect(response.json()).toMatchObject({
         message: expect.stringMatching(/already exists/),
+      });
+    });
+  });
+
+  describe('POST /assets/:id/parse', () => {
+    beforeEach(() => {
+      (
+        getImageData as jest.MockedFunction<typeof getImageData>
+      ).mockResolvedValue({ width: 100, height: 100, color: '#000000' });
+    });
+
+    it('populates image data', async () => {
+      const asset = await db.asset.create({ data: Fixtures.Asset() });
+      const response = await app.inject().post(`/api/assets/${asset.id}/parse`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({
+        id: asset.id,
+        width: 100,
+        height: 100,
+        color: '#000000',
+      });
+    });
+
+    it('does not error if fetching image data fails', async () => {
+      const asset = await db.asset.create({
+        data: Fixtures.Asset({ width: null, height: null, color: null }),
+      });
+      (
+        getImageData as jest.MockedFunction<typeof getImageData>
+      ).mockRejectedValue(new Error('wibble'));
+
+      const response = await app.inject().post(`/api/assets/${asset.id}/parse`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({
+        id: asset.id,
+        width: null,
+        height: null,
+        color: null,
       });
     });
   });

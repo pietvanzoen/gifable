@@ -77,10 +77,10 @@
           <a href="/view?id=${props.id}">
             <img
               loading="lazy"
+              width="${props.width || 300}"
+              height="${props.height || 200}"
               src="${props.url}"
-              alt=${props.url}
-              height="200"
-              width="300"
+              style="${`background-color: ${props.color};`}"
             />
             <${CopyButton} url="${props.url}" />
           </a>

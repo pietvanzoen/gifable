@@ -11,6 +11,9 @@ export const Fixtures = {
     return {
       url: chance.url(),
       comment: chance.sentence(),
+      width: chance.integer({ min: 1, max: 1000 }),
+      height: chance.integer({ min: 1, max: 1000 }),
+      color: chance.color(),
       ...options,
     };
   },

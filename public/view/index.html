@@ -43,13 +43,17 @@
     </main>
 
     <script type="module">
+      const img = document.getElementById('img');
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
       let asset = await request('GET', `/api/assets/${id}`);
 
       const comment = document.getElementById('comment');
       comment.value = asset.comment;
-      document.getElementById('img').setAttribute('src', asset.url);
+      img.setAttribute('width', asset.width);
+      img.setAttribute('height', asset.height);
+      img.style.backgroundColor = asset.color;
+      img.setAttribute('src', asset.url);
       const link = document.getElementById('link');
       link.setAttribute('href', asset.url);
       link.textContent = asset.url;

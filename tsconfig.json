@@ -1,4 +1,8 @@
 {
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/global.d.ts"],
   "include": ["src/**/*"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */

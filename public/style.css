@@ -77,3 +77,10 @@ label:has(+ textarea:required):after {
 input.error {
   border-color: var(--accent);
 }
+
+progress[value='0'] {
+  display: none;
+}
+::-webkit-progress-value {
+  transition: width 0.5s;
+}

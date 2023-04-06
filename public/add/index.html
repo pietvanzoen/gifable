@@ -32,6 +32,7 @@
           />
           <label for="comment">Comment</label>
           <textarea id="comment" name="comment"></textarea>
+          <progress id="progress" max="100" value="0"></progress>
           <div id="message"></div>
           <button type="reset">Reset</button>
           <button type="submit">Save</button>
@@ -44,16 +45,25 @@
       const fieldset = document.getElementById('add-fieldset');
       const message = document.getElementById('message');
       const inputs = document.querySelectorAll('input, select, textarea');
+      const progress = document.getElementById('progress');
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const formData = serializeForm(event.target);
         setLoading(true);
+        let asset;
+        progress.value = 0;
+
+        const interval = setInterval(() => {
+          progress.value += 1;
+        }, 200);
 
         try {
           const data = await request('POST', '/api/upload', formData);
           formData.url = data.url;
+          progress.value = 33;
         } catch (error) {
+          resetProgress(interval);
           setMessage(error.message);
           setLoading(false);
           return;
@@ -61,11 +71,26 @@
 
         try {
           const response = await request('POST', '/api/assets', formData);
-          window.location = '/view?id=' + response.id;
+          asset = response;
+          progress.value = 66;
         } catch (error) {
+          resetProgress(interval);
           setMessage(error.message);
           setLoading(false);
         }
+
+        try {
+          await request('POST', `/api/assets/${asset.id}/parse`);
+          progress.value = 100;
+        } catch (error) {
+          console.log(error);
+        }
+
+        clearInterval(interval);
+        setMessage('Saved!');
+        setTimeout(() => {
+          window.location = '/view?id=' + asset.id;
+        }, 1000);
       });
 
       inputs.forEach((input) => {
@@ -81,7 +106,7 @@
         setMessage('');
       });
 
-      function request(method, url, data) {
+      function request(method, url, data = {}) {
         return fetch(url, {
           method,
           body: JSON.stringify(data),
@@ -95,6 +120,11 @@
           }
           throw json;
         });
+      }
+
+      function resetProgress(interval) {
+        progress.value = 0;
+        clearInterval(interval);
       }
 
       function setLoading(loading) {

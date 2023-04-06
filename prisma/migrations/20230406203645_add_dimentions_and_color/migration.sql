@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Asset" ADD COLUMN "color" TEXT;
+ALTER TABLE "Asset" ADD COLUMN "height" INTEGER;
+ALTER TABLE "Asset" ADD COLUMN "width" INTEGER;

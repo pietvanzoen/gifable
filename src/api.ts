@@ -16,6 +16,7 @@ import {
 } from './api.types';
 import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
+import { getImageData } from './image-service';
 
 export default async function api(app: FastifyInstance) {
   app.post<{ Body: AssetCreateType; Reply: AssetType }>(
@@ -107,6 +108,31 @@ export default async function api(app: FastifyInstance) {
         );
       }
       return app.storage.uploadURL(request.body.url, request.body.filename);
+    }
+  );
+
+  app.post<{
+    Reply: AssetType;
+    Params: UpdateParamsType;
+  }>(
+    '/assets/:id/parse',
+    { schema: { params: UpdateParams } },
+    async (request, reply) => {
+      const asset = await app.db.asset.findUnique({
+        where: { id: request.params.id },
+      });
+      if (!asset) throw createHttpError.NotFound();
+      try {
+        const imageData = await getImageData(asset.url);
+        const updatedAsset = await app.db.asset.update({
+          where: { id: request.params.id },
+          data: imageData,
+        });
+        return updatedAsset;
+      } catch (error) {
+        request.log.error(error, "Couldn't parse image");
+        return asset;
+      }
     }
   );
 
