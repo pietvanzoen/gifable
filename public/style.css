@@ -65,3 +65,14 @@ figure > a > img {
 figure > a:hover > img {
   border-color: var(--accent);
 }
+
+label:has(+ input:required):after,
+label:has(+ select:required):after,
+label:has(+ textarea:required):after {
+  content: ' *';
+  color: var(--accent);
+}
+
+input.error {
+  border-color: var(--accent);
+}

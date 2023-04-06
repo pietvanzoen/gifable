@@ -28,6 +28,7 @@
             type="text"
             pattern="^[a-z0-9]+\.(gif|jpg|png)$"
             required
+            placeholder="example.gif"
           />
           <label for="comment">Comment</label>
           <textarea id="comment" name="comment"></textarea>
@@ -66,7 +67,20 @@
         }
       });
 
-      form.addEventListener('reset', () => setMessage(''));
+      const inputs = document.querySelectorAll('input, select, textarea');
+
+      inputs.forEach((input) => {
+        input.addEventListener('invalid', (event) => {
+          input.classList.add('error');
+        });
+      });
+
+      form.addEventListener('reset', () => {
+        inputs.forEach((input) => {
+          input.classList.remove('error');
+        });
+        setMessage('');
+      });
 
       function request(method, url, data) {
         return fetch(url, {
