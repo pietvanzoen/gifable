@@ -59,6 +59,7 @@ export default class FileStorage {
 
     const metaData = {
       'Content-Type': EXTENSION_TO_MIME_TYPE[path.extname(filename).slice(1)],
+      'Cache-Control': 'max-age=86400',
     };
 
     const data = await this.minioClient.putObject(
