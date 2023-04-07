@@ -20,3 +20,10 @@ model Asset {
   height Int?
   color String?
 }
+
+model User {
+  id Int @id @default(autoincrement())
+  account String @unique @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

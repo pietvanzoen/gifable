@@ -1,10 +1,12 @@
-import { PrismaClient } from '@prisma/client';
-import Fastify, { FastifyServerOptions } from 'fastify';
-import api from './api';
-import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import path from 'path';
+import fastifySecureSession from '@fastify/secure-session';
 import fastifyStatic from '@fastify/static';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import { PrismaClient, User } from '@prisma/client';
+import Fastify, { FastifyServerOptions } from 'fastify';
+import fs from 'node:fs';
 import createHttpError from 'http-errors';
+import path from 'path';
+import api from './api';
 import FileStorage from './file-storage';
 
 type ServerOptions = {
@@ -20,6 +22,12 @@ declare module 'fastify' {
   }
 }
 
+declare module '@fastify/secure-session' {
+  interface SessionData {
+    userId: User['id'];
+  }
+}
+
 export default async function server({ db, options, storage }: ServerOptions) {
   const fastify = Fastify({
     logger: true,
@@ -31,6 +39,10 @@ export default async function server({ db, options, storage }: ServerOptions) {
 
   fastify.register(fastifyStatic, {
     root: path.join(__dirname, '../public'),
+  });
+
+  fastify.register(fastifySecureSession, {
+    key: fs.readFileSync(path.join(__dirname, '../secret_key')),
   });
 
   await fastify.register(api, { prefix: 'api' });

@@ -90,7 +90,6 @@ describe('/api', () => {
     });
 
     it('url is not required', async () => {
-      const data = Fixtures.Asset();
       const response = await app
         .inject()
         .post(`/api/assets/${asset.id}`)
@@ -231,6 +230,53 @@ describe('/api', () => {
         height: null,
         color: null,
       });
+    });
+  });
+
+  describe('POST /users', () => {
+    it('creates user', async () => {
+      const response = await app.inject().post('/api/users');
+
+      expect(response.statusCode).toBe(201);
+      expect(response.json()).toMatchObject({
+        id: expect.any(Number),
+        account: expect.any(String),
+      });
+    });
+
+    it('sets session cookie', async () => {
+      const response = await app.inject().post('/api/users');
+
+      const newUser = response.json();
+      expect(response.statusCode).toBe(201);
+      const session = app.decodeSecureSession(response.cookies[0].value);
+      expect(session?.get('userId')).toBe(newUser.id);
+    });
+  });
+
+  describe('POST /login', () => {
+    it('returns error if user does not exist', async () => {
+      const response = await app
+        .inject()
+        .post('/api/login')
+        .payload({ account: 'wibble' });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json()).toMatchObject({
+        message: expect.stringMatching(/not found/i),
+      });
+    });
+
+    it('sets session cookie', async () => {
+      const user = await db.user.create({ data: {} });
+
+      const response = await app.inject().post('/api/login').payload({
+        account: user.account,
+      });
+
+      expect(response.statusCode).toBe(200);
+      const session = app.decodeSecureSession(response.cookies[0].value);
+      expect(session?.get('userId')).toBe(user.id);
     });
   });
 });

@@ -13,10 +13,14 @@ import {
   Upload,
   UploadResponseType,
   UploadType,
+  UserType,
+  LoginType,
+  Login,
 } from './api.types';
 import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
 import { getImageData } from './image-service';
+import ms from 'ms';
 
 export default async function api(app: FastifyInstance) {
   app.post<{ Body: AssetCreateType; Reply: AssetType }>(
@@ -135,6 +139,32 @@ export default async function api(app: FastifyInstance) {
       }
     }
   );
+
+  app.post<{
+    Reply: UserType;
+  }>('/users', async (request, reply) => {
+    const user = await app.db.user.create({ data: {} });
+    reply.status(201);
+    request.session.set('userId', user.id);
+    request.session.options({ maxAge: ms('1 day') / 1000 });
+    return user;
+  });
+
+  app.post<{
+    Body: LoginType;
+  }>('/login', { schema: { body: Login } }, async (request, reply) => {
+    const user = await app.db.user.findUnique({
+      where: { account: request.body.account },
+    });
+    if (!user) throw createHttpError.NotFound();
+
+    request.session.set('userId', user.id);
+    request.session.options({ maxAge: ms('1 day') / 1000 });
+
+    return {
+      message: 'Logged in',
+    };
+  });
 
   app.setErrorHandler(errorHandler);
 

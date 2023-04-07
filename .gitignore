@@ -363,3 +363,4 @@ $RECYCLE.BIN/
 
 /build
 *.db*
+secret_key

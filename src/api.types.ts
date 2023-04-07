@@ -62,3 +62,20 @@ export const UploadResponse = Type.Object({
   etag: Type.String(),
 });
 export type UploadResponseType = Static<typeof UploadResponse>;
+
+export const User = Type.Object(
+  {
+    account: Type.String(),
+    createdAt: Type.Date(),
+  },
+  { additionalProperties: false }
+);
+export type UserType = Static<typeof User>;
+
+export const Login = Type.Object(
+  {
+    account: Type.String(),
+  },
+  { additionalProperties: false }
+);
+export type LoginType = Static<typeof Login>;
