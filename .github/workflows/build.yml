@@ -17,8 +17,12 @@ jobs:
           node-version: 18
       - name: Install dependencies
         run: yarn install
+      - name: Generate secret_key
+        run: ./node_modules/@fastify/secure-session/genkey.js > secret_key
       - name: Run tests
         run: yarn test
+      - name: Clean up
+        run: rm secret_key
 
   build:
     runs-on: ubuntu-latest
