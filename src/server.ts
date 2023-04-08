@@ -9,6 +9,7 @@ import path from 'path';
 import api from './api';
 import views from './views';
 import FileStorage from './file-storage';
+import env from './env';
 
 type ServerOptions = {
   db: PrismaClient;
@@ -44,7 +45,9 @@ export default async function server({ db, options, storage }: ServerOptions) {
   });
 
   fastify.register(fastifySecureSession, {
-    key: fs.readFileSync(path.join(__dirname, '../secret_key')),
+    key: fs.readFileSync(
+      env.get('SESSION_KEY_PATH') || path.join(__dirname, '../secret_key')
+    ),
     cookie: {
       path: '/',
       httpOnly: true,
