@@ -1,13 +1,13 @@
 import Chance from 'chance';
-import { Prisma, PrismaClient } from '@prisma/client';
-import FileStorage, { UploadResponse } from './file-storage';
-import { UploadType } from './api.types';
+import { Asset, Prisma, PrismaClient } from '@prisma/client';
+import FileStorage from './file-storage';
+import { AssetCreateType, AssetUpdateType, UploadType } from './api.types';
 jest.mock('./file-storage');
 
 export const chance = new Chance();
 
 export const Fixtures = {
-  Asset(options?: Partial<Prisma.AssetCreateInput>): Prisma.AssetCreateInput {
+  Asset(options?: Partial<Asset>): AssetCreateType {
     return {
       url: chance.url(),
       comment: chance.sentence(),

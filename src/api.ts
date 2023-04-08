@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { FastifyError, FastifyInstance } from 'fastify';
+import { FastifyError, FastifyInstance, FastifyRequest } from 'fastify';
 import {
   AssetCreate,
   AssetCreateType,
@@ -27,8 +27,15 @@ export default async function api(app: FastifyInstance) {
     '/assets',
     { schema: { body: AssetCreate } },
     async (request, reply) => {
+      const userId = getSessionUserId(request);
+
       const asset = await app.db.asset.create({
-        data: request.body,
+        data: {
+          ...request.body,
+          user: {
+            connect: { id: userId },
+          },
+        },
       });
 
       reply.status(201);
@@ -45,8 +52,20 @@ export default async function api(app: FastifyInstance) {
     '/assets/:id',
     { schema: { params: UpdateParams, body: AssetUpdate } },
     async (request, reply) => {
+      const { id } = request.params;
+      const userId = getSessionUserId(request);
+
+      const assets = await app.db.asset.findMany({
+        where: { id, userId },
+        select: { id: true },
+      });
+
+      if (!assets?.length) {
+        throw createHttpError.NotFound();
+      }
+
       const asset = await app.db.asset.update({
-        where: { id: request.params.id },
+        where: { id },
         data: request.body,
       });
 
@@ -72,8 +91,12 @@ export default async function api(app: FastifyInstance) {
     '/assets',
     { schema: { querystring: AssetSearch } },
     async (request, reply) => {
+      const userId = getSessionUserId(request);
+
       const { search } = request.query;
-      const where: Prisma.AssetWhereInput = {};
+      const where: Prisma.AssetWhereInput = {
+        userId,
+      };
       if (search) {
         where.comment = { contains: search.trim() };
       }
@@ -92,10 +115,15 @@ export default async function api(app: FastifyInstance) {
     '/assets/:id',
     { schema: { params: UpdateParams } },
     async (request, reply) => {
-      const asset = await app.db.asset.delete({
-        where: { id: request.params.id },
+      const userId = getSessionUserId(request);
+
+      const { count } = await app.db.asset.deleteMany({
+        where: { id: request.params.id, userId },
       });
-      if (!asset) throw createHttpError.NotFound();
+
+      if (!count) {
+        throw createHttpError.NotFound();
+      }
 
       reply.status(204);
       return null;
@@ -106,6 +134,8 @@ export default async function api(app: FastifyInstance) {
     '/upload',
     { schema: { body: Upload } },
     async (request, reply) => {
+      const userId = getSessionUserId(request);
+
       if (await app.storage.exists(request.body.filename)) {
         throw createHttpError.Conflict(
           `File with name "${request.body.filename}" already exists`
@@ -122,14 +152,19 @@ export default async function api(app: FastifyInstance) {
     '/assets/:id/parse',
     { schema: { params: UpdateParams } },
     async (request, reply) => {
-      const asset = await app.db.asset.findUnique({
-        where: { id: request.params.id },
+      const { id } = request.params;
+      const userId = getSessionUserId(request);
+
+      const [asset] = await app.db.asset.findMany({
+        where: { id, userId },
       });
+
       if (!asset) throw createHttpError.NotFound();
+
       try {
         const imageData = await getImageData(asset.url);
         const updatedAsset = await app.db.asset.update({
-          where: { id: request.params.id },
+          where: { id },
           data: imageData,
         });
         return updatedAsset;
@@ -173,4 +208,12 @@ export default async function api(app: FastifyInstance) {
       request.log.error(error, error.message);
     }
   });
+
+  function getSessionUserId(request: FastifyRequest) {
+    const userId = request.session.get('userId');
+    if (!userId) {
+      throw createHttpError.Unauthorized();
+    }
+    return userId;
+  }
 }

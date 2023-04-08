@@ -19,6 +19,8 @@ model Asset {
   width Int?
   height Int?
   color String?
+  userId Int
+  user User @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -26,4 +28,5 @@ model User {
   account String @unique @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  assets Asset[]
 }
