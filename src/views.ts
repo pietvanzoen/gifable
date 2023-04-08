@@ -43,7 +43,11 @@ export default async function api(app: FastifyInstance) {
   });
 
   app.get('/login', async (request, reply) => {
-    reply.view('/views/login.eta');
+    reply.view('/views/login.eta', { view: 'login' });
+  });
+
+  app.get('/signup', async (request, reply) => {
+    reply.view('/views/signup.eta', { view: 'signup' });
   });
 
   app.get('*', async (request, reply) => {
@@ -53,7 +57,7 @@ export default async function api(app: FastifyInstance) {
   function assertSession(request: FastifyRequest, reply: FastifyReply) {
     request.log.info(`userId: ${request.session.get('userId')}`);
     if (!request.session.get('userId')) {
-      reply.redirect('/login?=redirect=' + request.url);
+      reply.redirect('/login?redirect=' + request.url);
       return false;
     }
     return true;

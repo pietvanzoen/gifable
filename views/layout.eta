@@ -17,6 +17,15 @@
         <a class="<%= it.view === 'add' ? 'current' : '' %>" href="/add">Add</a>
         <a href="/logout">Logout</a>
       </nav>
+      <% } else { %>
+      <nav>
+        <a class="<%= it.view === 'login' ? 'current' : '' %>" href="/login"
+          >Login</a
+        >
+        <a class="<%= it.view === 'signup' ? 'current' : '' %>" href="/signup"
+          >Signup</a
+        >
+      </nav>
       <% } %>
     </header>
 

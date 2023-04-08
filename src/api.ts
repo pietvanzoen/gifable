@@ -100,6 +100,7 @@ export default async function api(app: FastifyInstance) {
       if (search) {
         where.comment = { contains: search.trim() };
       }
+      request.log.info({ where }, 'Searching assets');
       reply.header('Cache-Control', 'private, max-age=60');
       return app.db.asset.findMany({
         where,

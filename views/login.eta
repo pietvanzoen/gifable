@@ -16,6 +16,9 @@
   const form = document.getElementById('login-form');
   const message = document.getElementById('message');
 
+  const params = new URLSearchParams(window.location.search);
+  const redirect = params.get('redirect');
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
@@ -28,7 +31,7 @@
       body: JSON.stringify({ account }),
     });
     if (resp.ok) {
-      window.location.href = '/';
+      window.location.href = redirect || '/';
     } else {
       const { message } = await resp.json();
       setMessage(message);

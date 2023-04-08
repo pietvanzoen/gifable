@@ -47,6 +47,7 @@ export default async function server({ db, options, storage }: ServerOptions) {
     key: fs.readFileSync(path.join(__dirname, '../secret_key')),
     cookie: {
       path: '/',
+      httpOnly: true,
     },
   });
 
