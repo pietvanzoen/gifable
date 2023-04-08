@@ -11,6 +11,7 @@ type FileStorageOptions = {
   storageBaseURL: string;
   basePath?: string;
   storage: Minio.ClientOptions;
+  maxFileSize: number;
 };
 
 const EXTENSION_TO_MIME_TYPE: Record<string, string> = {
@@ -29,12 +30,14 @@ export default class FileStorage {
   private bucket: string;
   private storageBaseURL: string;
   private basePath?: string;
+  private maxFileSize: number;
 
   constructor(options: FileStorageOptions) {
     this.minioClient = new Minio.Client(options.storage);
     this.bucket = options.bucket;
     this.basePath = options.basePath;
     this.storageBaseURL = options.storageBaseURL;
+    this.maxFileSize = options.maxFileSize;
   }
 
   async exists(filename: string): Promise<boolean> {
@@ -54,6 +57,9 @@ export default class FileStorage {
     debugLog('uploadURL', url, filePath);
 
     const fileStream = await this.getFileStream(url);
+    if (fileStream.readableLength > this.maxFileSize) {
+      throw new Error('File too large');
+    }
 
     debugLog('uploading file', filePath);
 
