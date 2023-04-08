@@ -27,7 +27,7 @@ export default async function api(app: FastifyInstance) {
     '/assets',
     { schema: { body: AssetCreate } },
     async (request, reply) => {
-      const userId = getSessionUserId(request);
+      const userId = await getSessionUserId(request);
 
       const asset = await app.db.asset.create({
         data: {
@@ -53,7 +53,7 @@ export default async function api(app: FastifyInstance) {
     { schema: { params: UpdateParams, body: AssetUpdate } },
     async (request, reply) => {
       const { id } = request.params;
-      const userId = getSessionUserId(request);
+      const userId = await getSessionUserId(request);
 
       const assets = await app.db.asset.findMany({
         where: { id, userId },
@@ -91,7 +91,7 @@ export default async function api(app: FastifyInstance) {
     '/assets',
     { schema: { querystring: AssetSearch } },
     async (request, reply) => {
-      const userId = getSessionUserId(request);
+      const userId = await getSessionUserId(request);
 
       const { search } = request.query;
       const where: Prisma.AssetWhereInput = {
@@ -116,7 +116,7 @@ export default async function api(app: FastifyInstance) {
     '/assets/:id',
     { schema: { params: UpdateParams } },
     async (request, reply) => {
-      const userId = getSessionUserId(request);
+      const userId = await getSessionUserId(request);
 
       const { count } = await app.db.asset.deleteMany({
         where: { id: request.params.id, userId },
@@ -135,7 +135,7 @@ export default async function api(app: FastifyInstance) {
     '/upload',
     { schema: { body: Upload } },
     async (request, reply) => {
-      const userId = getSessionUserId(request);
+      const userId = await getSessionUserId(request);
 
       if (await app.storage.exists(request.body.filename)) {
         throw createHttpError.Conflict(
@@ -154,7 +154,7 @@ export default async function api(app: FastifyInstance) {
     { schema: { params: UpdateParams } },
     async (request, reply) => {
       const { id } = request.params;
-      const userId = getSessionUserId(request);
+      const userId = await getSessionUserId(request);
 
       const [asset] = await app.db.asset.findMany({
         where: { id, userId },
@@ -210,8 +210,23 @@ export default async function api(app: FastifyInstance) {
     }
   });
 
-  function getSessionUserId(request: FastifyRequest) {
-    const userId = request.session.get('userId');
+  async function getSessionUserId(request: FastifyRequest) {
+    let userId = request.session.get('userId');
+
+    const authorisation = request.headers.authorization;
+    if (authorisation) {
+      const [type, account] = authorisation.split(' ');
+      if (type === 'Bearer') {
+        const user = await app.db.user.findUnique({
+          where: { account },
+          select: { id: true },
+        });
+        if (user) {
+          userId = user.id;
+        }
+      }
+    }
+
     if (!userId) {
       throw createHttpError.Unauthorized();
     }
