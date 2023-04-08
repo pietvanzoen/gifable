@@ -1,0 +1,128 @@
+<% layout('/views/layout.eta') %>
+
+<main>
+  <figure>
+    <img id="img" />
+    <figcaption><a id="link"></a></figcaption>
+  </figure>
+  <form id="add-form" name="add">
+    <label for="comment">Comment</label>
+    <textarea id="comment" name="comment"></textarea>
+    <div id="message"></div>
+
+    <center>
+      <button type="reset">Reset</button>
+      <button type="submit">Save</button>
+    </center>
+  </form>
+  <hr />
+
+  <center>
+    <button type="button" id="btn-delete">🗑️ Delete this asset</button>
+  </center>
+</main>
+
+<script type="module">
+  const img = document.getElementById('img');
+  const id = window.location.href.split('/').pop();
+  let asset = await request('GET', `/api/assets/${id}`);
+
+  const comment = document.getElementById('comment');
+  comment.value = asset.comment;
+  img.setAttribute('width', asset.width);
+  img.setAttribute('height', asset.height);
+  img.style.backgroundColor = asset.color;
+  img.setAttribute('src', asset.url);
+  const link = document.getElementById('link');
+  link.setAttribute('href', asset.url);
+  link.textContent = asset.url;
+
+  const form = document.getElementById('add-form');
+
+  form.addEventListener('reset', (event) => {
+    event.preventDefault();
+    comment.value = asset.comment;
+  });
+
+  const message = document.getElementById('message');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    try {
+      const data = serializeForm(event.target);
+      if (data.comment !== asset.comment) {
+        const newAsset = await request('POST', '/api/assets/' + asset.id, data);
+        comment.value = newAsset.comment;
+        asset = newAsset;
+      }
+      setMessage('Saved');
+      setTimeout(() => setMessage(''), 2000);
+    } catch (error) {
+      setMessage(error.message);
+      console.error(error);
+      return;
+    }
+  });
+
+  const btnDelete = document.getElementById('btn-delete');
+  btnDelete.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    if (!window.confirm('Are you sure?')) {
+      return;
+    }
+
+    fetch('/api/assets/' + asset.id, {
+      method: 'DELETE',
+    })
+      .then((response) => {
+        if (response.ok) return;
+        throw json;
+      })
+      .then(() => {
+        window.location.href = '/';
+      })
+      .catch(async (error) => {
+        const data = await response.json();
+        setMessage(data.message);
+        console.warn(error);
+      });
+  });
+
+  function request(method, url, data) {
+    return fetch(url, {
+      method,
+      body: data && JSON.stringify(data),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    }).then(async (response) => {
+      const json = await response.json();
+      if (response.ok) {
+        return json;
+      }
+      throw json;
+    });
+  }
+
+  function setMessage(str) {
+    message.lastChild?.remove();
+
+    if (!str) return;
+
+    const p = document.createElement('p');
+    p.classList.add('notice');
+    p.textContent = str;
+    message.appendChild(p);
+  }
+
+  function serializeForm(form) {
+    const obj = {};
+    const formData = new FormData(form);
+    for (const key of formData.keys()) {
+      obj[key] = formData.get(key);
+    }
+    return obj;
+  }
+</script>

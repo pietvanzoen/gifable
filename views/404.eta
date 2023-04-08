@@ -1,0 +1,7 @@
+<% layout('/views/layout.eta') %>
+<main id="main">
+  <center>
+    <h1>Whoops, page not found</h1>
+    <p>Sorry, we couldn't find the page you were looking for.</p>
+  </center>
+</main>

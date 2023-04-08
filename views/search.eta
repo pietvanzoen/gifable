@@ -1,0 +1,99 @@
+<% layout('/views/layout.eta', { bodyClass: 'search' }) %>
+
+<main id="main"></main>
+
+<script type="module" defer>
+  import { render } from 'https://esm.sh/preact';
+  import { html } from 'https://esm.sh/htm/preact';
+  import { useState, useEffect } from 'https://esm.sh/preact/hooks';
+
+  const params = new URLSearchParams(window.location.search);
+  const searchQuery = params.get('search');
+
+  function App(props) {
+    const [loading, setLoading] = useState(true);
+    const [assets, setAssets] = useState([]);
+    const [search, setSearch] = useState(searchQuery || '');
+
+    useEffect(async () => {
+      setLoading(true);
+      let params = '';
+      if (search) {
+        params = new URLSearchParams({ search });
+      }
+      const resp = await fetch('/api/assets?' + params);
+      setAssets(await resp.json());
+      window.history.pushState(null, '', '/?' + params);
+      setLoading(false);
+    }, [search]);
+
+    return html`<div>
+      <${Search} setSearch=${setSearch} search=${search} />
+      <${Results} assets=${assets} loading=${loading} />
+    </div>`;
+  }
+
+  function Search(props) {
+    return html`<search
+      ><input
+        type="search"
+        value=${props.search}
+        placeholder="Search"
+        onInput=${debounce(
+          (event) => props.setSearch(event.target.value),
+          500
+        )}
+    /></search>`;
+  }
+
+  function Results(props) {
+    return html`<div id="results">
+      ${props.loading ? html`<p>Loading...</p>` : ''}
+      ${props.assets.length === 0 && !props.loading
+        ? html`<p><em>No results found</em></p>`
+        : ''}
+      ${props.assets.map(Asset)}
+    </div>`;
+  }
+
+  function Asset(props) {
+    return html`<figure key=${props.id} title=${props.url}>
+      <a href="/view/${props.id}">
+        <img
+          loading="lazy"
+          width="${props.width || 300}"
+          height="${props.height || 200}"
+          src="${props.url}"
+          style="${`background-color: ${props.color};`}"
+        />
+        <${CopyButton} url="${props.url}" />
+      </a>
+      <figcaption>${props.comment}</figcaption>
+    </figure>`;
+  }
+
+  function CopyButton(props) {
+    return html`<button
+      classList="copy-button"
+      title=${`Copy ${props.url} to clipboard`}
+      onClick=${(event) => {
+        event.preventDefault();
+        navigator.clipboard.writeText(props.url);
+      }}
+    >
+      🔗
+    </button>`;
+  }
+
+  function debounce(callback, wait) {
+    let timeoutId = null;
+    return (...args) => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        callback.apply(null, args);
+      }, wait);
+    };
+  }
+
+  render(html`<${App} />`, document.getElementById('main'));
+</script>

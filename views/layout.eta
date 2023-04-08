@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="/public/style.css" />
+    <title>🦩 Gifme</title>
+  </head>
+  <body class="<%= it.bodyClass || '' %>">
+    <header>
+      <h1>Gifme</h1>
+      <% if (it.showNav !== false) { %>
+      <nav>
+        <a class="<%= it.view === 'search' ? 'current' : '' %>" href="/"
+          >Search</a
+        >
+        <a class="<%= it.view === 'add' ? 'current' : '' %>" href="/add">Add</a>
+        <a href="/logout">Logout</a>
+      </nav>
+      <% } %>
+    </header>
+
+    <%~ it.body %>
+  </body>
+</html>

@@ -1,0 +1,140 @@
+<% layout('/views/layout.eta') %>
+
+<main>
+  <form id="add-form" name="add">
+    <fieldset id="add-fieldset">
+      <legend><h3>Add a file</h3></legend>
+      <label for="url">URL</label>
+      <input id="url" name="url" type="text" required />
+      <label for="name">File name</label>
+      <input
+        id="filename"
+        name="filename"
+        type="text"
+        pattern="^[a-z0-9-]+\.(gif|jpg|png)$"
+        required
+        placeholder="example.gif"
+      />
+      <label for="comment">Comment</label>
+      <textarea id="comment" name="comment"></textarea>
+      <progress id="progress" max="100" value="0"></progress>
+      <div id="message"></div>
+      <button type="reset">Reset</button>
+      <button type="submit">Save</button>
+    </fieldset>
+  </form>
+</main>
+
+<script type="module">
+  const form = document.getElementById('add-form');
+  const fieldset = document.getElementById('add-fieldset');
+  const message = document.getElementById('message');
+  const inputs = document.querySelectorAll('input, select, textarea');
+  const progress = document.getElementById('progress');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = serializeForm(event.target);
+    setLoading(true);
+    let asset;
+    progress.value = 0;
+
+    const interval = setInterval(() => {
+      progress.value += 1;
+    }, 200);
+
+    try {
+      const data = await request('POST', '/api/upload', formData);
+      formData.url = data.url;
+      progress.value = 33;
+    } catch (error) {
+      resetProgress(interval);
+      setMessage(error.message);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await request('POST', '/api/assets', formData);
+      asset = response;
+      progress.value = 66;
+    } catch (error) {
+      resetProgress(interval);
+      setMessage(error.message);
+      setLoading(false);
+    }
+
+    try {
+      await request('POST', `/api/assets/${asset.id}/parse`);
+      progress.value = 100;
+    } catch (error) {
+      console.log(error);
+    }
+
+    clearInterval(interval);
+    setMessage('Saved!');
+    setTimeout(() => {
+      window.location = '/view/' + asset.id;
+    }, 1000);
+  });
+
+  inputs.forEach((input) => {
+    input.addEventListener('invalid', (event) => {
+      input.classList.add('error');
+    });
+  });
+
+  form.addEventListener('reset', () => {
+    inputs.forEach((input) => {
+      input.classList.remove('error');
+    });
+    setMessage('');
+  });
+
+  function request(method, url, data = {}) {
+    return fetch(url, {
+      method,
+      body: JSON.stringify(data),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    }).then(async (response) => {
+      const json = await response.json();
+      if (response.ok) {
+        return json;
+      }
+      throw json;
+    });
+  }
+
+  function resetProgress(interval) {
+    progress.value = 0;
+    clearInterval(interval);
+  }
+
+  function setLoading(loading) {
+    fieldset.disabled = loading;
+    fieldset.querySelector('button[type="submit"]').textContent = loading
+      ? 'Saving...'
+      : 'Save';
+  }
+
+  function setMessage(str) {
+    message.lastChild?.remove();
+
+    if (!str) return;
+    const p = document.createElement('p');
+    p.classList.add('notice');
+    p.textContent = str;
+    message.appendChild(p);
+  }
+
+  function serializeForm(form) {
+    const obj = {};
+    const formData = new FormData(form);
+    for (const key of formData.keys()) {
+      obj[key] = formData.get(key);
+    }
+    return obj;
+  }
+</script>

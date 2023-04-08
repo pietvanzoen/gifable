@@ -1,0 +1,47 @@
+<% layout('/views/layout.eta', { showNav: false }) %>
+
+<main>
+  <form id="login-form">
+    <fieldset>
+      <legend><h1>Login</h1></legend>
+      <label for="account">Account id</label>
+      <input type="text" name="username" required />
+      <div id="message"></div>
+      <button type="submit">Login</button>
+    </fieldset>
+  </form>
+</main>
+
+<script type="module">
+  const form = document.getElementById('login-form');
+  const message = document.getElementById('message');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const account = formData.get('username');
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ account }),
+    });
+    if (resp.ok) {
+      window.location.href = '/';
+    } else {
+      const { message } = await resp.json();
+      setMessage(message);
+    }
+  });
+
+  function setMessage(str) {
+    message.lastChild?.remove();
+
+    if (!str) return;
+    const p = document.createElement('p');
+    p.classList.add('notice');
+    p.textContent = str;
+    message.appendChild(p);
+  }
+</script>

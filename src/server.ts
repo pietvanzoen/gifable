@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import createHttpError from 'http-errors';
 import path from 'path';
 import api from './api';
+import views from './views';
 import FileStorage from './file-storage';
 
 type ServerOptions = {
@@ -38,12 +39,18 @@ export default async function server({ db, options, storage }: ServerOptions) {
   fastify.decorate<FileStorage>('storage', storage);
 
   fastify.register(fastifyStatic, {
+    prefix: '/public/',
     root: path.join(__dirname, '../public'),
   });
 
   fastify.register(fastifySecureSession, {
     key: fs.readFileSync(path.join(__dirname, '../secret_key')),
+    cookie: {
+      path: '/',
+    },
   });
+
+  await fastify.register(views);
 
   await fastify.register(api, { prefix: 'api' });
 
