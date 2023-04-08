@@ -26,7 +26,6 @@ describe('FileStorage', () => {
       bucket: 'test-bucket',
       storageBaseURL: 'https://test-bucket.s3.amazonaws.com',
       basePath: 'test-base-path',
-      maxFileSize: 1000000,
       storage: {
         endPoint: 's3.amazonaws.com',
         useSSL: true,
