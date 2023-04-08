@@ -267,6 +267,63 @@ describe('/api', () => {
     });
   });
 
+  describe('GET /assets/:id', () => {
+    let asset: Asset;
+    beforeEach(async () => {
+      asset = await db.asset.create({
+        data: { ...Fixtures.Asset(), user: { connect: { id: user.id } } },
+      });
+    });
+
+    it('returns asset', async () => {
+      const response = await app
+        .inject()
+        .cookies({ session })
+        .get(`/api/assets/${asset.id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({ id: asset.id });
+    });
+
+    it('returns error when asset does not exist', async () => {
+      const response = await app
+        .inject()
+        .cookies({ session })
+        .get(`/api/assets/9999`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json()).toMatchObject({
+        message: expect.stringMatching(/not found/i),
+      });
+    });
+
+    it('returns error if user not logged in', async () => {
+      const response = await app.inject().get(`/api/assets/${asset.id}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.json()).toMatchObject({
+        message: expect.stringMatching(/unauthorized/i),
+      });
+    });
+
+    it('returns error when asset does not belong to user', async () => {
+      const otherUser = await db.user.create({ data: {} });
+      const otherAsset = await db.asset.create({
+        data: { ...Fixtures.Asset(), user: { connect: { id: otherUser.id } } },
+      });
+
+      const response = await app
+        .inject()
+        .cookies({ session })
+        .get(`/api/assets/${otherAsset.id}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json()).toMatchObject({
+        message: expect.stringMatching(/not found/i),
+      });
+    });
+  });
+
   describe('DELETE /assets/:id', () => {
     let asset: Asset;
     beforeEach(async () => {

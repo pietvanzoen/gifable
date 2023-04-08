@@ -79,9 +79,12 @@ export default async function api(app: FastifyInstance) {
     Params: UpdateParamsType;
     Reply: AssetType;
   }>('/assets/:id', { schema: { params: UpdateParams } }, async (request) => {
-    const asset = await app.db.asset.findUnique({
-      where: { id: request.params.id },
+    const userId = await getSessionUserId(request);
+
+    const [asset] = await app.db.asset.findMany({
+      where: { id: request.params.id, userId },
     });
+
     if (!asset) throw createHttpError.NotFound();
 
     return asset;
