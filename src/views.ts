@@ -47,6 +47,10 @@ export default async function api(app: FastifyInstance) {
   });
 
   app.get('/signup', async (request, reply) => {
+    if (process.env.DISABLE_SIGNUP) {
+      reply.status(404).view('/views/404.eta');
+      return;
+    }
     reply.view('/views/signup.eta', { view: 'signup' });
   });
 

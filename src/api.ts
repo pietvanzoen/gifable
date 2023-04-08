@@ -179,6 +179,9 @@ export default async function api(app: FastifyInstance) {
   app.post<{
     Reply: UserType;
   }>('/users', async (request, reply) => {
+    if (process.env.DISABLE_SIGNUP) {
+      throw createHttpError.Forbidden('Signup is disabled');
+    }
     const user = await app.db.user.create({ data: {} });
     reply.status(201);
     request.session.set('userId', user.id);
