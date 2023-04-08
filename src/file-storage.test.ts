@@ -36,17 +36,17 @@ describe('FileStorage', () => {
     });
   });
 
-  describe('uploadFile', () => {
-    let url: string;
+  describe('upload', () => {
+    let buffer: Buffer;
     let filename: string;
 
     beforeEach(() => {
-      url = 'https://test-bucket.s3.amazonaws.com/test-base-path/test.jpg';
+      buffer = Buffer.from('test');
       filename = 'test.jpg';
     });
 
     it('uploads a file', async () => {
-      const uploadResponse = await fileStorage.uploadURL(url, filename);
+      const uploadResponse = await fileStorage.upload(buffer, filename);
       expect(uploadResponse).toEqual({
         url: 'https://test-bucket.s3.amazonaws.com/test-base-path/test.jpg',
         etag: 'test-etag',
@@ -54,29 +54,20 @@ describe('FileStorage', () => {
       });
     });
 
-    it('throws an error if the file is not found', async () => {
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
-        ok: false,
-      } as unknown as Response);
-      await expect(fileStorage.uploadURL(url, filename)).rejects.toThrow(
-        'Failed to fetch file'
-      );
-    });
-
     it('throws an error if filename is invalid', async () => {
       const filename = 'test.txt';
-      await expect(fileStorage.uploadURL(url, filename)).rejects.toThrow(
+      await expect(fileStorage.upload(buffer, filename)).rejects.toThrow(
         'Invalid filename'
       );
     });
 
     it('sets metaData', async () => {
-      await fileStorage.uploadURL(url, filename);
+      await fileStorage.upload(buffer, filename);
       expect(Minio.Client.prototype.putObject).toHaveBeenCalledWith(
         'test-bucket',
         'test-base-path/test.jpg',
-        expect.anything(),
-        expect.anything(),
+        buffer,
+        buffer.length,
         {
           'Content-Type': 'image/jpeg',
           'Cache-Control': 'max-age=86400',

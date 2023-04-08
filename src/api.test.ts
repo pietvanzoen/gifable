@@ -4,6 +4,7 @@ import server from './server';
 import { FastifyInstance } from 'fastify';
 import FileStorage from './file-storage';
 import { getImageData } from './image-service';
+import bytes from 'bytes';
 
 jest.mock('./image-service');
 
@@ -371,6 +372,8 @@ describe('/api', () => {
 
   describe('POST /upload', () => {
     it('uploads url to storage', async () => {
+      storage.download.mockResolvedValue(Buffer.from('foo'));
+
       const data = Fixtures.Upload();
       const response = await app
         .inject()
@@ -379,8 +382,12 @@ describe('/api', () => {
         .payload(data);
 
       expect(response.statusCode).toBe(200);
-      expect(storage.uploadURL).toHaveBeenCalledWith(
+      expect(storage.download).toHaveBeenCalledWith(
         data.url,
+        expect.anything()
+      );
+      expect(storage.upload).toHaveBeenCalledWith(
+        expect.any(Buffer),
         expect.any(String)
       );
     });

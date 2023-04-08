@@ -1,6 +1,5 @@
 import { fetch } from 'fetch-h2';
 import * as Minio from 'minio';
-import { Readable } from 'node:stream';
 import { debug } from 'debug';
 import path from 'node:path';
 import assert from 'node:assert';
@@ -11,7 +10,6 @@ type FileStorageOptions = {
   storageBaseURL: string;
   basePath?: string;
   storage: Minio.ClientOptions;
-  maxFileSize: number;
 };
 
 const EXTENSION_TO_MIME_TYPE: Record<string, string> = {
@@ -30,14 +28,12 @@ export default class FileStorage {
   private bucket: string;
   private storageBaseURL: string;
   private basePath?: string;
-  private maxFileSize: number;
 
   constructor(options: FileStorageOptions) {
     this.minioClient = new Minio.Client(options.storage);
     this.bucket = options.bucket;
     this.basePath = options.basePath;
     this.storageBaseURL = options.storageBaseURL;
-    this.maxFileSize = options.maxFileSize;
   }
 
   async exists(filename: string): Promise<boolean> {
@@ -50,16 +46,10 @@ export default class FileStorage {
     );
   }
 
-  async uploadURL(url: string, filename: string): Promise<UploadResponse> {
+  async upload(buffer: Buffer, filename: string): Promise<UploadResponse> {
     assert(FILENAME_REGEX.test(filename), 'Invalid filename');
 
     const filePath = this.makeFilePath(filename);
-    debugLog('uploadURL', url, filePath);
-
-    const fileStream = await this.getFileStream(url);
-    if (fileStream.readableLength > this.maxFileSize) {
-      throw new Error('File too large');
-    }
 
     debugLog('uploading file', filePath);
 
@@ -71,8 +61,8 @@ export default class FileStorage {
     const data = await this.minioClient.putObject(
       this.bucket,
       filePath,
-      fileStream,
-      fileStream.readableLength,
+      buffer,
+      buffer.length,
       metaData
     );
 
@@ -91,12 +81,35 @@ export default class FileStorage {
     return new URL(filePath, this.storageBaseURL).toString();
   }
 
-  private async getFileStream(url: string): Promise<Readable> {
+  async download(
+    url: string,
+    { progress }: { progress?: (size: number) => void }
+  ): Promise<Buffer> {
     debugLog('downloading file', url);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Failed to fetch file');
     }
-    return new Readable().wrap(await response.readable());
+    return response.readable().then((stream) => {
+      return new Promise<Buffer>((resolve, reject) => {
+        const chunks: Buffer[] = [];
+        stream.on('data', (chunk) => {
+          chunks.push(chunk);
+          const totalSize = chunks.reduce(
+            (acc, chunk) => acc + chunk.length,
+            0
+          );
+          if (progress) {
+            try {
+              progress(totalSize);
+            } catch (err) {
+              reject(err);
+            }
+          }
+        });
+        stream.on('end', () => resolve(Buffer.concat(chunks)));
+        stream.on('error', reject);
+      });
+    });
   }
 }

@@ -21,6 +21,9 @@ import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
 import { getImageData } from './image-service';
 import ms from 'ms';
+import bytes from 'bytes';
+
+const MAX_FILE_SIZE = bytes('10MB');
 
 export default async function api(app: FastifyInstance) {
   app.post<{ Body: AssetCreateType; Reply: AssetType }>(
@@ -137,14 +140,25 @@ export default async function api(app: FastifyInstance) {
     '/upload',
     { schema: { body: Upload } },
     async (request, reply) => {
-      const userId = await getSessionUserId(request);
+      await getSessionUserId(request);
 
       if (await app.storage.exists(request.body.filename)) {
         throw createHttpError.Conflict(
           `File with name "${request.body.filename}" already exists`
         );
       }
-      return app.storage.uploadURL(request.body.url, request.body.filename);
+
+      const buffer = await app.storage.download(request.body.url, {
+        progress(size) {
+          if (size > MAX_FILE_SIZE) {
+            throw createHttpError.PayloadTooLarge(
+              `File size is too large (max ${bytes(MAX_FILE_SIZE)})`
+            );
+          }
+        },
+      });
+
+      return app.storage.upload(buffer, request.body.filename);
     }
   );
 
