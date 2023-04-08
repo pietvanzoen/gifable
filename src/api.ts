@@ -100,8 +100,7 @@ export default async function api(app: FastifyInstance) {
       if (search) {
         where.comment = { contains: search.trim() };
       }
-      request.log.info({ where }, 'Searching assets');
-      reply.header('Cache-Control', 'private, max-age=60');
+      reply.header('Cache-Control', 'no-cache');
       return app.db.asset.findMany({
         where,
         orderBy: { createdAt: 'desc' },
