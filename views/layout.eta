@@ -17,7 +17,7 @@
         <a class="<%= it.view === 'add' ? 'current' : '' %>" href="/add">Add</a>
         <a href="/logout">Logout</a>
       </nav>
-      <% } else { %>
+      <% } else if (!it.signupDisabled) { %>
       <nav>
         <a class="<%= it.view === 'login' ? 'current' : '' %>" href="/login"
           >Login</a

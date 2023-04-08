@@ -43,7 +43,10 @@ export default async function api(app: FastifyInstance) {
   });
 
   app.get('/login', async (request, reply) => {
-    reply.view('/views/login.eta', { view: 'login' });
+    reply.view('/views/login.eta', {
+      view: 'login',
+      signupDisabled: Boolean(process.env.DISABLE_SIGNUP),
+    });
   });
 
   app.get('/signup', async (request, reply) => {
@@ -51,7 +54,10 @@ export default async function api(app: FastifyInstance) {
       reply.status(404).view('/views/404.eta');
       return;
     }
-    reply.view('/views/signup.eta', { view: 'signup' });
+    reply.view('/views/signup.eta', {
+      view: 'signup',
+      signupDisabled: Boolean(process.env.DISABLE_SIGNUP),
+    });
   });
 
   app.get('*', async (request, reply) => {
