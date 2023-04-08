@@ -2,8 +2,10 @@
 
 <main>
   <figure>
-    <img id="img" />
-    <figcaption><a id="link"></a></figcaption>
+    <center>
+      <img id="img" />
+      <figcaption><a id="link"></a></figcaption>
+    </center>
   </figure>
   <form id="add-form" name="add">
     <label for="comment">Comment</label>
