@@ -74,4 +74,33 @@ describe('FileStorage', () => {
       );
     });
   });
+
+  describe('getFilenameFromURL', () => {
+    it('returns the filename from a URL', () => {
+      const url =
+        'https://test-bucket.s3.amazonaws.com/test-base-path/test.jpg';
+      expect(fileStorage.getFilenameFromURL(url)).toBe('test.jpg');
+    });
+
+    it('returns null if the URL is not valid', () => {
+      const url = 'https://test-bucket.s3.amazonaws.com/test.jpg';
+      expect(fileStorage.getFilenameFromURL(url)).toBeNull();
+    });
+  });
+
+  describe('delete', () => {
+    let filename: string;
+
+    beforeEach(() => {
+      filename = 'test.jpg';
+    });
+
+    it('deletes a file', async () => {
+      await fileStorage.delete(filename);
+      expect(Minio.Client.prototype.removeObject).toHaveBeenCalledWith(
+        'test-bucket',
+        'test-base-path/test.jpg'
+      );
+    });
+  });
 });

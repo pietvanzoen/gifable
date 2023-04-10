@@ -112,4 +112,21 @@ export default class FileStorage {
       });
     });
   }
+
+  getFilenameFromURL(url: string): string | null {
+    const baseStorageURL = new URL(this.basePath || '', this.storageBaseURL)
+      .href;
+
+    if (!url.startsWith(baseStorageURL)) {
+      return null;
+    }
+
+    return url.slice(baseStorageURL.length + 1);
+  }
+
+  async delete(filename: string): Promise<void> {
+    const filePath = this.makeFilePath(filename);
+    debugLog('deleting file', filePath);
+    await this.minioClient.removeObject(this.bucket, filePath);
+  }
 }

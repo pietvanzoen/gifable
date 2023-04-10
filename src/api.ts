@@ -123,12 +123,22 @@ export default async function api(app: FastifyInstance) {
     async (request, reply) => {
       const userId = await getSessionUserId(request);
 
-      const { count } = await app.db.asset.deleteMany({
+      const [asset] = await app.db.asset.findMany({
         where: { id: request.params.id, userId },
+        select: { url: true },
       });
 
-      if (!count) {
+      if (!asset) {
         throw createHttpError.NotFound();
+      }
+
+      await app.db.asset.delete({
+        where: { id: request.params.id },
+      });
+
+      const storageFilename = app.storage.getFilenameFromURL(asset.url);
+      if (storageFilename) {
+        await app.storage.delete(storageFilename);
       }
 
       reply.status(204);

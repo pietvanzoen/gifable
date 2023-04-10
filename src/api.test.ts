@@ -341,6 +341,12 @@ describe('/api', () => {
 
       expect(response.statusCode).toBe(204);
       expect(response.json()).toBe(null);
+
+      const deletedAsset = await db.asset.findUnique({
+        where: { id: asset.id },
+      });
+
+      expect(deletedAsset).toBe(null);
     });
 
     it('returns error when asset does not belong to user', async () => {
@@ -367,6 +373,19 @@ describe('/api', () => {
       expect(response.json()).toMatchObject({
         message: expect.stringMatching(/unauthorized/i),
       });
+    });
+
+    it('delete asset from storage', async () => {
+      storage.getFilenameFromURL.mockReturnValue('foo.jpg');
+
+      const response = await app
+        .inject()
+        .cookies({ session })
+        .delete(`/api/assets/${asset.id}`);
+
+      expect(response.statusCode).toBe(204);
+      expect(storage.getFilenameFromURL).toHaveBeenCalledWith(asset.url);
+      expect(storage.delete).toHaveBeenCalledWith('foo.jpg');
     });
   });
 
