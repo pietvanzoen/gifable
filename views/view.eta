@@ -119,8 +119,22 @@
   const btnCopyMarkdown = document.getElementById('btn-copy-markdown');
   btnCopyMarkdown.addEventListener('click', (event) => {
     event.preventDefault();
-    navigator.clipboard.writeText(`![${asset.alt}](${asset.url})`);
+    const markdown = `![${htmlEncode(asset.alt)}](${asset.url})`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(markdown);
+    } else {
+      console.error(`navigator.clipboard.writeText is not supported.`, {
+        markdown,
+      });
+    }
   });
+
+  function htmlEncode(s) {
+    return s.replace(/./gm, function (s) {
+      // return "&#" + s.charCodeAt(0) + ";";
+      return s.match(/[a-z0-9\s]+/i) ? s : '&#' + s.charCodeAt(0) + ';';
+    });
+  }
 
   function request(method, url, data) {
     return fetch(url, {
