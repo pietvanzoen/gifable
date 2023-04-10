@@ -7,7 +7,12 @@
       <img id="img" />
       <figcaption><a id="link"></a></figcaption>
     </figure>
+    <button type="button" id="btn-copy-url">🔗 Copy URL to clipboard</button>
+    <button type="button" id="btn-copy-markdown">
+      📝 Copy markdown to clipboard
+    </button>
   </center>
+
   <form id="add-form" name="add">
     <fieldset>
       <legend>
@@ -45,6 +50,7 @@
   img.setAttribute('height', asset.height);
   img.style.backgroundColor = asset.color;
   img.setAttribute('src', asset.url);
+  img.setAttribute('alt', asset.alt);
   const link = document.getElementById('link');
   link.setAttribute('href', asset.url);
   link.textContent = asset.url;
@@ -102,6 +108,18 @@
         setMessage(data.message);
         console.warn(error);
       });
+  });
+
+  const btnCopyUrl = document.getElementById('btn-copy-url');
+  btnCopyUrl.addEventListener('click', (event) => {
+    event.preventDefault();
+    navigator.clipboard.writeText(asset.url);
+  });
+
+  const btnCopyMarkdown = document.getElementById('btn-copy-markdown');
+  btnCopyMarkdown.addEventListener('click', (event) => {
+    event.preventDefault();
+    navigator.clipboard.writeText(`![${asset.alt}](${asset.url})`);
   });
 
   function request(method, url, data) {
