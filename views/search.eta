@@ -73,19 +73,6 @@
     </figure>`;
   }
 
-  function CopyButton(props) {
-    return html`<button
-      classList="copy-button"
-      title=${`Copy ${props.url} to clipboard`}
-      onClick=${(event) => {
-        event.preventDefault();
-        navigator.clipboard.writeText(props.url);
-      }}
-    >
-      🔗
-    </button>`;
-  }
-
   function debounce(callback, wait) {
     let timeoutId = null;
     return (...args) => {
