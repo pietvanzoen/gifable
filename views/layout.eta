@@ -8,6 +8,7 @@
   </head>
   <body class="<%= it.bodyClass || '' %>">
     <header>
+      <a href="#main" class="visually-hidden">Skip to content</a>
       <h1>Gifme</h1>
       <% if (it.showNav !== false) { %>
       <nav>

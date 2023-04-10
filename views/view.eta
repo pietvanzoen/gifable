@@ -1,35 +1,15 @@
 <% layout('/views/layout.eta') %>
 
-<main>
+<main id="main">
   <center>
     <h2 id="title"></h2>
+
     <figure>
       <img id="img" />
     </figure>
-  </center>
 
-  <table style="width: 100%">
-    <tr>
-      <th>URL</th>
-      <td><a id="link"></a></td>
-    </tr>
-    <tr>
-      <th>Comment</th>
-      <td id="comment"></td>
-    </tr>
-    <tr>
-      <th>Alt text</th>
-      <td id="alt"></td>
-    </tr>
-    <tr>
-      <th>Added</th>
-      <td><time id="added"></time></td>
-    </tr>
-  </table>
-
-  <center>
     <fieldset>
-      <legend><h3>Copy to clipboard</h3></legend>
+      <legend><strong>Copy to clipboard</strong></legend>
       <button
         type="button"
         aria-label="Copy URL to clipboard"
@@ -54,15 +34,41 @@
     </fieldset>
   </center>
 
+  <table style="width: 100%" role="grid" aria-labelledby="meta-title">
+    <caption id="meta-title">
+      <h3>Info</h3>
+    </caption>
+    <tbody role="presentation">
+      <tr role="presentation">
+        <th tabindex="0">URL</th>
+        <td tabindex="-1"><a id="link"></a></td>
+      </tr>
+      <tr role="presentation">
+        <th tabindex="-1">Comment</th>
+        <td tabindex="-1" id="comment"></td>
+      </tr>
+      <tr role="presentation">
+        <th tabindex="-1">Alt text</th>
+        <td tabindex="-1" id="alt"></td>
+      </tr>
+      <tr role="presentation">
+        <th tabindex="-1">Added</th>
+        <td tabindex="-1"><time id="added"></time></td>
+      </tr>
+    </tbody>
+  </table>
+
   <center>
     <button
       type="button"
       id="btn-edit"
       onclick="document.getElementById('edit').showModal()"
     >
-      ✏️ Edit
+      <span visually-hidden="true">✏️</span> Edit info
     </button>
-    <button type="button" id="btn-delete">🗑️ Delete</button>
+    <button type="button" id="btn-delete">
+      <span aria-hidden="true">🗑️</span> Delete file
+    </button>
   </center>
 
   <dialog id="edit">
@@ -83,7 +89,7 @@
     </center>
   </dialog>
 
-  <dialog class="toast" id="toast">
+  <dialog class="toast" id="toast" role="alert">
     <div id="toast-message"></div>
   </dialog>
 </main>
@@ -175,7 +181,7 @@
     }
   }
 
-  function htmlEncode(s) {
+  function htmlEncode(s = '') {
     return s.replace(/./gm, function (s) {
       // return "&#" + s.charCodeAt(0) + ";";
       return s.match(/[a-z0-9\s]+/i) ? s : '&#' + s.charCodeAt(0) + ';';
