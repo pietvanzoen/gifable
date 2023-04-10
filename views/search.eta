@@ -57,13 +57,14 @@
   }
 
   function Asset(props) {
-    return html`<figure key=${props.id} title=${props.url}>
+    return html`<figure key=${props.id}>
       <a href="/view/${props.id}">
         <img
           loading="lazy"
           width="${props.width || 300}"
           height="${props.height || 200}"
           src="${props.url}"
+          alt="${props.alt}"
           style="${`background-color: ${props.color};`}"
         />
         <${CopyButton} url="${props.url}" />

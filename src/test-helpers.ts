@@ -1,7 +1,7 @@
 import Chance from 'chance';
-import { Asset, Prisma, PrismaClient } from '@prisma/client';
+import { Asset, PrismaClient } from '@prisma/client';
 import FileStorage from './file-storage';
-import { AssetCreateType, AssetUpdateType, UploadType } from './api.types';
+import { AssetCreateType, UploadType } from './api.types';
 jest.mock('./file-storage');
 
 export const chance = new Chance();
@@ -11,6 +11,7 @@ export const Fixtures = {
     return {
       url: chance.url(),
       comment: chance.sentence(),
+      alt: chance.sentence(),
       width: chance.integer({ min: 1, max: 1000 }),
       height: chance.integer({ min: 1, max: 1000 }),
       color: chance.color(),

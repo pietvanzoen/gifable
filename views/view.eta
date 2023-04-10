@@ -8,8 +8,10 @@
     </center>
   </figure>
   <form id="add-form" name="add">
-    <label for="comment">Comment</label>
+    <label for="comment">Search comment</label>
     <textarea id="comment" name="comment"></textarea>
+    <label for="alt">Alt text</label>
+    <textarea id="alt" name="alt"></textarea>
     <div id="message"></div>
 
     <center>
@@ -31,6 +33,8 @@
 
   const comment = document.getElementById('comment');
   comment.value = asset.comment;
+  const alt = document.getElementById('alt');
+  alt.value = asset.alt;
   img.setAttribute('width', asset.width);
   img.setAttribute('height', asset.height);
   img.style.backgroundColor = asset.color;
@@ -44,6 +48,7 @@
   form.addEventListener('reset', (event) => {
     event.preventDefault();
     comment.value = asset.comment;
+    alt.value = asset.alt;
   });
 
   const message = document.getElementById('message');
@@ -53,9 +58,10 @@
 
     try {
       const data = serializeForm(event.target);
-      if (data.comment !== asset.comment) {
+      if (data.comment !== asset.comment || data.alt !== asset.alt) {
         const newAsset = await request('POST', '/api/assets/' + asset.id, data);
         comment.value = newAsset.comment;
+        alt.value = newAsset.alt;
         asset = newAsset;
       }
       setMessage('Saved');

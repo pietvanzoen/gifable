@@ -15,8 +15,10 @@
         required
         placeholder="example.gif"
       />
-      <label for="comment">Comment</label>
+      <label for="comment">Search comment</label>
       <textarea id="comment" name="comment"></textarea>
+      <label for="alt">Alt text</label>
+      <textarea id="alt" name="alt"></textarea>
       <progress id="progress" max="100" value="0"></progress>
       <div id="message"></div>
       <button type="reset">Reset</button>

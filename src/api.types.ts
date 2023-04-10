@@ -9,6 +9,7 @@ export const Asset = Type.Object(
     id: Type.Number(),
     url: Type.String({ format: 'uri' }),
     comment: Type.Optional(Nullable(Type.String())),
+    alt: Type.Optional(Nullable(Type.String())),
     createdAt: Type.Date(),
     updatedAt: Type.Date(),
     width: Type.Optional(Nullable(Type.Number())),
@@ -23,6 +24,7 @@ export const AssetUpdate = Type.Object(
   {
     url: Type.Optional(Type.String({ format: 'uri' })),
     comment: Type.Optional(Nullable(Type.String())),
+    alt: Type.Optional(Nullable(Type.String())),
     width: Type.Optional(Nullable(Type.Number())),
     height: Type.Optional(Nullable(Type.Number())),
     color: Type.Optional(Nullable(Type.String())),
@@ -37,6 +39,7 @@ export type UpdateParamsType = Static<typeof UpdateParams>;
 export const AssetCreate = Type.Pick(Asset, [
   'url',
   'comment',
+  'alt',
   'width',
   'height',
   'color',

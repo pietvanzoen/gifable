@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { FastifyError, FastifyInstance, FastifyRequest } from 'fastify';
 import {
   AssetCreate,

@@ -16,6 +16,7 @@ model Asset {
   updatedAt DateTime @updatedAt
   url String @unique
   comment String?
+  alt String?
   width Int?
   height Int?
   color String?
