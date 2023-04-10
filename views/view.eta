@@ -1,29 +1,32 @@
 <% layout('/views/layout.eta') %>
 
 <main>
-  <figure>
-    <center>
+  <center>
+    <h2 id="title"></h2>
+    <figure>
       <img id="img" />
       <figcaption><a id="link"></a></figcaption>
-    </center>
-  </figure>
+    </figure>
+  </center>
   <form id="add-form" name="add">
-    <label for="comment">Search comment</label>
-    <textarea id="comment" name="comment"></textarea>
-    <label for="alt">Alt text</label>
-    <textarea id="alt" name="alt"></textarea>
-    <div id="message"></div>
+    <fieldset>
+      <legend><h3>Edit</h3></legend>
+      <label for="comment">Search comment</label>
+      <textarea id="comment" name="comment"></textarea>
+      <label for="alt">Alt text</label>
+      <textarea id="alt" name="alt"></textarea>
+      <div id="message"></div>
+
+      <center>
+        <button type="reset">Reset</button>
+        <button type="submit">Save</button>
+      </center>
+    </fieldset>
 
     <center>
-      <button type="reset">Reset</button>
-      <button type="submit">Save</button>
+      <button type="button" id="btn-delete">🗑️ Delete this asset</button>
     </center>
   </form>
-  <hr />
-
-  <center>
-    <button type="button" id="btn-delete">🗑️ Delete this asset</button>
-  </center>
 </main>
 
 <script type="module">
@@ -31,6 +34,7 @@
   const id = window.location.href.split('/').pop();
   let asset = await request('GET', `/api/assets/${id}`);
 
+  setTitle(asset);
   const comment = document.getElementById('comment');
   comment.value = asset.comment;
   const alt = document.getElementById('alt');
@@ -132,5 +136,10 @@
       obj[key] = formData.get(key);
     }
     return obj;
+  }
+
+  function setTitle(asset) {
+    const title = document.getElementById('title');
+    title.textContent = asset.url.split('/').pop();
   }
 </script>

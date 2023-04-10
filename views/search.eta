@@ -39,6 +39,7 @@
         type="search"
         value=${props.search}
         placeholder="Search"
+        aria-label="Search for a file"
         onInput=${debounce(
           (event) => props.setSearch(event.target.value),
           500
@@ -67,7 +68,6 @@
           alt="${props.alt}"
           style="${`background-color: ${props.color};`}"
         />
-        <${CopyButton} url="${props.url}" />
       </a>
       <figcaption>${props.comment}</figcaption>
     </figure>`;
