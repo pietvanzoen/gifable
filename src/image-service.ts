@@ -5,14 +5,15 @@ type ImageData = {
   color: string;
   width: number;
   height: number;
+  size: number;
 };
 
 export async function getImageData(url: string): Promise<ImageData> {
-  const [color, [width, height]] = await Promise.all([
+  const [color, imgData] = await Promise.all([
     getPrimaryColor(url),
     getImageSize(url),
   ]);
-  return { color, width, height };
+  return { color, ...imgData };
 }
 
 export async function getPrimaryColor(url: string): Promise<string> {
@@ -20,7 +21,10 @@ export async function getPrimaryColor(url: string): Promise<string> {
   return `#${color.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
 }
 
-export async function getImageSize(url: string): Promise<[number, number]> {
+export async function getImageSize(
+  url: string
+): Promise<{ width: number; height: number; size: number }> {
   const image = await Jimp.read(url);
-  return [image.bitmap.width, image.bitmap.height];
+  const { width, height, data } = image.bitmap;
+  return { width, height, size: data.length };
 }

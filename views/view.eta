@@ -52,6 +52,10 @@
         <td tabindex="-1" id="alt"></td>
       </tr>
       <tr role="presentation">
+        <th tabindex="-1">Size</th>
+        <td tabindex="-1" id="size"></td>
+      </tr>
+      <tr role="presentation">
         <th tabindex="-1">Added</th>
         <td tabindex="-1"><time id="added"></time></td>
       </tr>
@@ -106,6 +110,7 @@
   const btnCopyUrl = document.getElementById('btn-copy-url');
   const btnCopyMarkdown = document.getElementById('btn-copy-markdown');
   const btnCopyAlt = document.getElementById('btn-copy-alt');
+  const size = document.getElementById('size');
 
   const id = window.location.href.split('/').pop();
   updateAsset(await request('GET', `/api/assets/${id}`));
@@ -258,6 +263,12 @@
     });
     added.setAttribute('datetime', asset.createdAt);
     added.setAttribute('title', asset.createdAt);
+
+    size.textContent = asset.size ? `${bytesToMB(asset.size)}MB` : '';
+  }
+
+  function bytesToMB(bytes) {
+    return (bytes / 1024 / 1024).toFixed(2);
   }
 
   let toastTimeout;

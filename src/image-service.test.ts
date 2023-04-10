@@ -13,7 +13,7 @@ describe('image helpers', () => {
   describe('getImageSize', () => {
     it('should return image size', async () => {
       const size = await getImageSize('https://xn--vi8h.piet.me/alright.gif');
-      expect(size).toEqual([500, 209]);
+      expect(size).toEqual({ width: 500, height: 209, size: 418000 });
     });
   });
 });

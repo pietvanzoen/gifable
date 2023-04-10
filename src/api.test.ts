@@ -442,7 +442,12 @@ describe('/api', () => {
     beforeEach(() => {
       (
         getImageData as jest.MockedFunction<typeof getImageData>
-      ).mockResolvedValue({ width: 100, height: 100, color: '#000000' });
+      ).mockResolvedValue({
+        width: 100,
+        height: 100,
+        color: '#000000',
+        size: 1234,
+      });
     });
 
     it('populates image data', async () => {
@@ -460,6 +465,7 @@ describe('/api', () => {
         width: 100,
         height: 100,
         color: '#000000',
+        size: 1234,
       });
     });
 

@@ -18,6 +18,7 @@ model Asset {
   comment String?
   alt String?
   width Int?
+  size Int?
   height Int?
   color String?
   userId Int
