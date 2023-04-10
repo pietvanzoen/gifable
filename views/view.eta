@@ -10,7 +10,9 @@
   </center>
   <form id="add-form" name="add">
     <fieldset>
-      <legend><h3>Edit</h3></legend>
+      <legend>
+        <h3>Edit <span id="edit-title"></span></h3>
+      </legend>
       <label for="comment">Search comment</label>
       <textarea id="comment" name="comment"></textarea>
       <label for="alt">Alt text</label>
@@ -140,6 +142,9 @@
 
   function setTitle(asset) {
     const title = document.getElementById('title');
-    title.textContent = asset.url.split('/').pop();
+    const filename = asset.url.split('/').pop();
+    title.textContent = filename;
+    const editTitle = document.getElementById('edit-title');
+    editTitle.textContent = filename;
   }
 </script>
