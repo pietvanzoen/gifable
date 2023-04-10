@@ -5,65 +5,109 @@
     <h2 id="title"></h2>
     <figure>
       <img id="img" />
-      <figcaption><a id="link"></a></figcaption>
     </figure>
-    <button type="button" id="btn-copy-url">🔗 Copy URL to clipboard</button>
-    <button type="button" id="btn-copy-markdown">
-      📝 Copy markdown to clipboard
-    </button>
   </center>
 
-  <form id="add-form" name="add">
-    <fieldset>
-      <legend>
-        <h3>Edit <span id="edit-title"></span></h3>
-      </legend>
-      <label for="comment">Search comment</label>
-      <textarea id="comment" name="comment"></textarea>
-      <label for="alt">Alt text</label>
-      <textarea id="alt" name="alt"></textarea>
-      <div id="message"></div>
+  <table style="width: 100%">
+    <tr>
+      <th>URL</th>
+      <td><a id="link"></a></td>
+    </tr>
+    <tr>
+      <th>Comment</th>
+      <td id="comment"></td>
+    </tr>
+    <tr>
+      <th>Alt text</th>
+      <td id="alt"></td>
+    </tr>
+    <tr>
+      <th>Added</th>
+      <td><time id="added"></time></td>
+    </tr>
+  </table>
 
-      <center>
-        <button type="reset">Reset</button>
-        <button type="submit">Save</button>
-      </center>
+  <center>
+    <fieldset>
+      <legend><h3>Copy to clipboard</h3></legend>
+      <button
+        type="button"
+        aria-label="Copy URL to clipboard"
+        id="btn-copy-url"
+      >
+        🔗 URL
+      </button>
+      <button
+        type="button"
+        aria-label="Copy alt text to clipboard"
+        id="btn-copy-alt"
+      >
+        💬 Alt text
+      </button>
+      <button
+        type="button"
+        aria-label="Copy Markdown to clipboard"
+        id="btn-copy-markdown"
+      >
+        📝 Markdown
+      </button>
     </fieldset>
+  </center>
+
+  <center>
+    <button
+      type="button"
+      id="btn-edit"
+      onclick="document.getElementById('edit').showModal()"
+    >
+      ✏️ Edit
+    </button>
+    <button type="button" id="btn-delete">🗑️ Delete</button>
+  </center>
+
+  <dialog id="edit">
+    <h3>Edit <span id="edit-title"></span></h3>
+    <form id="edit-form" name="add">
+      <label for="field-comment">Search comment</label>
+      <textarea id="field-comment" name="comment"></textarea>
+      <label for="field-alt">Alt text</label>
+      <textarea id="field-alt" name="alt"></textarea>
+      <div id="message"></div>
+    </form>
 
     <center>
-      <button type="button" id="btn-delete">🗑️ Delete this asset</button>
+      <form method="dialog" style="display: inline-block">
+        <button type="submit">Cancel</button>
+      </form>
+      <button form="edit-form" type="submit">Save</button>
     </center>
-  </form>
+  </dialog>
+
+  <dialog class="toast" id="toast">
+    <div id="toast-message"></div>
+  </dialog>
 </main>
 
 <script type="module">
+  let asset;
+
   const img = document.getElementById('img');
+  const editModal = document.getElementById('edit');
+  const form = document.getElementById('edit-form');
+  const message = document.getElementById('message');
+  const btnDelete = document.getElementById('btn-delete');
+  const added = document.getElementById('added');
+  const btnCopyUrl = document.getElementById('btn-copy-url');
+  const btnCopyMarkdown = document.getElementById('btn-copy-markdown');
+  const btnCopyAlt = document.getElementById('btn-copy-alt');
+
   const id = window.location.href.split('/').pop();
-  let asset = await request('GET', `/api/assets/${id}`);
-
-  setTitle(asset);
-  const comment = document.getElementById('comment');
-  comment.value = asset.comment;
-  const alt = document.getElementById('alt');
-  alt.value = asset.alt;
-  img.setAttribute('width', asset.width);
-  img.setAttribute('height', asset.height);
-  img.style.backgroundColor = asset.color;
-  img.setAttribute('src', asset.url);
-  img.setAttribute('alt', asset.alt);
-  const link = document.getElementById('link');
-  link.setAttribute('href', asset.url);
-  link.textContent = asset.url;
-
-  const form = document.getElementById('add-form');
+  updateAsset(await request('GET', `/api/assets/${id}`));
 
   form.addEventListener('reset', (event) => {
     event.preventDefault();
-    comment.value = asset.comment;
-    alt.value = asset.alt;
+    updateAsset(asset);
   });
-
-  const message = document.getElementById('message');
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -71,13 +115,27 @@
     try {
       const data = serializeForm(event.target);
       if (data.comment !== asset.comment || data.alt !== asset.alt) {
-        const newAsset = await request('POST', '/api/assets/' + asset.id, data);
-        comment.value = newAsset.comment;
-        alt.value = newAsset.alt;
-        asset = newAsset;
+        updateAsset(await request('POST', '/api/assets/' + asset.id, data));
       }
-      setMessage('Saved');
-      setTimeout(() => setMessage(''), 2000);
+    } catch (error) {
+      setMessage(error.message);
+      console.error(error);
+      return;
+    }
+
+    editModal.close();
+    toast('Saved');
+  });
+
+  btnDelete.addEventListener('click', async (event) => {
+    event.preventDefault();
+
+    if (!window.confirm('Are you sure?')) {
+      return;
+    }
+
+    try {
+      await request('DELETE', '/api/assets/' + asset.id);
     } catch (error) {
       setMessage(error.message);
       console.error(error);
@@ -85,49 +143,37 @@
     }
   });
 
-  const btnDelete = document.getElementById('btn-delete');
-  btnDelete.addEventListener('click', (event) => {
-    event.preventDefault();
-
-    if (!window.confirm('Are you sure?')) {
-      return;
-    }
-
-    fetch('/api/assets/' + asset.id, {
-      method: 'DELETE',
-    })
-      .then((response) => {
-        if (response.ok) return;
-        throw json;
-      })
-      .then(() => {
-        window.location.href = '/';
-      })
-      .catch(async (error) => {
-        const data = await response.json();
-        setMessage(data.message);
-        console.warn(error);
-      });
-  });
-
-  const btnCopyUrl = document.getElementById('btn-copy-url');
   btnCopyUrl.addEventListener('click', (event) => {
     event.preventDefault();
-    navigator.clipboard.writeText(asset.url);
+    copyToClipboard(asset.url);
+    toast('URL copied to clipboard');
   });
 
-  const btnCopyMarkdown = document.getElementById('btn-copy-markdown');
   btnCopyMarkdown.addEventListener('click', (event) => {
     event.preventDefault();
-    const markdown = `![${htmlEncode(asset.alt)}](${asset.url})`;
+    copyToClipboard(`![${htmlEncode(asset.alt)}](${asset.url})`);
+    toast('Markdown copied to clipboard');
+  });
+
+  btnCopyAlt.addEventListener('click', (event) => {
+    event.preventDefault();
+    copyToClipboard(asset.alt);
+    toast('Alt text copied to clipboard');
+  });
+
+  editModal.addEventListener('close', () => {
+    updateAsset(asset);
+  });
+
+  function copyToClipboard(text) {
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(markdown);
+      navigator.clipboard.writeText(text);
     } else {
       console.error(`navigator.clipboard.writeText is not supported.`, {
-        markdown,
+        text,
       });
     }
-  });
+  }
 
   function htmlEncode(s) {
     return s.replace(/./gm, function (s) {
@@ -178,5 +224,47 @@
     title.textContent = filename;
     const editTitle = document.getElementById('edit-title');
     editTitle.textContent = filename;
+  }
+
+  function updateAsset(newAsset) {
+    asset = newAsset;
+    setTitle(asset);
+    const comment = document.getElementById('field-comment');
+    comment.value = asset.comment;
+    const alt = document.getElementById('field-alt');
+    alt.value = asset.alt;
+
+    document.getElementById('comment').textContent = asset.comment;
+    document.getElementById('alt').textContent = asset.alt;
+
+    img.setAttribute('width', asset.width);
+    img.setAttribute('height', asset.height);
+    img.style.backgroundColor = asset.color;
+    img.setAttribute('src', asset.url);
+    img.setAttribute('alt', asset.alt);
+    const link = document.getElementById('link');
+    link.setAttribute('href', asset.url);
+    link.textContent = asset.url;
+
+    added.textContent = new Date(asset.createdAt).toLocaleString('en-GB', {
+      dateStyle: 'long',
+      timeStyle: 'short',
+    });
+    added.setAttribute('datetime', asset.createdAt);
+    added.setAttribute('title', asset.createdAt);
+  }
+
+  let toastTimeout;
+  function toast(message) {
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    toastMessage.textContent = message;
+    toast.show();
+    toastTimeout = setTimeout(() => {
+      toast.close();
+    }, 2000);
   }
 </script>

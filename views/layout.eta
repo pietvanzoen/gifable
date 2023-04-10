@@ -30,5 +30,8 @@
     </header>
 
     <%~ it.body %>
+    <footer>
+      <small>Made with 🤍 by <a href="https://piet.me">piet.me</a></small>
+    </footer>
   </body>
 </html>

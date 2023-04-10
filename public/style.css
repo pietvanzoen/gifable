@@ -84,3 +84,24 @@ progress[value='0'] {
 ::-webkit-progress-value {
   transition: width 0.5s;
 }
+
+dialog {
+  width: auto;
+}
+
+button.small {
+  font-size: 0.8em;
+  padding: 0.2em 0.5em;
+}
+
+dialog.toast {
+  position: fixed;
+  left: unset;
+  right: 1em;
+  top: 1em;
+  margin: 0;
+}
+
+dialog.toast::backdrop {
+  display: none;
+}
