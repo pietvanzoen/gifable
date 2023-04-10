@@ -51,6 +51,7 @@ export default async function server({ db, options, storage }: ServerOptions) {
     cookie: {
       path: '/',
       httpOnly: true,
+      sameSite: 'strict',
     },
   });
 
