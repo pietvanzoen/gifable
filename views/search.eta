@@ -69,7 +69,10 @@
           style="${`background-color: ${props.color};`}"
         />
       </a>
-      <figcaption>${props.comment}</figcaption>
+      <figcaption>
+        ${props.comment}
+        ${!props.alt ? html`<p><em>⚠️ No alt text</em></p>` : ''}
+      </figcaption>
     </figure>`;
   }
 
