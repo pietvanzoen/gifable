@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { FastifyError, FastifyInstance, FastifyRequest } from 'fastify';
 import {
+  Asset,
   AssetCreate,
   AssetCreateType,
   AssetSearch,
@@ -11,11 +12,13 @@ import {
   UpdateParams,
   UpdateParamsType,
   Upload,
-  UploadResponseType,
   UploadType,
   UserType,
   LoginType,
   Login,
+  AssetListType,
+  AssetList,
+  User,
 } from './api.types';
 import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
@@ -28,7 +31,7 @@ const MAX_FILE_SIZE = bytes('10MB');
 export default async function api(app: FastifyInstance) {
   app.post<{ Body: AssetCreateType; Reply: AssetType }>(
     '/assets',
-    { schema: { body: AssetCreate } },
+    { schema: { body: AssetCreate, response: { 201: Asset } } },
     async (request, reply) => {
       const userId = await getSessionUserId(request);
 
@@ -53,7 +56,13 @@ export default async function api(app: FastifyInstance) {
     Reply: AssetType;
   }>(
     '/assets/:id',
-    { schema: { params: UpdateParams, body: AssetUpdate } },
+    {
+      schema: {
+        params: UpdateParams,
+        body: AssetUpdate,
+        response: { 200: Asset },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params;
       const userId = await getSessionUserId(request);
@@ -81,21 +90,25 @@ export default async function api(app: FastifyInstance) {
   app.get<{
     Params: UpdateParamsType;
     Reply: AssetType;
-  }>('/assets/:id', { schema: { params: UpdateParams } }, async (request) => {
-    const userId = await getSessionUserId(request);
+  }>(
+    '/assets/:id',
+    { schema: { params: UpdateParams, response: { 200: Asset } } },
+    async (request) => {
+      const userId = await getSessionUserId(request);
 
-    const [asset] = await app.db.asset.findMany({
-      where: { id: request.params.id, userId },
-    });
+      const [asset] = await app.db.asset.findMany({
+        where: { id: request.params.id, userId },
+      });
 
-    if (!asset) throw createHttpError.NotFound();
+      if (!asset) throw createHttpError.NotFound();
 
-    return asset;
-  });
+      return asset;
+    }
+  );
 
-  app.get<{ Reply: AssetType[]; Querystring: AssetSearchType }>(
+  app.get<{ Reply: AssetListType; Querystring: AssetSearchType }>(
     '/assets',
-    { schema: { querystring: AssetSearch } },
+    { schema: { querystring: AssetSearch, response: { 200: AssetList } } },
     async (request, reply) => {
       const userId = await getSessionUserId(request);
 
@@ -146,7 +159,7 @@ export default async function api(app: FastifyInstance) {
     }
   );
 
-  app.post<{ Body: UploadType; Reply: AssetCreateType }>(
+  app.post<{ Body: UploadType; Reply: AssetType }>(
     '/upload-url',
     { schema: { body: Upload } },
     async (request, reply) => {
@@ -214,16 +227,20 @@ export default async function api(app: FastifyInstance) {
 
   app.post<{
     Reply: UserType;
-  }>('/users', async (request, reply) => {
-    if (process.env.DISABLE_SIGNUP) {
-      throw createHttpError.Forbidden('Signup is disabled');
+  }>(
+    '/users',
+    { schema: { response: { 201: User } } },
+    async (request, reply) => {
+      if (process.env.DISABLE_SIGNUP) {
+        throw createHttpError.Forbidden('Signup is disabled');
+      }
+      const user = await app.db.user.create({ data: {} });
+      reply.status(201);
+      request.session.set('userId', user.id);
+      request.session.options({ maxAge: ms('1 day') / 1000 });
+      return user;
     }
-    const user = await app.db.user.create({ data: {} });
-    reply.status(201);
-    request.session.set('userId', user.id);
-    request.session.options({ maxAge: ms('1 day') / 1000 });
-    return user;
-  });
+  );
 
   app.post<{
     Body: LoginType;

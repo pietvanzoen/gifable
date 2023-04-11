@@ -20,6 +20,9 @@ export const Asset = Type.Object(
 );
 export type AssetType = Static<typeof Asset>;
 
+export const AssetList = Type.Array(Asset);
+export type AssetListType = Static<typeof AssetList>;
+
 export const AssetUpdate = Type.Pick(Asset, ['comment', 'alt']);
 export type AssetUpdateType = Static<typeof AssetUpdate>;
 
@@ -51,6 +54,7 @@ export type UploadResponseType = Static<typeof UploadResponse>;
 
 export const User = Type.Object(
   {
+    id: Type.Number(),
     account: Type.String(),
     createdAt: Type.Date(),
   },
