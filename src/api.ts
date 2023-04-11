@@ -244,15 +244,33 @@ export default async function api(app: FastifyInstance) {
 
     const authorisation = request.headers.authorization;
     if (authorisation) {
-      const [type, account] = authorisation.split(' ');
-      if (type === 'Bearer') {
-        const user = await app.db.user.findUnique({
-          where: { account },
-          select: { id: true },
-        });
-        if (user) {
-          userId = user.id;
-        }
+      let account: string;
+      const [type, auth] = authorisation.split(' ');
+
+      switch (type) {
+        case 'Basic':
+          const [username, password] = Buffer.from(auth, 'base64')
+            .toString()
+            .split(':');
+          account = password;
+          break;
+
+        case 'Bearer':
+          account = auth;
+          break;
+
+        default:
+          throw createHttpError.BadRequest(
+            `Invalid authorization type "${type}"`
+          );
+      }
+
+      const user = await app.db.user.findUnique({
+        where: { account },
+        select: { id: true },
+      });
+      if (user) {
+        userId = user.id;
       }
     }
 
