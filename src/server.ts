@@ -62,7 +62,7 @@ export default async function server({ db, options, storage }: ServerOptions) {
   fastify.get('/health', async () => {
     try {
       await db.$connect();
-      return { status: 'ok' };
+      return { status: 'ok', uptime: process.uptime() };
     } catch (error: any) {
       throw createHttpError.ServiceUnavailable(error?.message);
     }
