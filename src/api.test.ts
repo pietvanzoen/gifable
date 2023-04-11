@@ -33,17 +33,19 @@ describe('/api', () => {
 
   describe('POST /assets', () => {
     it('creates asset', async () => {
-      const data = Fixtures.Asset();
+      const { url, comment, alt } = Fixtures.Asset();
       const response = await app
         .inject()
         .cookies({ session })
         .post('/api/assets')
-        .payload(data);
+        .payload({ url, comment, alt });
 
       expect(response.statusCode).toBe(201);
       expect(response.json()).toMatchObject({
         id: expect.any(Number),
-        ...data,
+        url,
+        comment,
+        alt,
       });
     });
 
@@ -112,17 +114,18 @@ describe('/api', () => {
     });
 
     it('updates asset', async () => {
-      const data = Fixtures.Asset();
+      const { comment, alt } = Fixtures.Asset();
       const response = await app
         .inject()
         .cookies({ session })
         .post(`/api/assets/${asset.id}`)
-        .payload(data);
+        .payload({ comment, alt });
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toMatchObject({
         id: asset.id,
-        ...data,
+        comment,
+        alt,
       });
     });
 
@@ -150,19 +153,6 @@ describe('/api', () => {
       expect(response.statusCode).toBe(404);
       expect(response.json()).toMatchObject({
         message: expect.stringMatching(/not found/i),
-      });
-    });
-
-    it('returns error if url is invalid', async () => {
-      const response = await app
-        .inject()
-        .cookies({ session })
-        .post(`/api/assets/${asset.id}`)
-        .payload({ url: 'wibble' });
-
-      expect(response.statusCode).toBe(400);
-      expect(response.json()).toMatchObject({
-        message: expect.stringMatching(/url/),
       });
     });
 

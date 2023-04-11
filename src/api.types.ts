@@ -20,30 +20,13 @@ export const Asset = Type.Object(
 );
 export type AssetType = Static<typeof Asset>;
 
-export const AssetUpdate = Type.Object(
-  {
-    url: Type.Optional(Type.String({ format: 'uri' })),
-    comment: Type.Optional(Nullable(Type.String())),
-    alt: Type.Optional(Nullable(Type.String())),
-    width: Type.Optional(Nullable(Type.Number())),
-    height: Type.Optional(Nullable(Type.Number())),
-    color: Type.Optional(Nullable(Type.String())),
-  },
-  { additionalProperties: false }
-);
+export const AssetUpdate = Type.Pick(Asset, ['comment', 'alt']);
 export type AssetUpdateType = Static<typeof AssetUpdate>;
 
 export const UpdateParams = Type.Object({ id: Type.Number() });
 export type UpdateParamsType = Static<typeof UpdateParams>;
 
-export const AssetCreate = Type.Pick(Asset, [
-  'url',
-  'comment',
-  'alt',
-  'width',
-  'height',
-  'color',
-]);
+export const AssetCreate = Type.Pick(Asset, ['url', 'comment', 'alt']);
 export type AssetCreateType = Static<typeof AssetCreate>;
 
 export const AssetSearch = Type.Object({
