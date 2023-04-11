@@ -19,16 +19,26 @@ import {
   AssetListType,
   AssetList,
   User,
+  UploadFileType,
+  UploadFile,
 } from './api.types';
 import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
 import { getImageData } from './image-service';
 import ms from 'ms';
 import bytes from 'bytes';
+import fastifyMultipart from '@fastify/multipart';
 
 const MAX_FILE_SIZE = bytes('10MB');
 
 export default async function api(app: FastifyInstance) {
+  app.register(fastifyMultipart, {
+    attachFieldsToBody: true,
+    limits: {
+      fileSize: MAX_FILE_SIZE,
+    },
+  });
+
   app.post<{ Body: AssetCreateType; Reply: AssetType }>(
     '/assets',
     { schema: { body: AssetCreate, response: { 201: Asset } } },
@@ -182,6 +192,38 @@ export default async function api(app: FastifyInstance) {
       });
 
       const { url } = await app.storage.upload(buffer, request.body.filename);
+
+      const asset = await app.db.asset.create({
+        data: {
+          userId,
+          url,
+        },
+      });
+
+      reply.status(201);
+      return asset;
+    }
+  );
+
+  app.post<{ Body: UploadFileType; Reply: AssetType }>(
+    '/upload-file',
+    async (request, reply) => {
+      const userId = await getSessionUserId(request);
+
+      const { file, filename } = request.body;
+      if (!file) {
+        throw createHttpError.BadRequest('File is required');
+      }
+
+      if (await app.storage.exists(filename.value)) {
+        throw createHttpError.Conflict(
+          `File with name "${filename.value}" already exists`
+        );
+      }
+
+      const buffer = await file.toBuffer();
+
+      const { url } = await app.storage.upload(buffer, filename.value);
 
       const asset = await app.db.asset.create({
         data: {

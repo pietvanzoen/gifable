@@ -4,8 +4,32 @@
   <form id="add-form" name="add">
     <fieldset id="add-fieldset">
       <legend><h3>Add a file</h3></legend>
+
+      <p>
+        Select a file from your computer or enter the URL of an image file. You
+        can optionally add a search comment and alt text.
+      </p>
+
+      <input type="radio" id="url-radio" name="method" value="url" checked />
       <label for="url">URL</label>
-      <input id="url" name="url" type="text" required />
+      <input type="radio" id="file-radio" name="method" value="file" />
+      <label for="file">File</label>
+
+      <div id="url-group">
+        <label for="url">URL</label>
+        <input id="url" name="url" type="text" required />
+      </div>
+
+      <div id="file-group" style="display: none">
+        <label for="file">File</label>
+        <input
+          id="file"
+          name="file"
+          type="file"
+          accept="image/png, image/jpeg, image/gif"
+        />
+      </div>
+
       <label for="name">File name</label>
       <input
         id="filename"
@@ -15,6 +39,7 @@
         required
         placeholder="example.gif"
       />
+
       <label for="comment">Search comment</label>
       <textarea id="comment" name="comment"></textarea>
       <label for="alt">Alt text</label>
@@ -33,6 +58,13 @@
   const message = document.getElementById('message');
   const inputs = document.querySelectorAll('input, select, textarea');
   const progress = document.getElementById('progress');
+  const fileGroup = document.getElementById('file-group');
+  const urlGroup = document.getElementById('url-group');
+  const fileInput = document.getElementById('file');
+  const urlInput = document.getElementById('url');
+  const urlRadio = document.getElementById('url-radio');
+  const fileRadio = document.getElementById('file-radio');
+  const filenameInput = document.getElementById('filename');
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -46,7 +78,14 @@
     }, 200);
 
     try {
-      asset = await request('POST', '/api/upload-url', { url, filename });
+      if (fileRadio.checked) {
+        const data = new FormData();
+        data.append('file', fileInput.files[0]);
+        data.append('filename', filename);
+        asset = await request('POST', '/api/upload-file', data);
+      } else {
+        asset = await request('POST', '/api/upload-url', { url, filename });
+      }
       progress.value = 33;
     } catch (error) {
       resetProgress(interval);
@@ -94,13 +133,41 @@
     setMessage('');
   });
 
+  fileRadio.addEventListener('change', () => {
+    fileGroup.style.display = 'block';
+    fileInput.required = true;
+    urlGroup.style.display = 'none';
+    urlInput.required = false;
+  });
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    const filename = file.name;
+    filenameInput.value = filename.toLowerCase();
+  });
+
+  urlRadio.addEventListener('change', () => {
+    fileGroup.style.display = 'none';
+    fileInput.required = false;
+    urlGroup.style.display = 'block';
+    urlInput.required = true;
+  });
+
   function request(method, url, data = {}) {
+    const headers = {};
+    let body;
+
+    if (data.constructor === FormData) {
+      body = data;
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(data);
+    }
+
     return fetch(url, {
       method,
-      body: JSON.stringify(data),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
+      body,
+      headers,
     }).then(async (response) => {
       const json = await response.json();
       if (response.ok) {

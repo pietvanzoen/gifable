@@ -10,8 +10,9 @@ export const Asset = Type.Object(
     url: Type.String({ format: 'uri' }),
     comment: Type.Optional(Nullable(Type.String())),
     alt: Type.Optional(Nullable(Type.String())),
-    createdAt: Type.Date(),
-    updatedAt: Type.Date(),
+    createdAt: Type.Any(),
+    updatedAt: Type.Any(),
+    size: Type.Optional(Nullable(Type.Number())),
     width: Type.Optional(Nullable(Type.Number())),
     height: Type.Optional(Nullable(Type.Number())),
     color: Type.Optional(Nullable(Type.String())),
@@ -45,6 +46,19 @@ export const Upload = Type.Object(
   { additionalProperties: false }
 );
 export type UploadType = Static<typeof Upload>;
+
+export const UploadFile = Type.Object({
+  file: Type.Object({
+    filename: Type.String(),
+    mimetype: Type.String(),
+    encoding: Type.String(),
+    toBuffer: Type.Any(),
+  }),
+  filename: Type.Object({
+    value: Type.RegEx(FILENAME_REGEX),
+  }),
+});
+export type UploadFileType = Static<typeof UploadFile>;
 
 export const UploadResponse = Type.Object({
   url: Type.String({ format: 'uri' }),

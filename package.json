@@ -19,6 +19,7 @@
     "build:docker": "docker build -t pietvanzoen/gifme:latest ."
   },
   "dependencies": {
+    "@fastify/multipart": "^7.6.0",
     "@fastify/secure-session": "^6.0.0",
     "@fastify/static": "^6.9.0",
     "@fastify/type-provider-typebox": "^3.0.0",
