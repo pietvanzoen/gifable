@@ -379,18 +379,23 @@ describe('/api', () => {
     });
   });
 
-  describe('POST /upload', () => {
-    it('uploads url to storage', async () => {
+  describe('POST /upload-url', () => {
+    it('uploads url to storage and creates asset', async () => {
       storage.download.mockResolvedValue(Buffer.from('foo'));
+      storage.upload.mockResolvedValue({
+        url: 'https://foo.bar/baz.jpg',
+        etag: 'foo',
+        versionId: 'bar',
+      });
 
       const data = Fixtures.Upload();
       const response = await app
         .inject()
         .cookies({ session })
-        .post('/api/upload')
+        .post('/api/upload-url')
         .payload(data);
 
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode).toBe(201);
       expect(storage.download).toHaveBeenCalledWith(
         data.url,
         expect.anything()
@@ -399,6 +404,10 @@ describe('/api', () => {
         expect.any(Buffer),
         expect.any(String)
       );
+      expect(response.json()).toMatchObject({
+        id: expect.any(Number),
+        url: 'https://foo.bar/baz.jpg',
+      });
     });
 
     it('returns error if file already exists', async () => {
@@ -408,7 +417,7 @@ describe('/api', () => {
       const response = await app
         .inject()
         .cookies({ session })
-        .post('/api/upload')
+        .post('/api/upload-url')
         .payload(data);
 
       expect(response.statusCode).toBe(409);
@@ -419,7 +428,7 @@ describe('/api', () => {
 
     it('returns error if user is not logged in', async () => {
       const data = Fixtures.Upload();
-      const response = await app.inject().post('/api/upload').payload(data);
+      const response = await app.inject().post('/api/upload-url').payload(data);
 
       expect(response.statusCode).toBe(401);
       expect(response.json()).toMatchObject({

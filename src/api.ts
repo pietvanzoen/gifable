@@ -146,11 +146,11 @@ export default async function api(app: FastifyInstance) {
     }
   );
 
-  app.post<{ Body: UploadType; Reply: UploadResponseType }>(
-    '/upload',
+  app.post<{ Body: UploadType; Reply: AssetCreateType }>(
+    '/upload-url',
     { schema: { body: Upload } },
     async (request, reply) => {
-      await getSessionUserId(request);
+      const userId = await getSessionUserId(request);
 
       if (await app.storage.exists(request.body.filename)) {
         throw createHttpError.Conflict(
@@ -168,7 +168,17 @@ export default async function api(app: FastifyInstance) {
         },
       });
 
-      return app.storage.upload(buffer, request.body.filename);
+      const { url } = await app.storage.upload(buffer, request.body.filename);
+
+      const asset = await app.db.asset.create({
+        data: {
+          userId,
+          url,
+        },
+      });
+
+      reply.status(201);
+      return asset;
     }
   );
 

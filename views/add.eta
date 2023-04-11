@@ -36,7 +36,7 @@
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const formData = serializeForm(event.target);
+    const { url, filename, comment, alt } = serializeForm(event.target);
     setLoading(true);
     let asset;
     progress.value = 0;
@@ -46,8 +46,7 @@
     }, 200);
 
     try {
-      const data = await request('POST', '/api/upload', formData);
-      formData.url = data.url;
+      asset = await request('POST', '/api/upload-url', { url, filename });
       progress.value = 33;
     } catch (error) {
       resetProgress(interval);
@@ -57,8 +56,10 @@
     }
 
     try {
-      const response = await request('POST', '/api/assets', formData);
-      asset = response;
+      const response = await request('POST', `/api/assets/${asset.id}`, {
+        comment,
+        alt,
+      });
       progress.value = 66;
     } catch (error) {
       resetProgress(interval);
