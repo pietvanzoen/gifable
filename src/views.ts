@@ -1,10 +1,14 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyView from '@fastify/view';
 import eta from 'eta';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import fs from 'node:fs/promises';
 
 export default async function api(app: FastifyInstance) {
   app.register(fastifyView, {
     engine: { eta },
+    defaultContext: {
+      buildSHA: (await fs.readFile('build_sha', 'utf8')).trim(),
+    },
   });
 
   app.get('/', async (request, reply) => {

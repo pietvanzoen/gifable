@@ -34,6 +34,8 @@ jobs:
       - name: Set outputs
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Set build_sha file
+        run: echo ${{ steps.vars.outputs.sha_short }} > build_sha
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag ghcr.io/pietvanzoen/gifme:${{ steps.vars.outputs.sha_short }}
       - name: Tag latest

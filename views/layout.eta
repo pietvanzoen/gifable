@@ -32,7 +32,15 @@
 
     <%~ it.body %>
     <footer>
-      <small>Made with 🤍 by <a href="https://piet.me">piet.me</a></small>
+      <small
+        >Build:
+        <a
+          href="https://github.com/pietvanzoen/gifme/tree/<%= it.buildSHA === 'dev'  ? 'main' : it.buildSHA %>"
+          ><%= it.buildSHA %></a
+        >
+        |
+        <a href="https://github.com/pietvanzoen/gifme/issues">Issues</a></small
+      >
     </footer>
   </body>
 </html>
