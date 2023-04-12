@@ -330,7 +330,6 @@ describe('/api', () => {
         .delete(`/api/assets/${asset.id}`);
 
       expect(response.statusCode).toBe(204);
-      expect(response.json()).toBe(null);
 
       const deletedAsset = await db.asset.findUnique({
         where: { id: asset.id },

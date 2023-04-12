@@ -164,8 +164,7 @@ export default async function api(app: FastifyInstance) {
         await app.storage.delete(storageFilename);
       }
 
-      reply.status(204);
-      return null;
+      return reply.status(204).send();
     }
   );
 
