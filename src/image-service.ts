@@ -1,9 +1,10 @@
 import { getColor } from 'colorthief';
-import { GifUtil } from 'gifwrap';
 import Jimp from 'jimp';
+import { debug } from 'debug';
+const log = debug('app:image-service');
 
 type ImageData = {
-  color: string;
+  color: string | null;
   width: number;
   height: number;
   size: number;
@@ -28,7 +29,12 @@ export async function getImageData(url: string): Promise<ImageData> {
   };
 }
 
-export async function getPrimaryColor(url: string): Promise<string> {
-  const color: [number, number, number] = await getColor(url);
-  return `#${color.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
+export async function getPrimaryColor(url: string): Promise<string | null> {
+  try {
+    const color: [number, number, number] = await getColor(url);
+    return `#${color.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
+  } catch (e) {
+    log('Failed to get primary color', e);
+    return null;
+  }
 }

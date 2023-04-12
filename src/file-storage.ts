@@ -3,7 +3,7 @@ import * as Minio from 'minio';
 import { debug } from 'debug';
 import path from 'node:path';
 import assert from 'node:assert';
-const debugLog = debug('file-storage');
+const debugLog = debug('app:file-storage');
 
 type FileStorageOptions = {
   bucket: string;
