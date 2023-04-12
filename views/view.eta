@@ -73,6 +73,9 @@
     <button type="button" id="btn-delete">
       <span aria-hidden="true">🗑️</span> Delete file
     </button>
+    <button type="button" id="btn-reparse">
+      <span visually-hidden="true">🔁</span> Reparse file
+    </button>
   </center>
 
   <dialog id="edit">
@@ -106,6 +109,7 @@
   const form = document.getElementById('edit-form');
   const message = document.getElementById('message');
   const btnDelete = document.getElementById('btn-delete');
+  const btnReparse = document.getElementById('btn-reparse');
   const added = document.getElementById('added');
   const btnCopyUrl = document.getElementById('btn-copy-url');
   const btnCopyMarkdown = document.getElementById('btn-copy-markdown');
@@ -150,6 +154,21 @@
       window.location.href = '/';
     } catch (error) {
       setMessage(error.message);
+      console.error(error);
+      return;
+    }
+  });
+
+  btnReparse.addEventListener('click', async (event) => {
+    event.preventDefault();
+
+    try {
+      updateAsset(
+        await request('POST', '/api/assets/' + asset.id + '/parse', {})
+      );
+      toast('Reparsed');
+    } catch (error) {
+      toast(error.message);
       console.error(error);
       return;
     }
