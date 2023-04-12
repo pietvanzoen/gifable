@@ -47,7 +47,7 @@ export default class FileStorage {
   }
 
   async upload(buffer: Buffer, filename: string): Promise<UploadResponse> {
-    assert(FILENAME_REGEX.test(filename), 'Invalid filename');
+    assert(FILENAME_REGEX.test(filename), `Invalid filename "${filename}"`);
 
     const filePath = this.makeFilePath(filename);
 

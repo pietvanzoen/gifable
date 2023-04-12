@@ -20,7 +20,6 @@ import {
   AssetList,
   User,
   UploadFileType,
-  UploadFile,
 } from './api.types';
 import { errorHandler } from './error-handler';
 import createHttpError from 'http-errors';
@@ -28,6 +27,7 @@ import { getImageData } from './image-service';
 import ms from 'ms';
 import bytes from 'bytes';
 import fastifyMultipart from '@fastify/multipart';
+import path from 'node:path';
 
 const MAX_FILE_SIZE = bytes('10MB');
 
@@ -148,21 +148,28 @@ export default async function api(app: FastifyInstance) {
 
       const [asset] = await app.db.asset.findMany({
         where: { id: request.params.id, userId },
-        select: { url: true },
+        select: { url: true, thumbnailUrl: true },
       });
 
       if (!asset) {
         throw createHttpError.NotFound();
       }
 
+      request.log.info(`Deleting asset ${request.params.id}`);
       await app.db.asset.delete({
         where: { id: request.params.id },
       });
 
-      const storageFilename = app.storage.getFilenameFromURL(asset.url);
-      if (storageFilename) {
-        await app.storage.delete(storageFilename);
-      }
+      await Promise.all(
+        [asset.url, asset.thumbnailUrl].map((url) => {
+          if (!url) return;
+          const storageFilename = app.storage.getFilenameFromURL(url);
+          if (storageFilename) {
+            request.log.info(`Deleting file ${storageFilename}`);
+            return app.storage.delete(storageFilename);
+          }
+        })
+      );
 
       return reply.status(204).send();
     }
@@ -253,11 +260,36 @@ export default async function api(app: FastifyInstance) {
       if (!asset) throw createHttpError.NotFound();
 
       try {
-        const imageData = await getImageData(asset.url);
+        const { width, height, color, size, thumbnail } = await getImageData(
+          asset.url
+        );
+
+        const updateData: Prisma.AssetUpdateInput = {
+          width,
+          height,
+          size,
+          color,
+        };
+
+        if (thumbnail) {
+          try {
+            const basename = path.basename(asset.url, path.extname(asset.url));
+            const { url: thumbnailUrl } = await app.storage.upload(
+              thumbnail,
+              `${basename}-thumbnail.jpg`
+            );
+            request.log.info({ thumbnailUrl }, 'Generated thumbnail');
+            updateData.thumbnailUrl = thumbnailUrl;
+          } catch (error) {
+            request.log.error(error, "Couldn't generate thumbnail");
+          }
+        }
+
         const updatedAsset = await app.db.asset.update({
           where: { id },
-          data: imageData,
+          data: updateData,
         });
+
         return updatedAsset;
       } catch (error) {
         request.log.error(error, "Couldn't parse image");

@@ -15,6 +15,7 @@ model Asset {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   url String @unique
+  thumbnailUrl String?
   comment String?
   alt String?
   width Int?

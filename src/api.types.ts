@@ -8,6 +8,7 @@ export const Asset = Type.Object(
   {
     id: Type.Number(),
     url: Type.String({ format: 'uri' }),
+    thumbnailUrl: Type.Optional(Nullable(Type.String({ format: 'uri' }))),
     comment: Type.Optional(Nullable(Type.String())),
     alt: Type.Optional(Nullable(Type.String())),
     createdAt: Type.Any(),

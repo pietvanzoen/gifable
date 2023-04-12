@@ -58,19 +58,23 @@
   }
 
   function Asset(props) {
+    const [src, setSrc] = useState(props.thumbnailUrl || props.url);
+
     return html`<figure key=${props.id}>
       <a href="/view/${props.id}">
         <img
           loading="lazy"
           width="${props.width || 300}"
           height="${props.height || 200}"
-          src="${props.url}"
+          src="${src}"
           alt="${props.alt}"
           style="${`background-color: ${props.color};`}"
+          onMouseOver=${() => setSrc(props.url)}
+          onMouseOut=${() => setSrc(props.thumbnailUrl || props.url)}
         />
       </a>
       <figcaption>
-        ${props.comment}
+        ${props.url.split('/').pop()}
         ${!props.alt ? html`<p><em>⚠️ No alt text</em></p>` : ''}
       </figcaption>
     </figure>`;

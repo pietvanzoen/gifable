@@ -1,4 +1,4 @@
-import { getPrimaryColor, getImageSize } from './image-service';
+import { getPrimaryColor, getImageData } from './image-service';
 
 describe('image helpers', () => {
   describe('getPrimaryColor', () => {
@@ -10,10 +10,10 @@ describe('image helpers', () => {
     });
   });
 
-  describe('getImageSize', () => {
+  describe('getImageData', () => {
     it('should return image size', async () => {
-      const size = await getImageSize('https://xn--vi8h.piet.me/alright.gif');
-      expect(size).toEqual({ width: 500, height: 209, size: 418000 });
+      const size = await getImageData('https://xn--vi8h.piet.me/alright.gif');
+      expect(size).toMatchObject({ width: 500, height: 209, size: 418000 });
     });
   });
 });
