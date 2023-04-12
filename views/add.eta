@@ -11,9 +11,9 @@
       </p>
 
       <input type="radio" id="url-radio" name="method" value="url" checked />
-      <label for="url">URL</label>
+      <label for="url-radio">URL</label>
       <input type="radio" id="file-radio" name="method" value="file" />
-      <label for="file">File</label>
+      <label for="file-radio">File</label>
 
       <div id="url-group">
         <label for="url">URL</label>
