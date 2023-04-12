@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Generate secret_key
-        run: ./node_modules/@fastify/secure-session/genkey.js > secret_key
+        run: yarn generate-key
       - name: Run tests
         run: yarn test
       - name: Clean up

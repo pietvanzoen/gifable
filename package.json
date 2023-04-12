@@ -13,7 +13,8 @@
     "fmt": "prettier --write .",
     "pretest": "rm -f ./prisma/test.db && DATABASE_URL=file:./test.db prisma migrate deploy",
     "test": "jest src",
-    "predev": "prisma generate",
+    "generate-key": "if [ ! -e secret_key ]; then ./node_modules/@fastify/secure-session/genkey.js > secret_key; fi",
+    "predev": "npx prisma generate && yarn generate-key",
     "migrate": "prisma migrate deploy",
     "start:docker": "yarn migrate && node build/main.js",
     "build:docker": "docker build -t pietvanzoen/gifme:latest ."
