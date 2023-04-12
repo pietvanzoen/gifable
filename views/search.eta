@@ -99,6 +99,7 @@
         </a>
         ${isPlayable
           ? html`<button
+              tabindex="-1"
               title=${isPlaying ? 'Pause' : 'Play'}
               classList="play"
               onClick=${() => setPlayingId(isPlaying ? null : props.id)}
