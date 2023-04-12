@@ -10,13 +10,29 @@
   const params = new URLSearchParams(window.location.search);
   const searchQuery = params.get('search');
 
+  let intervalId = null;
+
   function App(props) {
     const [loading, setLoading] = useState(true);
     const [assets, setAssets] = useState([]);
     const [search, setSearch] = useState(searchQuery || '');
+    const [playingId, setPlayingId] = useState(null);
+
+    useEffect(() => {
+      if (playingId) {
+        clearInterval(intervalId);
+        intervalId = setInterval(() => {
+          setPlayingId(null);
+        }, 10_000);
+      } else {
+        clearInterval(intervalId);
+      }
+      return () => clearInterval(intervalId);
+    }, [playingId]);
 
     useEffect(async () => {
       setLoading(true);
+      setPlayingId(null);
       let params = '';
       if (search) {
         params = new URLSearchParams({ search });
@@ -29,7 +45,12 @@
 
     return html`<div>
       <${Search} setSearch=${setSearch} search=${search} />
-      <${Results} assets=${assets} loading=${loading} />
+      <${Results}
+        assets=${assets}
+        loading=${loading}
+        playingId=${playingId}
+        setPlayingId=${setPlayingId}
+      />
     </div>`;
   }
 
@@ -53,27 +74,55 @@
       ${props.assets.length === 0 && !props.loading
         ? html`<p><em>No results found</em></p>`
         : ''}
-      ${props.assets.map(Asset)}
+      ${props.assets.map(
+        (data) =>
+          html`<${Asset}
+            ...${data}
+            isPlaying=${data.id === props.playingId}
+            setPlayingId=${props.setPlayingId}
+          />`
+      )}
     </div>`;
   }
 
   function Asset(props) {
-    return html`<figure key=${props.id}>
-      <a href="/view/${props.id}">
-        <img
-          loading="lazy"
-          width="${props.width || 300}"
-          height="${props.height || 200}"
-          src="${props.thumbnailUrl || props.url}"
-          alt="${props.alt}"
-          style="${`background-color: ${props.color};`}"
-        />
-      </a>
+    const { id, url, isPlaying, setPlayingId, thumbnailUrl } = props;
+    const isPlayable = Boolean(url.endsWith('.gif') && thumbnailUrl);
+    return html`<figure key=${id}>
+      <div class="img-wrapper">
+        <a href="/view/${id}">
+          ${!isPlayable
+            ? html`<${AssetImage} ...${props} src=${url} />`
+            : isPlaying
+            ? html`<${AssetImage} ...${props} src=${url} />`
+            : html`<${AssetImage} ...${props} src=${thumbnailUrl || url} />`}
+        </a>
+        ${isPlayable
+          ? html`<button
+              title=${isPlaying ? 'Pause' : 'Play'}
+              classList="play"
+              onClick=${() => setPlayingId(isPlaying ? null : props.id)}
+            >
+              ${isPlaying ? '⏸' : '▶'}
+            </button>`
+          : ''}
+      </div>
       <figcaption>
         ${props.url.split('/').pop()}
         ${!props.alt ? html`<p><em>⚠️ No alt text</em></p>` : ''}
       </figcaption>
     </figure>`;
+  }
+
+  function AssetImage(props) {
+    return html`<img
+      loading="lazy"
+      width="${props.width || 300}"
+      height="${props.height || 200}"
+      src="${props.src}"
+      alt="${props.alt}"
+      style="${`background-color: ${props.color};`}"
+    />`;
   }
 
   function debounce(callback, wait) {

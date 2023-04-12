@@ -58,12 +58,12 @@ body.search {
   width: 2em;
   height: 2em;
 }
-figure > a > img {
+.img-wrapper img {
   background-color: var(--accent-bg);
-  border: 1px solid transparent;
+  border: 2px solid var(--bg);
   width: 100%;
 }
-figure > a:hover > img {
+.img-wrapper a:hover > img {
   border-color: var(--accent);
 }
 
@@ -120,4 +120,31 @@ center legend {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+button.play {
+  background-color: var(--accent-bg);
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  margin: 0;
+  text-align: center;
+  padding: 0;
+  color: var(--text);
+}
+
+.img-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.img-wrapper button.play {
+  opacity: 0.5;
+  position: absolute;
+  bottom: 1em;
+  right: 0.8em;
+}
+.img-wrapper:hover button.play {
+  opacity: 0.8;
 }
