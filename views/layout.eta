@@ -32,15 +32,19 @@
 
     <%~ it.body %>
     <footer>
-      <small
-        >Build:
-        <a
-          href="https://github.com/pietvanzoen/gifme/tree/<%= it.buildSHA === 'dev'  ? 'main' : it.buildSHA %>"
-          ><%= it.buildSHA %></a
-        >
-        |
-        <a href="https://github.com/pietvanzoen/gifme/issues">Issues</a></small
-      >
+      <small>
+        <div>
+          Version:
+          <a
+            href="https://github.com/pietvanzoen/gifme/tree/<%= it.buildSHA === 'dev'  ? 'main' : it.buildSHA %>"
+            ><%= it.buildSHA %></a
+          >
+        </div>
+
+        <div>
+          <a href="https://github.com/pietvanzoen/gifme/issues">Issues</a>
+        </div>
+      </small>
     </footer>
   </body>
 </html>
