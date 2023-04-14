@@ -1,4 +1,4 @@
-# Gifme
+# Gifable
 
 Self hosted gif library.
 

@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" href="/public/style.css" />
-    <title>🦩 Gifme</title>
+    <title>🦩 Gifable</title>
   </head>
   <body class="<%= it.bodyClass || '' %>">
     <header>
       <a href="#main" class="visually-hidden">Skip to content</a>
-      <h1>Gifme</h1>
+      <h1>Gifable</h1>
       <% if (it.showNav !== false) { %>
       <nav>
         <a class="<%= it.view === 'search' ? 'current' : '' %>" href="/"
@@ -36,13 +36,13 @@
         <div>
           Version:
           <a
-            href="https://github.com/pietvanzoen/gifme/tree/<%= it.buildSHA === 'dev'  ? 'main' : it.buildSHA %>"
+            href="https://github.com/pietvanzoen/gifable/tree/<%= it.buildSHA === 'dev'  ? 'main' : it.buildSHA %>"
             ><%= it.buildSHA %></a
           >
         </div>
 
         <div>
-          <a href="https://github.com/pietvanzoen/gifme/issues">Issues</a>
+          <a href="https://github.com/pietvanzoen/gifable/issues">Issues</a>
         </div>
       </small>
     </footer>
