@@ -26,8 +26,6 @@ export default async function main() {
     },
   });
 
-  await db.$connect();
-
   const fastify = server({ db, storage });
 
   return fastify;

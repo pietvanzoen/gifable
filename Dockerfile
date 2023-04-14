@@ -17,6 +17,7 @@ COPY --from=ts-compiler /usr/app/public ./public
 COPY --from=ts-compiler /usr/app/prisma ./prisma
 COPY --from=ts-compiler /usr/app/views ./views
 COPY --from=ts-compiler /usr/app/build_sha ./build_sha
+COPY --from=ts-compiler /usr/app/_scripts ./_scripts
 RUN yarn --production
 
 FROM --platform=linux/amd64 node:18-alpine

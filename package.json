@@ -8,7 +8,6 @@
   "license": "MIT",
   "scripts": {
     "dev": "npx nodemon",
-    "start": "yarn build && node build/main.js",
     "build": "rm -rf ./build && tsc",
     "fmt": "prettier --write .",
     "pretest": "rm -f ./prisma/test.db && DATABASE_URL=file:./test.db prisma migrate deploy",
@@ -16,8 +15,7 @@
     "generate-key": "if [ ! -e secret_key ]; then ./node_modules/@fastify/secure-session/genkey.js > secret_key; fi",
     "predev": "npx prisma generate && yarn generate-key",
     "migrate": "prisma migrate deploy",
-    "prestart:docker": "yarn migrate",
-    "start:docker": "node build/main.js | pino-pretty",
+    "start": "node build/main.js",
     "build:docker": "docker build -t pietvanzoen/gifable:latest ."
   },
   "dependencies": {
