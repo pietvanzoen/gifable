@@ -29,6 +29,6 @@ WORKDIR /usr/app
 COPY --from=ts-remover /usr/app ./
 USER 1000
 EXPOSE 3000
-CMD ["yarn", "start:docker"]
+CMD ["yarn", "start"]
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD wget -q -O /dev/null http://localhost:3000/health || exit 1
