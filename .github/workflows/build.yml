@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Run tests
-        run: SESSION_KEY=$(_scripts/generate_secret_key.sh) yarn test
+        run: SESSION_KEY=$(_scripts/generate-session-key.sh) yarn test
       - name: Clean up
         run: rm secret_key
 
