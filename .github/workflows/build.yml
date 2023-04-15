@@ -23,8 +23,6 @@ jobs:
         run: yarn install
       - name: Run tests
         run: SESSION_KEY=$(_scripts/generate-session-key.sh) yarn test
-      - name: Clean up
-        run: rm secret_key
 
   build:
     runs-on: ubuntu-latest
