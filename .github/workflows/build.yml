@@ -21,10 +21,8 @@ jobs:
           node-version: 18
       - name: Install dependencies
         run: yarn install
-      - name: Set session key
-        run: export SESSION_KEY=$(_scripts/generate_secret_key.sh)
       - name: Run tests
-        run: yarn test
+        run: SESSION_KEY=$(_scripts/generate_secret_key.sh) yarn test
       - name: Clean up
         run: rm secret_key
 
