@@ -5,7 +5,7 @@
   "main": "build/main.js",
   "repository": "git@github.com:pietvanzoen/gifable.git",
   "author": "pietvanzoen <hi@piet.me>",
-  "license": "GNU Affero General Public License v3.0",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "npx nodemon",
     "build": "rm -rf ./build && tsc",
