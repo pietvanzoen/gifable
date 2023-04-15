@@ -4,8 +4,8 @@
   "description": "Self hosted gif library",
   "main": "build/main.js",
   "repository": "git@github.com:pietvanzoen/gifable.git",
-  "author": "pietvanzoen <hi@pietvanzoen.com>",
-  "license": "MIT",
+  "author": "pietvanzoen <hi@piet.me>",
+  "license": "GNU Affero General Public License v3.0",
   "scripts": {
     "dev": "npx nodemon",
     "build": "rm -rf ./build && tsc",
