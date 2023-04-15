@@ -3,7 +3,6 @@ import fastifyStatic from '@fastify/static';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { PrismaClient, User } from '@prisma/client';
 import Fastify, { FastifyServerOptions } from 'fastify';
-import fs from 'node:fs';
 import createHttpError from 'http-errors';
 import path from 'path';
 import api from './api';
@@ -45,13 +44,12 @@ export default async function server({ db, options, storage }: ServerOptions) {
   });
 
   fastify.register(fastifySecureSession, {
-    key: fs.readFileSync(
-      env.get('SESSION_KEY_PATH') || path.join(__dirname, '../secret_key')
-    ),
+    key: Buffer.from(env.require('SESSION_KEY'), 'hex'),
     cookie: {
       path: '/',
       httpOnly: true,
       sameSite: 'strict',
+      secure: 'auto',
     },
   });
 

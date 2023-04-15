@@ -12,7 +12,6 @@
     "fmt": "prettier --write .",
     "pretest": "rm -f ./prisma/test.db && DATABASE_URL=file:./test.db prisma migrate deploy",
     "test": "jest src",
-    "generate-key": "if [ ! -e secret_key ]; then ./node_modules/@fastify/secure-session/genkey.js > secret_key; fi",
     "predev": "npx prisma generate",
     "migrate": "prisma migrate deploy",
     "prestart": "yarn migrate",
