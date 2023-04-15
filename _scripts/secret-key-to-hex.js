@@ -4,8 +4,6 @@
 
 const fs = require('fs');
 
-console.log(process.argv);
-
 const keyBuffer = fs.readFileSync(process.argv[2]);
 const hexString = keyBuffer.toString('hex');
 process.stdout.write(hexString)
