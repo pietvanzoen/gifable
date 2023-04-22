@@ -1,0 +1,23 @@
+body {
+  grid-template-columns: 1fr min(60em, 90%) 1fr;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 1em;
+}
+
+@media (min-width: 40em) {
+  .results {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+figure {
+  text-align: center;
+}
+
+figure img {
+  width: 100%;
+}

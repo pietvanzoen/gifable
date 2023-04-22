@@ -361,6 +361,7 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/deno,git,jetbrains+all,linux,macos,node,sublimetext,windows
 
-/build
-*.db*
-secret_key
+.env
+prisma/*.db*
+build/
+public/build/
