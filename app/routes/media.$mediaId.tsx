@@ -144,7 +144,12 @@ export default function MediaRoute() {
           <tr role="presentation">
             <th tabIndex={-1}>Added</th>
             <td tabIndex={-1}>
-              <time dateTime={createdAt}>{createdAt}</time>
+              <time dateTime={createdAt}>
+                {new Date(createdAt).toLocaleString("GB-en", {
+                  dateStyle: "long",
+                  timeStyle: "short",
+                })}
+              </time>
             </td>
           </tr>
         </tbody>
