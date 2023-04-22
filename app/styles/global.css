@@ -57,3 +57,38 @@ center legend {
 dialog {
   width: auto;
 }
+
+button.play {
+  background-color: var(--accent-bg);
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  margin: 0;
+  text-align: center;
+  padding: 0;
+  color: var(--text);
+}
+
+.img-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.img-wrapper button.play {
+  opacity: 0.5;
+  position: absolute;
+  bottom: 1em;
+  right: 0.8em;
+}
+.img-wrapper:hover button.play {
+  opacity: 0.8;
+}
+.img-wrapper img {
+  background-color: var(--accent-bg);
+  border: 2px solid var(--bg);
+  width: 100%;
+}
+.img-wrapper a:hover > img {
+  border-color: var(--accent);
+}
