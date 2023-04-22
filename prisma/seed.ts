@@ -1,36 +1,44 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
+import { register } from '~/utils/session.server';
 const db = new PrismaClient();
 
+const SEED_JSON_URL = process.env.SEED_JSON_URL;
+
 async function seed() {
-  const kody = await db.user.create({
-    data: {
-      username: "kody",
-      // this is a hashed version of "twixrox"
-      passwordHash:
-        "$2b$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu/1u",
-    },
-  });
+  const username = process.env.SEED_USER || 'test';
+  const password = process.env.SEED_PASSWORD || 'Trustno1';
+
+  console.log(`Seeding database with user ${username}`);
+
+  const user = await register({ username, password });
+  const media = await getMedia();
   await Promise.all(
-    getMedia().map((media) => {
-      return db.media.create({ data: { ...media, userId: kody.id } });
+    media.map((media: any) => {
+      return db.media.create({ data: { ...media, userId: user.id } });
     })
   );
 }
 
 seed();
 
-function getMedia() {
+async function getMedia() {
+  if (SEED_JSON_URL) {
+    console.log(`Fetching media from ${SEED_JSON_URL}`);
+    const res = await fetch(SEED_JSON_URL);
+    return res.json();
+  }
+  console.log(`Using default media`);
   return [
     {
-      url: "https://xn--vi8h.piet.me/pedro-hug.gif",
+      url: 'https://xn--vi8h.piet.me/pedro-hug.gif',
       comment: `Pedro pascal, hug`,
     },
     {
-      url: "https://xn--vi8h.piet.me/happydance.gif",
+      url: 'https://xn--vi8h.piet.me/happydance.gif',
       comment: `Seinfeld, happy dance`,
     },
     {
-      url: "https://xn--vi8h.piet.me/vibes.gif",
+      url: 'https://xn--vi8h.piet.me/vibes.gif',
       comment: `Vibes, cat`,
     },
   ];
