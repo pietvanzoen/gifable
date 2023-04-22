@@ -1,6 +1,10 @@
-node_modules
-.git
-build
-.vim
-.sessions
-Dockerfile
+/.git
+/.vim
+/.sessions
+/node_modules
+*.log
+.DS_Store
+.env
+/.cache
+/public/build
+/build

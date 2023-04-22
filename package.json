@@ -21,6 +21,7 @@
     "bytes": "^3.1.2",
     "classnames": "^2.3.2",
     "colorthief": "^2.4.0",
+    "debug": "^4.3.4",
     "dotenv": "^16.0.3",
     "fetch-h2": "^3.0.2",
     "isbot": "^3.6.5",

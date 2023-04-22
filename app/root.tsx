@@ -35,7 +35,7 @@ function Document({
   children: React.ReactNode;
   title?: string;
 }) {
-  const { user, buildSHA } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
   return (
     <html lang="en">
       <head>
@@ -48,7 +48,7 @@ function Document({
         <header>
           <h1>🦩 Gifable</h1>
 
-          {user ? (
+          {data?.user ? (
             <nav>
               <NavLink to="/">Search</NavLink>
               <NavLink to="/media/new">Add</NavLink>
@@ -65,10 +65,10 @@ function Document({
               Version:{" "}
               <a
                 href={`https://github.com/pietvanzoen/gifable/tree/${
-                  buildSHA === "dev" ? "main" : buildSHA
+                  data?.buildSHA === "dev" ? "main" : data?.buildSHA
                 }`}
               >
-                {buildSHA}
+                {data?.buildSHA}
               </a>
             </div>
 

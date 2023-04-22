@@ -2,6 +2,9 @@ import bcrypt from "bcryptjs";
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 
 import { db } from "./db.server";
+import debug from "debug";
+
+const log = debug("app:session");
 
 type LoginForm = {
   username: string;
@@ -13,7 +16,9 @@ export async function register({ username, password }: LoginForm) {
   const user = await db.user.create({
     data: { username, passwordHash },
   });
-  return { id: user.id, username };
+  const userData = { id: user.id, username };
+  log("registered user", userData);
+  return userData;
 }
 
 export async function login({ username, password }: LoginForm) {
@@ -23,7 +28,9 @@ export async function login({ username, password }: LoginForm) {
   if (!user) return null;
   const isCorrectPassword = await bcrypt.compare(password, user.passwordHash);
   if (!isCorrectPassword) return null;
-  return { id: user.id, username };
+  const userData = { id: user.id, username };
+  log("logged in user", userData);
+  return userData;
 }
 
 const sessionSecret = process.env.SESSION_SECRET;
@@ -54,6 +61,7 @@ export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get("userId");
   if (!userId || typeof userId !== "string") return null;
+
   return userId;
 }
 
@@ -99,6 +107,7 @@ export async function logout(request: Request) {
 export async function createUserSession(userId: string, redirectTo: string) {
   const session = await storage.getSession();
   session.set("userId", userId);
+  log("created session for user", userId);
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await storage.commitSession(session),

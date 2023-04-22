@@ -16,6 +16,9 @@ import { ValidatedForm, validationError } from "remix-validated-form";
 import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 import Alert from "~/components/Alert";
+import debug from "debug";
+
+const log = debug("app:login");
 
 const validator = withZod(
   z.object({
@@ -39,8 +42,10 @@ export async function action({ request }: ActionArgs) {
 
   switch (loginType) {
     case "login": {
+      log("Logging in user %s", username);
       const user = await login({ username, password });
       if (!user) {
+        log("User %s not found", username);
         return badRequest({
           repopulateFields: result.submittedData,
           formError: `Username/Password combination is incorrect`,
@@ -51,27 +56,34 @@ export async function action({ request }: ActionArgs) {
     }
 
     case "register": {
+      log("Registering user %s", username);
       const userExists = await db.user.findUnique({
         where: { username },
       });
       if (userExists) {
+        log("User %s already exists", username);
         return badRequest({
           repopulateFields: result.submittedData,
           formError: `User with username ${username} already exists`,
         });
       }
 
+      log("Creating user %s", username);
       const user = await register({ username, password });
+
       if (!user) {
+        log("Failed to create user %s", username);
         return badRequest({
           repopulateFields: result.submittedData,
           formError: `Something went wrong trying to create a new user.`,
         });
       }
+
       return createUserSession(user.id, redirectTo);
     }
 
     default: {
+      log("Invalid login type %s", loginType);
       return badRequest({
         repopulateFields: result.submittedData,
         formError: `Login type invalid`,
