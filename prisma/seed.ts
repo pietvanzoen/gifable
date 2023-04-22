@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client';
-import { register } from '~/utils/session.server';
+import { PrismaClient } from "@prisma/client";
+import { register } from "~/utils/session.server";
 const db = new PrismaClient();
 
 const SEED_JSON_URL = process.env.SEED_JSON_URL;
 
 async function seed() {
-  const username = process.env.SEED_USER || 'test';
-  const password = process.env.SEED_PASSWORD || 'Trustno1';
+  const username = process.env.SEED_USER || "test";
+  const password = process.env.SEED_PASSWORD || "Trustno1";
 
   console.log(`Seeding database with user ${username}`);
 
@@ -30,15 +30,15 @@ async function getMedia() {
   console.log(`Using default media`);
   return [
     {
-      url: 'https://xn--vi8h.piet.me/pedro-hug.gif',
+      url: "https://xn--vi8h.piet.me/pedro-hug.gif",
       comment: `Pedro pascal, hug`,
     },
     {
-      url: 'https://xn--vi8h.piet.me/happydance.gif',
+      url: "https://xn--vi8h.piet.me/happydance.gif",
       comment: `Seinfeld, happy dance`,
     },
     {
-      url: 'https://xn--vi8h.piet.me/vibes.gif',
+      url: "https://xn--vi8h.piet.me/vibes.gif",
       comment: `Vibes, cat`,
     },
   ];

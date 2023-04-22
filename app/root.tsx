@@ -9,15 +9,15 @@ import {
   ScrollRestoration,
   useLoaderData,
   useRouteError,
-} from '@remix-run/react';
-import type { LinksFunction, LoaderArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+} from "@remix-run/react";
+import type { LinksFunction, LoaderArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 
-import stylesUrl from '~/styles/global.css';
-import { getUser } from './utils/session.server';
+import stylesUrl from "~/styles/global.css";
+import { getUser } from "./utils/session.server";
 
 export const links: LinksFunction = () => {
-  return [{ rel: 'stylesheet', href: stylesUrl }];
+  return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
 export async function loader({ request }: LoaderArgs) {
