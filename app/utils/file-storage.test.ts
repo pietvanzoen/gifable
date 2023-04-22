@@ -1,6 +1,6 @@
 import { PassThrough } from "stream";
 import FileStorage from "./file-storage";
-import type { Response} from "fetch-h2";
+import type { Response } from "fetch-h2";
 import { fetch } from "fetch-h2";
 import * as Minio from "minio";
 
@@ -58,6 +58,21 @@ describe("FileStorage", () => {
       const filename = "test.txt";
       await expect(fileStorage.upload(buffer, filename)).rejects.toThrow(
         "Invalid filename"
+      );
+    });
+
+    it("allows single directory in filename", async () => {
+      const filename = "test/test.jpg";
+      await fileStorage.upload(buffer, filename);
+      expect(Minio.Client.prototype.putObject).toHaveBeenCalledWith(
+        "test-bucket",
+        "test-base-path/test/test.jpg",
+        buffer,
+        buffer.length,
+        {
+          "Content-Type": "image/jpeg",
+          "Cache-Control": "max-age=86400",
+        }
       );
     });
 

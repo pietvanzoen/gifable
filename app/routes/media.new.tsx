@@ -14,7 +14,7 @@ import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 
 import { db } from "~/utils/db.server";
-import { requireUserId } from "~/utils/session.server";
+import { getUser, requireUserId } from "~/utils/session.server";
 import { storeURL, getImageData, storeBuffer } from "~/utils/media.server";
 import bytes from "bytes";
 import { useState } from "react";
@@ -56,19 +56,24 @@ export async function action({ request }: ActionArgs) {
   const result = await validator.validate(formData);
   if (result.error) return validationError(result.error, result.submittedData);
 
+  const user = await getUser(request);
+  if (!user) throw new Error("User not found");
+
   const { comment, uploadType, filename } = result.data;
+
+  const userFilename = `${user.username}/${filename}`;
 
   const mediaUrl =
     uploadType === "url"
-      ? await storeURL(result.data.url, filename)
+      ? await storeURL(result.data.url, userFilename)
       : await storeBuffer(
           Buffer.from(await result.data.file.arrayBuffer()),
-          filename
+          userFilename
         );
 
   const { thumbnail, ...imageData } = await getImageData(mediaUrl);
 
-  const thumbnailFilename = `${filename.split(".")[0]}-thumbnail.jpg`;
+  const thumbnailFilename = `${userFilename.split(".")[0]}-thumbnail.jpg`;
 
   let thumbnailUrl: string | null = null;
   if (thumbnail) {

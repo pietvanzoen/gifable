@@ -20,7 +20,10 @@ import Alert from "~/components/Alert";
 const validator = withZod(
   z.object({
     loginType: z.enum(["login", "register"]),
-    username: z.string().min(3),
+    username: z
+      .string()
+      .min(3)
+      .regex(/^[a-z0-9-_]+$/),
     password: z.string().min(6),
     redirectTo: z.string().optional(),
   })
