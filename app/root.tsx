@@ -1,3 +1,5 @@
+import type { LinksFunction, LoaderArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   Link,
@@ -10,11 +12,10 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
-import type { LinksFunction, LoaderArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 
 import stylesUrl from "~/styles/global.css";
 import { getUser } from "./utils/session.server";
+import env from "~/utils/env.server";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -23,6 +24,7 @@ export const links: LinksFunction = () => {
 export async function loader({ request }: LoaderArgs) {
   return json({
     user: await getUser(request),
+    buildSHA: env.buildSHA,
   });
 }
 
@@ -33,7 +35,7 @@ function Document({
   children: React.ReactNode;
   title?: string;
 }) {
-  const data = useLoaderData<typeof loader>();
+  const { user, buildSHA } = useLoaderData<typeof loader>();
   return (
     <html lang="en">
       <head>
@@ -46,7 +48,7 @@ function Document({
         <header>
           <h1>🦩 Gifable</h1>
 
-          {data?.user ? (
+          {user ? (
             <nav>
               <NavLink to="/">Search</NavLink>
               <NavLink to="/media/new">Add</NavLink>
@@ -56,6 +58,25 @@ function Document({
         </header>
 
         <main>{children}</main>
+
+        <footer>
+          <small>
+            <div>
+              Version:{" "}
+              <a
+                href={`https://github.com/pietvanzoen/gifable/tree/${
+                  buildSHA === "dev" ? "main" : buildSHA
+                }`}
+              >
+                {buildSHA}
+              </a>
+            </div>
+
+            <div>
+              <a href="https://github.com/pietvanzoen/gifable/issues">Issues</a>
+            </div>
+          </small>
+        </footer>
 
         <Scripts />
         <ScrollRestoration />

@@ -1,5 +1,9 @@
 import * as dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 dotenv.config();
+
+const BUILD_SHA = fs.readFileSync(path.resolve("./build_sha"), "utf8").trim();
 
 export default {
   get(key: string) {
@@ -12,5 +16,9 @@ export default {
       throw new Error(`Missing required environment variable: ${key}`);
     }
     return value;
+  },
+
+  get buildSHA() {
+    return BUILD_SHA;
   },
 };

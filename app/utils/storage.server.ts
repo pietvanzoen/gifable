@@ -1,4 +1,4 @@
-import env from "./env";
+import env from "./env.server";
 import FileStorage from "./file-storage";
 
 let storage: FileStorage;
