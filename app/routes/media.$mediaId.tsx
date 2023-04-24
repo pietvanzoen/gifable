@@ -132,7 +132,7 @@ export default function MediaRoute() {
         <tbody role="presentation">
           <tr role="presentation">
             <th tabIndex={0}>URL</th>
-            <td tabIndex={-1}>
+            <td tabIndex={-1} style={{ wordBreak: "break-all" }}>
               <a href={url}>{url}</a>
             </td>
           </tr>
