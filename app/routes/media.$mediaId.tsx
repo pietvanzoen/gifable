@@ -118,7 +118,7 @@ export default function MediaRoute() {
           <button
             type="button"
             aria-label="Copy Markdown to clipboard"
-            onClick={() => copyToClipboard(`![${altText}](${url})`)}
+            onClick={() => copyToClipboard(`![${altText || ""}](${url})`)}
           >
             📝 Markdown
           </button>
