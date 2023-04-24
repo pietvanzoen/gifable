@@ -38,9 +38,17 @@ export async function action({ params, request }: ActionArgs) {
   return redirect("/");
 }
 
-export async function loader({ params }: LoaderArgs) {
+export async function loader({ request, params }: LoaderArgs) {
+  const userId = await requireUserId(request);
   const media = await db.media.findUnique({
     where: { id: params.mediaId },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
   });
   if (!media) {
     console.log("Media not found", params.mediaId);
@@ -48,11 +56,12 @@ export async function loader({ params }: LoaderArgs) {
       status: 404,
     });
   }
-  return json({ media });
+  return json({ userId, media });
 }
 
 export default function MediaRoute() {
-  const { media } = useLoaderData<typeof loader>();
+  const { userId, media } = useLoaderData<typeof loader>();
+  const isMine = media.userId === userId;
 
   const {
     url = "",
@@ -152,20 +161,28 @@ export default function MediaRoute() {
               </time>
             </td>
           </tr>
+          {isMine ? null : (
+            <tr role="presentation">
+              <th tabIndex={-1}>User</th>
+              <td tabIndex={-1}>{media.user.username}</td>
+            </tr>
+          )}
         </tbody>
       </table>
 
-      <center>
-        <Link to={`/media/${media.id}/edit`} className="button">
-          ✏️ Edit info
-        </Link>{" "}
-        &nbsp;
-        <form method="post" style={{ display: "inline-block" }}>
-          <button name="intent" type="submit" value="delete">
-            🗑️ Delete
-          </button>
-        </form>
-      </center>
+      {isMine ? (
+        <center>
+          <Link to={`/media/${media.id}/edit`} className="button">
+            ✏️ Edit info
+          </Link>{" "}
+          &nbsp;
+          <form method="post" style={{ display: "inline-block" }}>
+            <button name="intent" type="submit" value="delete">
+              🗑️ Delete
+            </button>
+          </form>
+        </center>
+      ) : null}
     </div>
   );
 }
