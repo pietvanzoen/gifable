@@ -10,7 +10,7 @@ async function seed() {
 
   console.log(`Seeding database with user ${username}`);
 
-  const user = await register({ username, password });
+  const user = await register({ username, password, isAdmin: true });
   const media = await getMedia();
   await Promise.all(
     media.map((media: any) => {

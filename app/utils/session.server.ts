@@ -10,14 +10,15 @@ const log = debug("app:session");
 type LoginForm = {
   username: string;
   password: string;
+  isAdmin?: boolean;
 };
 
-export async function register({ username, password }: LoginForm) {
+export async function register({ username, password, isAdmin }: LoginForm) {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await db.user.create({
-    data: { username, passwordHash },
+    data: { username, passwordHash, isAdmin: isAdmin || false },
   });
-  const userData = { id: user.id, username };
+  const userData = { id: user.id, username, isAdmin: user.isAdmin };
   log("registered user", userData);
   return userData;
 }
@@ -30,6 +31,10 @@ export async function login({ username, password }: LoginForm) {
   const isCorrectPassword = await bcrypt.compare(password, user.passwordHash);
   if (!isCorrectPassword) return null;
   const userData = { id: user.id, username };
+  await db.user.update({
+    where: { id: user.id },
+    data: { lastLogin: new Date() },
+  });
   log("logged in user", userData);
   return userData;
 }
@@ -83,7 +88,7 @@ export async function getUser(request: Request) {
   try {
     const user = await db.user.findUnique({
       where: { id: userId },
-      select: { id: true, username: true },
+      select: { id: true, username: true, isAdmin: true },
     });
     return user;
   } catch {

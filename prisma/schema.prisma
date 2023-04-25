@@ -30,4 +30,6 @@ model User {
   username     String   @unique
   passwordHash String
   medias       Media[]
+  isAdmin      Boolean  @default(false)
+  lastLogin    DateTime?
 }
