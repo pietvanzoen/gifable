@@ -3,7 +3,7 @@ import type { ChangeEventHandler } from "react";
 import { useField } from "remix-validated-form";
 
 export type FormInputProps = {
-  label: string;
+  label?: string;
   name: string;
   value?: string;
   type?: "text" | "password" | "radio" | "hidden" | "textarea" | "file";
@@ -41,7 +41,7 @@ export default function FormInput({
       )}
       style={style}
     >
-      {!["hidden", "radio"].includes(type) && (
+      {!["hidden", "radio"].includes(type) && label && (
         <label htmlFor={fieldId}>{label}</label>
       )}
       <Tag
