@@ -13,8 +13,12 @@ type LoginForm = {
   isAdmin?: boolean;
 };
 
+async function hashPassword(password: string) {
+  return bcrypt.hash(password, 10);
+}
+
 export async function register({ username, password, isAdmin }: LoginForm) {
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await hashPassword(password);
   const user = await db.user.create({
     data: { username, passwordHash, isAdmin: isAdmin || false },
   });
@@ -23,20 +27,45 @@ export async function register({ username, password, isAdmin }: LoginForm) {
   return userData;
 }
 
+export async function changePassword({
+  username,
+  password,
+}: {
+  username: string;
+  password: string;
+}) {
+  const passwordHash = await hashPassword(password);
+  await db.user.update({
+    where: { username },
+    data: { passwordHash },
+  });
+  log("changed password for user %s", username);
+}
+
 export async function login({ username, password }: LoginForm) {
+  const validPassword = await checkPassword({ username, password });
+  if (!validPassword) return null;
+  const user = await db.user.update({
+    where: { username },
+    data: { lastLogin: new Date() },
+  });
+  log("logged in user", username);
+  return { id: user.id, username };
+}
+
+export async function checkPassword({
+  username,
+  password,
+}: {
+  username: string;
+  password: string;
+}) {
   const user = await db.user.findUnique({
     where: { username },
   });
-  if (!user) return null;
+  if (!user) return false;
   const isCorrectPassword = await bcrypt.compare(password, user.passwordHash);
-  if (!isCorrectPassword) return null;
-  const userData = { id: user.id, username };
-  await db.user.update({
-    where: { id: user.id },
-    data: { lastLogin: new Date() },
-  });
-  log("logged in user", userData);
-  return userData;
+  return isCorrectPassword;
 }
 
 const storage = createCookieSessionStorage({

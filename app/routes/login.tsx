@@ -17,17 +17,13 @@ import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 import Alert from "~/components/Alert";
 import debug from "debug";
+import { UserSchema } from "~/utils/validators";
 
 const log = debug("app:login");
 
 const validator = withZod(
-  z.object({
+  UserSchema.extend({
     loginType: z.enum(["login", "register"]),
-    username: z
-      .string()
-      .min(3)
-      .regex(/^[a-z0-9-_]+$/),
-    password: z.string().min(6),
     redirectTo: z.string().optional(),
   })
 );

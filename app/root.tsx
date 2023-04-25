@@ -52,7 +52,7 @@ function Document({
             <nav>
               <NavLink to="/">Search</NavLink>
               <NavLink to="/media/new">Add</NavLink>
-              {data?.user?.isAdmin && <NavLink to="/admin">Admin</NavLink>}
+              <NavLink to="/settings">Settings</NavLink>
               <Link to="/logout">Logout</Link>
             </nav>
           ) : null}
