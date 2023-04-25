@@ -57,4 +57,5 @@ LABEL org.opencontainers.image.source=https://github.com/pietvanzoen/gifable
 LABEL org.opencontainers.image.description="Gifable: A simple gif libary."
 LABEL org.opencontainers.image.licenses=MIT
 
+EXPOSE 3000
 CMD ["npm", "run", "start"]
