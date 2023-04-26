@@ -1,4 +1,5 @@
 import { PassThrough } from "stream";
+import type { FileStorageOptions } from "./file-storage";
 import FileStorage from "./file-storage";
 import type { Response } from "fetch-h2";
 import { fetch } from "fetch-h2";
@@ -8,6 +9,7 @@ jest.mock("minio");
 jest.mock("fetch-h2");
 
 describe("FileStorage", () => {
+  let storageOptions: FileStorageOptions;
   let fileStorage: FileStorage;
 
   beforeEach(() => {
@@ -23,7 +25,7 @@ describe("FileStorage", () => {
       versionId: "test-version-id",
     });
 
-    fileStorage = new FileStorage({
+    storageOptions = {
       bucket: "test-bucket",
       storageBaseURL: "https://test-bucket.s3.amazonaws.com",
       basePath: "test-base-path",
@@ -33,7 +35,8 @@ describe("FileStorage", () => {
         accessKey: "test-access-key",
         secretKey: "test-secret-key",
       },
-    });
+    };
+    fileStorage = new FileStorage(storageOptions);
   });
 
   describe("upload", () => {
@@ -101,6 +104,15 @@ describe("FileStorage", () => {
     it("returns null if the URL is not valid", () => {
       const url = "https://test-bucket.s3.amazonaws.com/test.jpg";
       expect(fileStorage.getFilenameFromURL(url)).toBeNull();
+    });
+
+    it("works when basePath is empty", () => {
+      fileStorage = new FileStorage({
+        ...storageOptions,
+        basePath: "",
+      });
+      const url = "https://test-bucket.s3.amazonaws.com/test.jpg";
+      expect(fileStorage.getFilenameFromURL(url)).toBe("test.jpg");
     });
   });
 

@@ -5,7 +5,7 @@ import path from "node:path";
 import assert from "node:assert";
 const debugLog = debug("app:file-storage");
 
-type FileStorageOptions = {
+export type FileStorageOptions = {
   bucket: string;
   storageBaseURL: string;
   basePath?: string;
@@ -73,7 +73,7 @@ export default class FileStorage {
     };
   }
 
-  private makeFilePath(filename: string) {
+  makeFilePath(filename: string) {
     const basePath = this.basePath || "";
     return path.join(basePath.replace("^/", ""), filename);
   }
@@ -122,7 +122,7 @@ export default class FileStorage {
       return null;
     }
 
-    return url.slice(baseStorageURL.length + 1);
+    return url.slice(baseStorageURL.length).replace(/^\//, "");
   }
 
   async delete(filename: string): Promise<void> {
