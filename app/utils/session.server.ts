@@ -98,7 +98,7 @@ export async function getUserId(request: Request) {
 export async function requireUserId(
   request: Request,
   redirectTo: string = new URL(request.url).pathname
-) {
+): Promise<string> {
   const session = await getUserSession(request);
   const userId = session.get("userId");
   if (!userId || typeof userId !== "string") {
@@ -106,6 +106,16 @@ export async function requireUserId(
     throw redirect(`/login?${searchParams}`);
   }
   return userId;
+}
+
+export async function requireUser(request: Request) {
+  await requireUserId(request);
+
+  const user = await getUser(request);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
 }
 
 export async function getUser(request: Request) {

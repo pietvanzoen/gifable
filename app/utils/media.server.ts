@@ -4,6 +4,7 @@ import { storage } from "./storage.server";
 import { getColor } from "colorthief";
 import Jimp from "jimp";
 import { debug } from "debug";
+import type { Media } from "@prisma/client";
 const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes("10MB");
@@ -56,6 +57,32 @@ export async function getImageData(url: string): Promise<ImageData> {
     width,
     height,
     thumbnail,
+  };
+}
+
+export async function reparse(media: Media) {
+  const filename = storage.getFilenameFromURL(media.url);
+
+  if (!filename) {
+    return media;
+  }
+
+  const buffer = await storage.download(media.url);
+
+  const { width, height, color, thumbnail } = await getImageData(media.url);
+
+  let thumbnailUrl = media.thumbnailUrl;
+  if (media.url.endsWith(".gif") && !thumbnailUrl && thumbnail) {
+    const { url } = await storage.upload(thumbnail, filename);
+    thumbnailUrl = url;
+  }
+
+  return {
+    width,
+    height,
+    color,
+    thumbnailUrl,
+    size: buffer.length,
   };
 }
 

@@ -8,40 +8,51 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
+import { forbidden, notFound } from "remix-utils";
 
 import { db } from "~/utils/db.server";
-import { deleteURL } from "~/utils/media.server";
-import { requireUserId } from "~/utils/session.server";
+import { deleteURL, reparse } from "~/utils/media.server";
+import { requireUser, requireUserId } from "~/utils/session.server";
 
 export async function action({ params, request }: ActionArgs) {
+  const user = await requireUser(request);
   const form = await request.formData();
-  if (form.get("intent") !== "delete") {
-    throw new Response(`The intent ${form.get("intent")} is not supported`, {
-      status: 400,
-    });
-  }
 
-  const userId = await requireUserId(request);
   const media = await db.media.findUnique({
     where: { id: params.mediaId },
   });
   if (!media) {
-    throw new Response("Can't delete what does not exist", {
-      status: 404,
-    });
+    throw notFound({ message: "Media not found" });
   }
-  if (media.userId !== userId) {
-    throw new Response("Pssh, nice try. That's not your media", {
-      status: 403,
-    });
+  if (media.userId !== user.id || !user.isAdmin) {
+    throw forbidden({ message: "You can't do that" });
   }
-  await Promise.all([deleteURL(media.url), deleteURL(media.thumbnailUrl)]);
-  await db.media.delete({ where: { id: params.mediaId } });
-  return redirect("/");
+
+  switch (form.get("intent") as string) {
+    case "reparse":
+      if (!user.isAdmin) {
+        throw forbidden({ message: "You can't do that" });
+      }
+      await db.media.update({
+        where: { id: params.mediaId },
+        data: await reparse(media),
+      });
+      return redirect(`/media/${params.mediaId}`);
+
+    case "delete":
+      await Promise.all([deleteURL(media.url), deleteURL(media.thumbnailUrl)]);
+      await db.media.delete({ where: { id: params.mediaId } });
+      return redirect("/");
+
+    default:
+      throw new Response(`The intent ${form.get("intent")} is not supported`, {
+        status: 400,
+      });
+  }
 }
 
 export async function loader({ request, params }: LoaderArgs) {
-  const userId = await requireUserId(request);
+  const user = await requireUser(request);
   const media = await db.media.findUnique({
     where: { id: params.mediaId },
     include: {
@@ -58,12 +69,12 @@ export async function loader({ request, params }: LoaderArgs) {
       status: 404,
     });
   }
-  return json({ userId, media });
+  return json({ user, media });
 }
 
 export default function MediaRoute() {
-  const { userId, media } = useLoaderData<typeof loader>();
-  const isMine = media.userId === userId;
+  const { user, media } = useLoaderData<typeof loader>();
+  const isMine = media.userId === user.id;
 
   const {
     url = "",
@@ -181,6 +192,15 @@ export default function MediaRoute() {
           <form method="post" style={{ display: "inline-block" }}>
             <button name="intent" type="submit" value="delete">
               🗑️ Delete
+            </button>
+          </form>
+        </center>
+      ) : null}
+      {user.isAdmin ? (
+        <center>
+          <form method="post" style={{ display: "inline-block" }}>
+            <button name="intent" type="submit" value="reparse">
+              🔁 Reparse
             </button>
           </form>
         </center>

@@ -84,7 +84,7 @@ export default class FileStorage {
 
   async download(
     url: string,
-    { progress }: { progress?: (size: number) => void }
+    options?: { progress?: (size: number) => void }
   ): Promise<Buffer> {
     debugLog("downloading file", url);
     const response = await fetch(url);
@@ -100,9 +100,9 @@ export default class FileStorage {
             (acc, chunk) => acc + chunk.length,
             0
           );
-          if (progress) {
+          if (options?.progress) {
             try {
-              progress(totalSize);
+              options.progress(totalSize);
             } catch (err) {
               reject(err);
             }
