@@ -32,4 +32,5 @@ model User {
   medias       Media[]
   isAdmin      Boolean  @default(false)
   lastLogin    DateTime?
+  apiToken     String?
 }
