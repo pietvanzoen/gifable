@@ -4,7 +4,7 @@ import { storage } from "./storage.server";
 import { getColor } from "colorthief";
 import Jimp from "jimp";
 import { debug } from "debug";
-const log = debug("app:image-service");
+const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes("10MB");
 
@@ -66,4 +66,15 @@ export async function getPrimaryColor(url: string): Promise<string | null> {
     log("Failed to get primary color", e);
     return null;
   }
+}
+
+export async function deleteURL(url: string | null) {
+  if (!url) {
+    return;
+  }
+  const filename = storage.getFilenameFromURL(url);
+  if (!filename) {
+    return;
+  }
+  await storage.delete(filename);
 }

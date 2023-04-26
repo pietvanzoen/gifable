@@ -10,6 +10,7 @@ import {
 } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
+import { deleteURL } from "~/utils/media.server";
 import { requireUserId } from "~/utils/session.server";
 
 export async function action({ params, request }: ActionArgs) {
@@ -34,6 +35,7 @@ export async function action({ params, request }: ActionArgs) {
       status: 403,
     });
   }
+  await Promise.all([deleteURL(media.url), deleteURL(media.thumbnailUrl)]);
   await db.media.delete({ where: { id: params.mediaId } });
   return redirect("/");
 }
