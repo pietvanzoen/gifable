@@ -11,7 +11,7 @@ const MAX_FILE_SIZE = bytes("10MB");
 export async function storeURL(
   originalURL: string,
   filename: string
-): Promise<string> {
+): Promise<{ url: string; size: number }> {
   const buffer = await storage.download(originalURL, {
     progress(size) {
       if (size > MAX_FILE_SIZE) {
@@ -24,25 +24,27 @@ export async function storeURL(
 
   const { url } = await storage.upload(buffer, filename);
 
-  return url;
+  return { url, size: buffer.length };
 }
 
-export async function storeBuffer(buffer: Buffer, filename: string) {
+export async function storeBuffer(
+  buffer: Buffer,
+  filename: string
+): Promise<{ url: string; size: number }> {
   const { url } = await storage.upload(buffer, filename);
-  return url;
+  return { url, size: buffer.length };
 }
 
 type ImageData = {
   color: string | null;
   width: number;
   height: number;
-  size: number;
   thumbnail?: Buffer;
 };
 
 export async function getImageData(url: string): Promise<ImageData> {
   const image = await Jimp.read(url);
-  const { width, height, data } = image.bitmap;
+  const { width, height } = image.bitmap;
   let thumbnail: Buffer | undefined;
 
   if (url.endsWith(".gif")) {
@@ -53,7 +55,6 @@ export async function getImageData(url: string): Promise<ImageData> {
     color: await getPrimaryColor(url),
     width,
     height,
-    size: data.length,
     thumbnail,
   };
 }

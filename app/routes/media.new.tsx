@@ -63,7 +63,7 @@ export async function action({ request }: ActionArgs) {
 
   const userFilename = `${user.username}/${filename}`;
 
-  const mediaUrl =
+  const { url: mediaUrl, size } =
     uploadType === "url"
       ? await storeURL(result.data.url, userFilename)
       : await storeBuffer(
@@ -77,7 +77,8 @@ export async function action({ request }: ActionArgs) {
 
   let thumbnailUrl: string | null = null;
   if (thumbnail) {
-    thumbnailUrl = await storeBuffer(thumbnail, thumbnailFilename);
+    const resp = await storeBuffer(thumbnail, thumbnailFilename);
+    thumbnailUrl = resp.url;
   }
 
   const media = await db.media.create({
@@ -86,6 +87,7 @@ export async function action({ request }: ActionArgs) {
       thumbnailUrl,
       comment,
       ...imageData,
+      size,
       userId,
     },
   });
