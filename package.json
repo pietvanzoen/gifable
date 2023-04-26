@@ -4,11 +4,12 @@
   "scripts": {
     "prebuild": "prisma generate",
     "build": "remix build",
-    "dev": "remix dev",
+    "dev": "DEBUG=app:* remix dev",
     "prestart": "prisma migrate deploy",
     "start": "remix-serve build",
     "typecheck": "tsc",
     "test": "jest app",
+    "test:watch": "jest app --watch",
     "format": "prettier --write ."
   },
   "dependencies": {
