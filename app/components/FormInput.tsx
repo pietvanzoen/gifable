@@ -4,6 +4,7 @@ import { useField } from "remix-validated-form";
 
 export type FormInputProps = {
   label?: string;
+  help?: string;
   name: string;
   value?: string;
   type?: "text" | "password" | "radio" | "hidden" | "textarea" | "file";
@@ -17,6 +18,7 @@ export type FormInputProps = {
 export default function FormInput({
   name,
   label,
+  help,
   type = "text",
   value,
   checked,
@@ -42,7 +44,10 @@ export default function FormInput({
       style={style}
     >
       {!["hidden", "radio"].includes(type) && label && (
-        <label htmlFor={fieldId}>{label}</label>
+        <label htmlFor={fieldId}>
+          <span className="field-label">{label}</span>{" "}
+          {help && <div className="field-help">{help}</div>}
+        </label>
       )}
       <Tag
         {...getInputProps({ id: fieldId, type, value, required })}
@@ -53,7 +58,9 @@ export default function FormInput({
         onChange={onChange}
       />
       {["radio"].includes(type) && (
-        <label htmlFor={fieldId}>&nbsp;{label}</label>
+        <label htmlFor={fieldId} className="field-label">
+          &nbsp;{label}
+        </label>
       )}
       {error && (
         <div id={`${fieldId}-error`}>

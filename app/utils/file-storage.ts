@@ -130,4 +130,25 @@ export default class FileStorage {
     debugLog("deleting file", filePath);
     await this.minioClient.removeObject(this.bucket, filePath);
   }
+
+  async rename(
+    oldFilename: string,
+    newFilename: string
+  ): Promise<{ url: string }> {
+    const oldFilePath = this.makeFilePath(oldFilename);
+    const newFilePath = this.makeFilePath(newFilename);
+    debugLog("renaming file", this.bucket, oldFilePath, newFilePath);
+
+    await this.minioClient.copyObject(
+      this.bucket,
+      newFilePath,
+      `/${this.bucket}/${oldFilePath}`,
+      // @ts-ignore https://github.com/minio/minio-js/issues/1097
+      null
+    );
+    await this.delete(oldFilename);
+    return {
+      url: this.makeFileURL(newFilePath),
+    };
+  }
 }

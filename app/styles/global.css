@@ -44,9 +44,14 @@ input.field-error {
 .field-error i nput {
   border-color: var(--accent);
 }
-.field--required label:after {
+.field--required .field-label:after {
   content: " *";
   color: var(--accent);
+}
+.field-help {
+  font-size: 0.8em;
+  color: var(--text-light);
+  margin: 0.2em 0;
 }
 
 center legend {

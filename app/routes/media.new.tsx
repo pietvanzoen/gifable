@@ -15,7 +15,12 @@ import SubmitButton from "~/components/SubmitButton";
 
 import { db } from "~/utils/db.server";
 import { getUser, requireUserId } from "~/utils/session.server";
-import { storeURL, getImageData, storeBuffer } from "~/utils/media.server";
+import {
+  storeURL,
+  getImageData,
+  storeBuffer,
+  makeThumbnailFilename,
+} from "~/utils/media.server";
 import bytes from "bytes";
 import { useState } from "react";
 
@@ -73,7 +78,7 @@ export async function action({ request }: ActionArgs) {
 
   const { thumbnail, ...imageData } = await getImageData(mediaUrl);
 
-  const thumbnailFilename = `${userFilename.split(".")[0]}-thumbnail.jpg`;
+  const thumbnailFilename = makeThumbnailFilename(userFilename);
 
   let thumbnailUrl: string | null = null;
   if (thumbnail) {

@@ -106,3 +106,34 @@ export async function deleteURL(url: string | null) {
   }
   await storage.delete(filename);
 }
+
+export async function rename(
+  media: Pick<Media, "url" | "thumbnailUrl">,
+  newFilename: string
+) {
+  const filename = storage.getFilenameFromURL(media.url);
+  if (!filename) {
+    return null;
+  }
+  const requests = [storage.rename(filename, newFilename)];
+
+  const thumbnailFilename = storage.getFilenameFromURL(
+    media.thumbnailUrl || ""
+  );
+  if (thumbnailFilename) {
+    requests.push(
+      storage.rename(thumbnailFilename, makeThumbnailFilename(newFilename))
+    );
+  }
+
+  const [urlResp, thumbnailResp] = await Promise.all(requests);
+
+  return {
+    url: urlResp.url,
+    thumbnailUrl: thumbnailResp?.url || null,
+  };
+}
+
+export function makeThumbnailFilename(filename: string) {
+  return `${filename.split(".")[0]}-thumbnail.jpg`;
+}

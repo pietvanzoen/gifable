@@ -1,3 +1,4 @@
+import type { Media } from "@prisma/client";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
@@ -15,17 +16,19 @@ import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 
 import { db } from "~/utils/db.server";
-import { requireUserId } from "~/utils/session.server";
+import { rename } from "~/utils/media.server";
+import { requireUser, requireUserId } from "~/utils/session.server";
 
 const validator = withZod(
   z.object({
+    filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
     comment: z.string().optional(),
     altText: z.string().optional(),
   })
 );
 
 export async function action({ params, request }: ActionArgs) {
-  const userId = await requireUserId(request);
+  const user = await requireUser(request);
 
   const result = await validator.validate(await request.formData());
 
@@ -35,16 +38,24 @@ export async function action({ params, request }: ActionArgs) {
   const { comment, altText } = result.data;
 
   const [media] = await db.media.findMany({
-    where: { id, userId },
-    select: { id: true },
+    where: { id, userId: user.id },
+    select: { id: true, url: true, thumbnailUrl: true },
   });
+
   if (!media) {
     throw forbidden({ message: `You can't edit this media` });
   }
 
+  let renameData: Pick<Media, "url" | "thumbnailUrl"> | null = null;
+  const currentFilename = media.url.split("/").pop();
+  if (currentFilename !== result.data.filename) {
+    const newFilename = `${user.username}/${result.data.filename}`;
+    renameData = await rename(media, newFilename);
+  }
+
   await db.media.update({
     where: { id },
-    data: { comment, altText },
+    data: { comment, altText, ...renameData },
   });
 
   return redirect(`/media/${id}`);
@@ -64,6 +75,7 @@ export async function loader({ params }: LoaderArgs) {
 
 export default function MediaRoute() {
   const { media } = useLoaderData<typeof loader>();
+  const filename = media.url.split("/").pop();
 
   const { url = "", comment = "", altText = "", width, height, color } = media;
   const title = url.split("/").pop();
@@ -88,7 +100,11 @@ export default function MediaRoute() {
       <ValidatedForm
         id="edit-form"
         validator={validator}
-        defaultValues={{ comment: comment || "", altText: altText || "" }}
+        defaultValues={{
+          filename,
+          comment: comment || "",
+          altText: altText || "",
+        }}
         method="post"
         noValidate={useHydrated()}
       >
@@ -96,6 +112,13 @@ export default function MediaRoute() {
           <legend>
             <h2>Edit info</h2>
           </legend>
+          <FormInput
+            type="text"
+            name="filename"
+            label="Filename"
+            help="Changing the filename will break the existing url."
+            required
+          />
           <FormInput type="textarea" name="comment" label="Comment" />
           <FormInput type="textarea" name="altText" label="Alt text" />
         </fieldset>
