@@ -53,6 +53,14 @@ input.field-error {
   color: var(--text-light);
   margin: 0.2em 0;
 }
+.field--tag {
+  display: inline-block;
+  margin: 0.2em 0.5em;
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  background-color: var(--accent-bg);
+  color: var(--text);
+}
 
 center legend {
   margin-left: auto;

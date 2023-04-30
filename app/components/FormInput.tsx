@@ -7,7 +7,15 @@ export type FormInputProps = {
   help?: string;
   name: string;
   value?: string;
-  type?: "text" | "password" | "radio" | "hidden" | "textarea" | "file";
+  variant?: "tag";
+  type?:
+    | "text"
+    | "password"
+    | "radio"
+    | "hidden"
+    | "textarea"
+    | "file"
+    | "checkbox";
   checked?: boolean;
   options?: { value: string; label: string }[];
   required?: boolean;
@@ -17,6 +25,7 @@ export type FormInputProps = {
 
 export default function FormInput({
   name,
+  variant,
   label,
   help,
   type = "text",
@@ -28,7 +37,7 @@ export default function FormInput({
 }: FormInputProps) {
   const { error, getInputProps } = useField(name);
   let fieldId = name;
-  if (type === "radio") {
+  if (["radio", "checkbox"].includes(type)) {
     fieldId = `${name}-${value}`;
   }
 
@@ -39,11 +48,12 @@ export default function FormInput({
       className={classNames(
         "field",
         `field--${type}`,
-        required && "field--required"
+        required && "field--required",
+        variant ? "field--" + variant : ""
       )}
       style={style}
     >
-      {!["hidden", "radio"].includes(type) && label && (
+      {!["hidden", "radio", "checkbox"].includes(type) && label && (
         <label htmlFor={fieldId}>
           <span className="field-label">{label}</span>{" "}
           {help && <div className="field-help">{help}</div>}
@@ -54,10 +64,12 @@ export default function FormInput({
         aria-invalid={Boolean(error)}
         className={error ? "field-error" : ""}
         aria-errormessage={error ? `${fieldId}-error` : undefined}
-        checked={type === "radio" ? checked : undefined}
+        defaultChecked={
+          ["checkbox", "radio"].includes(type) ? checked : undefined
+        }
         onChange={onChange}
       />
-      {["radio"].includes(type) && (
+      {["radio", "checkbox"].includes(type) && (
         <label htmlFor={fieldId} className="field-label">
           &nbsp;{label}
         </label>

@@ -1,13 +1,13 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import type { Media, Prisma, User } from "@prisma/client";
-import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
+import type { Prisma } from "@prisma/client";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 
 import styles from "~/styles/search.css";
-import { useEffect, useState } from "react";
+import MediaList from "~/components/MediaList";
 
 type SelectOptions = "all" | "mine" | "not-mine";
 
@@ -22,6 +22,7 @@ export async function loader({ request }: LoaderArgs) {
   const where: Prisma.MediaWhereInput = {};
   const search = (params.get("search") || "").trim();
   const select = (params.get("select") || "mine").trim();
+  const tag = (params.get("tag") || "").trim();
 
   if (search) {
     where.comment = { contains: search };
@@ -32,10 +33,13 @@ export async function loader({ request }: LoaderArgs) {
   if (select === "not-mine") {
     where.userId = { not: userId };
   }
+  if (tag) {
+    where.tags = { some: { name: tag } };
+  }
 
-  return json({
-    userId,
-    media: await db.media.findMany({
+  const [tags, media] = await Promise.all([
+    db.tag.findMany(),
+    db.media.findMany({
       where,
       select: {
         id: true,
@@ -54,6 +58,12 @@ export async function loader({ request }: LoaderArgs) {
       },
       orderBy: { createdAt: "desc" },
     }),
+  ]);
+
+  return json({
+    userId,
+    media,
+    tags,
   });
 }
 
@@ -63,26 +73,9 @@ export default function MediaRoute() {
     search: "",
     select: "mine",
   });
-  const [playingId, setPlayingId] = useState<Media["id"]>("");
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
 
   const select = searchParams.get("select") as SelectOptions;
-
-  useEffect(() => {
-    if (playingId) {
-      clearInterval(intervalId);
-      setIntervalId(
-        setInterval(() => {
-          setPlayingId("");
-        }, 10_000)
-      );
-    } else {
-      clearInterval(intervalId);
-      setIntervalId(undefined);
-    }
-    return () => clearInterval(intervalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playingId]);
+  const tag = searchParams.get("tag");
 
   return (
     <div>
@@ -102,68 +95,23 @@ export default function MediaRoute() {
               <option value="not-mine">Not mine</option>
             </select>
             &nbsp;
+            <select name="tag" defaultValue={tag || ""}>
+              <option value="">All tags</option>
+              {data.tags.map((tag) => (
+                <option key={tag.id} value={tag.name}>
+                  {tag.name}
+                </option>
+              ))}
+            </select>
+            &nbsp;
             <button type="submit">Search</button>
           </form>
         </center>
         <br />
       </header>
 
-      {data.media.length === 0 ? <p>No results.</p> : null}
-
-      <div className="results">
-        {data.media.map((data) => (
-          <MediaItem
-            media={data}
-            key={data.id}
-            isPlaying={playingId === data.id}
-            setPlayingId={setPlayingId}
-            select={select}
-          />
-        ))}
-      </div>
+      <MediaList media={data.media} showUser={select !== "mine"} />
     </div>
-  );
-}
-
-function MediaItem(props: {
-  media: Pick<
-    Media,
-    "id" | "url" | "thumbnailUrl" | "width" | "height" | "color" | "altText"
-  > & { user: Pick<User, "username"> };
-  isPlaying: boolean;
-  setPlayingId: (id: Media["id"]) => void;
-  select: SelectOptions;
-}) {
-  const { id, url, thumbnailUrl, width, height, color, altText } = props.media;
-  const { isPlaying, setPlayingId } = props;
-  return (
-    <figure className="media">
-      <div className="img-wrapper">
-        <Link prefetch="intent" to={`/media/${id}`}>
-          <img
-            loading="lazy"
-            src={isPlaying || !thumbnailUrl ? url : thumbnailUrl}
-            alt={altText || ""}
-            width={width || 300}
-            height={height || 200}
-            style={{ backgroundColor: color || "#0e0e0e" }}
-          />
-        </Link>
-        {thumbnailUrl ? (
-          <button
-            className="play"
-            onClick={() => setPlayingId(id)}
-            dangerouslySetInnerHTML={{
-              __html: isPlaying ? "&#x23F8;" : "&#x23F5;",
-            }}
-          />
-        ) : null}
-      </div>
-      <figcaption>
-        {url.split("/").pop()}
-        {props.select === "mine" ? null : ` by ${props.media.user.username}`}
-      </figcaption>
-    </figure>
   );
 }
 

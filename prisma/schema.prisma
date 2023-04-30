@@ -21,6 +21,15 @@ model Media {
   size       Int?
   userId String
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags       Tag[]
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  media     Media[]
 }
 
 model User {
