@@ -5,6 +5,7 @@ import { getColor } from "colorthief";
 import Jimp from "jimp";
 import { debug } from "debug";
 import type { Media } from "@prisma/client";
+import { db } from "./db.server";
 const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes("10MB");
@@ -136,4 +137,36 @@ export async function rename(
 
 export function makeThumbnailFilename(filename: string) {
   return `${filename.split(".")[0]}-thumbnail.jpg`;
+}
+
+export function getCommonCommentTerms(
+  media: Pick<Media, "comment">[],
+  limit: number
+) {
+  const terms = {} as Record<string, number>;
+  media.forEach((m) => {
+    m.comment?.split(",").forEach((c) => {
+      const term = c.trim().toLowerCase();
+      terms[term] = (terms[term] || 0) + 1;
+    });
+  });
+
+  return Object.entries(terms)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit);
+}
+
+export async function getMediaTerms(limit: number = 5, userId?: string) {
+  const where = userId ? { userId } : {};
+  const media = await db.media.findMany({
+    where: {
+      ...where,
+      OR: [{ comment: { not: null } }, { comment: { not: "" } }],
+    },
+    select: {
+      comment: true,
+    },
+  });
+
+  return getCommonCommentTerms(media, limit);
 }

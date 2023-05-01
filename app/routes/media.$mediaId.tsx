@@ -151,7 +151,19 @@ export default function MediaRoute() {
           </tr>
           <tr role="presentation">
             <th tabIndex={-1}>Comment</th>
-            <td tabIndex={-1}>{comment}</td>
+            <td tabIndex={-1}>
+              {comment?.split(",").map((text, i) => {
+                const term = text.trim().toLowerCase();
+                return (
+                  <>
+                    {i > 0 ? ", " : ""}
+                    <Link to={`/?search=${term}`} title={`Search for ${term}`}>
+                      {term}
+                    </Link>
+                  </>
+                );
+              })}
+            </td>
           </tr>
           <tr role="presentation">
             <th tabIndex={-1}>Alt text</th>

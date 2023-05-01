@@ -5,7 +5,7 @@ import {
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
+import { useActionData, useLoaderData } from "@remix-run/react";
 import { withZod } from "@remix-validated-form/with-zod";
 import { useHydrated } from "remix-utils";
 import { ValidatedForm, validationError } from "remix-validated-form";
@@ -20,6 +20,8 @@ import {
   getImageData,
   storeBuffer,
   makeThumbnailFilename,
+  getCommonCommentTerms,
+  getMediaTerms,
 } from "~/utils/media.server";
 import bytes from "bytes";
 import { useState } from "react";
@@ -102,12 +104,16 @@ export async function action({ request }: ActionArgs) {
 
 export async function loader({ request }: LoaderArgs) {
   await requireUserId(request);
-  return json({});
+  const terms = await getMediaTerms(5);
+  return json({ terms });
 }
 
 export default function NewMediaRoute() {
+  const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const [uploadType, setUploadType] = useState<"url" | "file">("url");
+
+  const termsList = data.terms.map(([term]) => `'${term}'`).join(", ");
 
   return (
     <ValidatedForm
@@ -150,7 +156,12 @@ export default function NewMediaRoute() {
           <FormInput name="file" label="File" required type="file" />
         )}
         <FormInput name="filename" label="Filename" required />
-        <FormInput type="textarea" name="comment" label="Comment" />
+        <FormInput
+          type="textarea"
+          help={`This field is used for searching. Some common terms are: ${termsList}`}
+          name="comment"
+          label="Comment"
+        />
         <FormInput type="textarea" name="altText" label="Alt text" />
         <SubmitButton />
       </fieldset>

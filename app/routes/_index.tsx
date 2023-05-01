@@ -8,6 +8,7 @@ import { requireUserId } from "~/utils/session.server";
 
 import styles from "~/styles/search.css";
 import MediaList from "~/components/MediaList";
+import { getCommonCommentTerms, getMediaTerms } from "~/utils/media.server";
 
 type SelectOptions = "all" | "mine" | "not-mine";
 
@@ -33,9 +34,8 @@ export async function loader({ request }: LoaderArgs) {
     where.userId = { not: userId };
   }
 
-  return json({
-    userId,
-    media: await db.media.findMany({
+  const [media, terms] = await Promise.all([
+    db.media.findMany({
       where,
       select: {
         id: true,
@@ -54,6 +54,13 @@ export async function loader({ request }: LoaderArgs) {
       },
       orderBy: { createdAt: "desc" },
     }),
+    getMediaTerms(8, select === "mine" ? userId : undefined),
+  ]);
+
+  return json({
+    userId,
+    media,
+    terms,
   });
 }
 
@@ -86,6 +93,17 @@ export default function MediaRoute() {
             &nbsp;
             <button type="submit">Search</button>
           </form>
+        </center>
+        <center>
+          <small>
+            <strong>Quick search: </strong>
+            {data.terms.map(([term], i) => (
+              <span key={term}>
+                {i > 0 && ", "}
+                <a href={`/?search=${term}`}>{term}</a>
+              </span>
+            ))}
+          </small>
         </center>
         <br />
       </header>
