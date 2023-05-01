@@ -1,5 +1,6 @@
 import type { Media, User } from "@prisma/client";
 import { Link } from "@remix-run/react";
+import { useHydrated } from "remix-utils";
 
 export type MediaItemProps = {
   media: Pick<
@@ -12,6 +13,7 @@ export type MediaItemProps = {
 };
 
 export default function MediaItem(props: MediaItemProps) {
+  const isHydrated = useHydrated();
   const { id, url, thumbnailUrl, width, height, color, altText } = props.media;
   const { showUser, isPlaying, setPlayingId } = props;
   return (
@@ -27,7 +29,7 @@ export default function MediaItem(props: MediaItemProps) {
             style={{ backgroundColor: color || "#0e0e0e" }}
           />
         </Link>
-        {thumbnailUrl ? (
+        {thumbnailUrl && isHydrated ? (
           <button
             className="play"
             onClick={() => setPlayingId(id)}
