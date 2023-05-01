@@ -4,13 +4,13 @@ export function getCommonCommentTerms(
   media: Pick<Media, "comment">[],
   limit: number
 ) {
-  const terms = {} as Record<string, number>;
-  media.forEach((m) => {
+  const terms = media.reduce((terms, m) => {
     m.comment?.split(",").forEach((c) => {
       const term = c.trim().toLowerCase();
       terms[term] = (terms[term] || 0) + 1;
     });
-  });
+    return terms;
+  }, {} as Record<string, number>);
 
   return Object.entries(terms)
     .filter(([, count]) => count > 1)
