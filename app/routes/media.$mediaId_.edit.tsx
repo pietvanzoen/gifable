@@ -68,7 +68,7 @@ export async function loader({ params }: LoaderArgs) {
   if (!media) {
     throw notFound({ message: "Media not found" });
   }
-  const terms = await getMediaTerms();
+  const terms = await getMediaTerms(db);
   return json({ media, terms });
 }
 

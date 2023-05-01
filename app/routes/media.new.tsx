@@ -103,7 +103,7 @@ export async function action({ request }: ActionArgs) {
 
 export async function loader({ request }: LoaderArgs) {
   await requireUserId(request);
-  const terms = await getMediaTerms(5);
+  const terms = await getMediaTerms(db, 5);
   return json({ terms });
 }
 

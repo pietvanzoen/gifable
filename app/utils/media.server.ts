@@ -4,8 +4,7 @@ import { storage } from "./storage.server";
 import { getColor } from "colorthief";
 import Jimp from "jimp";
 import { debug } from "debug";
-import type { Media } from "@prisma/client";
-import { db } from "./db.server";
+import type { Media, PrismaClient } from "@prisma/client";
 const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes("10MB");
@@ -157,7 +156,11 @@ export function getCommonCommentTerms(
     .slice(0, limit);
 }
 
-export async function getMediaTerms(limit: number = 5, userId?: string) {
+export async function getMediaTerms(
+  db: PrismaClient,
+  limit: number = 5,
+  userId?: string
+) {
   const where = userId ? { userId } : {};
   const media = await db.media.findMany({
     where: {
