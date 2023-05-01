@@ -22,7 +22,6 @@ export async function loader({ request }: LoaderArgs) {
   const where: Prisma.MediaWhereInput = {};
   const search = (params.get("search") || "").trim();
   const select = (params.get("select") || "mine").trim();
-  const tag = (params.get("tag") || "").trim();
 
   if (search) {
     where.comment = { contains: search };
@@ -33,13 +32,10 @@ export async function loader({ request }: LoaderArgs) {
   if (select === "not-mine") {
     where.userId = { not: userId };
   }
-  if (tag) {
-    where.tags = { some: { name: tag } };
-  }
 
-  const [tags, media] = await Promise.all([
-    db.tag.findMany(),
-    db.media.findMany({
+  return json({
+    userId,
+    media: await db.media.findMany({
       where,
       select: {
         id: true,
@@ -58,12 +54,6 @@ export async function loader({ request }: LoaderArgs) {
       },
       orderBy: { createdAt: "desc" },
     }),
-  ]);
-
-  return json({
-    userId,
-    media,
-    tags,
   });
 }
 
@@ -75,7 +65,6 @@ export default function MediaRoute() {
   });
 
   const select = searchParams.get("select") as SelectOptions;
-  const tag = searchParams.get("tag");
 
   return (
     <div>
@@ -93,15 +82,6 @@ export default function MediaRoute() {
               <option value="mine">My media</option>
               <option value="all">All media</option>
               <option value="not-mine">Not mine</option>
-            </select>
-            &nbsp;
-            <select name="tag" defaultValue={tag || ""}>
-              <option value="">All tags</option>
-              {data.tags.map((tag) => (
-                <option key={tag.id} value={tag.name}>
-                  {tag.name}
-                </option>
-              ))}
             </select>
             &nbsp;
             <button type="submit">Search</button>

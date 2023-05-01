@@ -24,7 +24,6 @@ const validator = withZod(
     filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
     comment: z.string().optional(),
     altText: z.string().optional(),
-    tags: z.union([z.array(z.string()), z.string()]).optional(),
   })
 );
 
@@ -40,12 +39,7 @@ export async function action({ params, request }: ActionArgs) {
 
   const [media] = await db.media.findMany({
     where: { id, userId: user.id },
-    select: {
-      id: true,
-      url: true,
-      thumbnailUrl: true,
-      tags: { select: { name: true } },
-    },
+    select: { id: true, url: true, thumbnailUrl: true },
   });
 
   if (!media) {
@@ -59,32 +53,10 @@ export async function action({ params, request }: ActionArgs) {
     renameData = await rename(media, newFilename);
   }
 
-  const { tags } = result.data;
-  const newTags = Array.isArray(tags) ? tags : tags ? [tags] : [];
-
-  const updateMedia = db.media.update({
+  await db.media.update({
     where: { id },
-    data: {
-      comment,
-      altText,
-      ...renameData,
-    },
+    data: { comment, altText, ...renameData },
   });
-
-  const setTags = db.media.update({
-    where: { id },
-    data: {
-      tags: {
-        disconnect: media.tags,
-        connectOrCreate: newTags?.map((name) => ({
-          where: { name },
-          create: { name },
-        })),
-      },
-    },
-  });
-
-  await db.$transaction([updateMedia, setTags]);
 
   return redirect(`/media/${id}`);
 }
@@ -92,25 +64,18 @@ export async function action({ params, request }: ActionArgs) {
 export async function loader({ params }: LoaderArgs) {
   const media = await db.media.findUnique({
     where: { id: params.mediaId },
-    include: {
-      tags: {
-        select: { id: true, name: true },
-      },
-    },
   });
   if (!media) {
     throw new Response("What a media! Not found.", {
       status: 404,
     });
   }
-  return json({ media, tags: await db.tag.findMany() });
+  return json({ media });
 }
 
 export default function MediaRoute() {
-  const { media, tags } = useLoaderData<typeof loader>();
+  const { media } = useLoaderData<typeof loader>();
   const filename = media.url.split("/").pop();
-
-  const tagIds = media.tags.map(({ id }) => id);
 
   const { url = "", comment = "", altText = "", width, height, color } = media;
   const title = url.split("/").pop();
@@ -156,23 +121,6 @@ export default function MediaRoute() {
           />
           <FormInput type="textarea" name="comment" label="Comment" />
           <FormInput type="textarea" name="altText" label="Alt text" />
-          <label>Tags</label>
-
-          <div>
-            {tags.map((tag) => (
-              <FormInput
-                variant="tag"
-                key={tag.id}
-                name="tags"
-                type="checkbox"
-                label={tag.name}
-                checked={tagIds.includes(tag.id)}
-                value={tag.name}
-              />
-            ))}
-          </div>
-
-          <Link to="/tags">Add a new tag</Link>
         </fieldset>
       </ValidatedForm>
 

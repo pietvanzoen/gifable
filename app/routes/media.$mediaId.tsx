@@ -61,12 +61,6 @@ export async function loader({ request, params }: LoaderArgs) {
           username: true,
         },
       },
-      tags: {
-        select: {
-          name: true,
-          id: true,
-        },
-      },
     },
   });
   if (!media) {
@@ -75,8 +69,7 @@ export async function loader({ request, params }: LoaderArgs) {
       status: 404,
     });
   }
-  const tags = await db.tag.findMany({});
-  return json({ user, media, tags });
+  return json({ user, media });
 }
 
 export default function MediaRoute() {
@@ -179,23 +172,6 @@ export default function MediaRoute() {
                   timeStyle: "short",
                 })}
               </time>
-            </td>
-          </tr>
-          <tr role="presentation">
-            <th tabIndex={-1}>Tags</th>
-            <td tabIndex={-1}>
-              {media.tags.length === 0 ? (
-                <em>None</em>
-              ) : (
-                media.tags.map((tag, i) => (
-                  <>
-                    {i > 0 ? ", " : null}
-                    <Link key={tag.name} to={`/?tag=${tag.name}`}>
-                      {tag.name}
-                    </Link>
-                  </>
-                ))
-              )}
             </td>
           </tr>
           {isMine ? null : (

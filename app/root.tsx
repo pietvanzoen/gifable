@@ -52,7 +52,6 @@ function Document({
             <nav>
               <NavLink to="/">Search</NavLink>
               <NavLink to="/media/new">Add</NavLink>
-              <NavLink to="/tags">Tags</NavLink>
               <NavLink to="/settings">Settings</NavLink>
               <Link to="/logout">Logout</Link>
             </nav>
