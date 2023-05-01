@@ -12,7 +12,7 @@ import { forbidden, notFound } from "remix-utils";
 
 import { db } from "~/utils/db.server";
 import { deleteURL, reparse } from "~/utils/media.server";
-import { requireUser, requireUserId } from "~/utils/session.server";
+import { requireUser } from "~/utils/session.server";
 
 export async function action({ params, request }: ActionArgs) {
   const user = await requireUser(request);
@@ -152,15 +152,15 @@ export default function MediaRoute() {
           <tr role="presentation">
             <th tabIndex={-1}>Comment</th>
             <td tabIndex={-1}>
-              {comment?.split(",").map((text, i) => {
+              {comment?.split(",").map((text, i: number) => {
                 const term = text.trim().toLowerCase();
                 return (
-                  <>
+                  <span key={text + i}>
                     {i > 0 ? ", " : ""}
                     <Link to={`/?search=${term}`} title={`Search for ${term}`}>
                       {term}
                     </Link>
-                  </>
+                  </span>
                 );
               })}
             </td>

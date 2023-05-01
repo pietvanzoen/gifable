@@ -1,14 +1,21 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Link,
+  NavLink,
+  useLoaderData,
+  useSearchParams,
+} from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 
 import styles from "~/styles/search.css";
 import MediaList from "~/components/MediaList";
-import { getCommonCommentTerms, getMediaTerms } from "~/utils/media.server";
+import { getMediaTerms } from "~/utils/media.server";
+import { useState } from "react";
+import { useHydrated } from "remix-utils";
 
 type SelectOptions = "all" | "mine" | "not-mine";
 
@@ -54,7 +61,7 @@ export async function loader({ request }: LoaderArgs) {
       },
       orderBy: { createdAt: "desc" },
     }),
-    getMediaTerms(8, select === "mine" ? userId : undefined),
+    getMediaTerms(25, select === "mine" ? userId : undefined),
   ]);
 
   return json({
@@ -71,6 +78,7 @@ export default function MediaRoute() {
     select: "mine",
   });
 
+  const search = searchParams.get("search") || "";
   const select = searchParams.get("select") as SelectOptions;
 
   return (
@@ -82,7 +90,7 @@ export default function MediaRoute() {
               type="search"
               name="search"
               placeholder="Search"
-              defaultValue={searchParams.get("search") || ""}
+              defaultValue={search}
             />
             &nbsp;
             <select name="select" defaultValue={select}>
@@ -92,24 +100,58 @@ export default function MediaRoute() {
             </select>
             &nbsp;
             <button type="submit">Search</button>
+            &nbsp;
+            <Link role="button" to="/">
+              Clear
+            </Link>
           </form>
         </center>
-        <center>
-          <small>
-            <strong>Quick search: </strong>
-            {data.terms.map(([term], i) => (
-              <span key={term}>
-                {i > 0 && ", "}
-                <a href={`/?search=${term}`}>{term}</a>
-              </span>
-            ))}
-          </small>
-        </center>
+        <QuickSearch terms={data.terms} currentSearch={search} />
         <br />
       </header>
 
       <MediaList media={data.media} showUser={select !== "mine"} />
     </div>
+  );
+}
+
+function QuickSearch({
+  terms,
+  currentSearch,
+}: {
+  terms: [string, number][];
+  currentSearch: string;
+}) {
+  const limit = 6;
+  const isHydrated = useHydrated();
+  const [showAllTerms, setShowAllTerms] = useState(false);
+  const termsList = showAllTerms ? terms : terms.slice(0, limit);
+  return (
+    <center>
+      <small>
+        <strong>Quick search: </strong>
+        {termsList.map(([term, count], i) => (
+          <span key={term}>
+            {i > 0 && ", "}
+            <Link
+              className={currentSearch === term ? "active" : ""}
+              to={`/?search=${term}`}
+            >
+              {term}
+            </Link>
+            {showAllTerms ? <small> ({count})</small> : null}
+          </span>
+        ))}
+        {terms.length > limit && isHydrated && (
+          <span>
+            ,&nbsp;
+            <button className="link" onClick={() => setShowAllTerms((s) => !s)}>
+              {showAllTerms ? "show less" : "show more"}
+            </button>
+          </span>
+        )}
+      </small>
+    </center>
   );
 }
 

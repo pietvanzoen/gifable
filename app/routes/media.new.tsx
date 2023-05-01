@@ -20,7 +20,6 @@ import {
   getImageData,
   storeBuffer,
   makeThumbnailFilename,
-  getCommonCommentTerms,
   getMediaTerms,
 } from "~/utils/media.server";
 import bytes from "bytes";
@@ -28,8 +27,8 @@ import { useState } from "react";
 
 const commonFields = z.object({
   filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
-  comment: z.string().optional(),
-  altText: z.string().optional(),
+  comment: z.string().trim().optional(),
+  altText: z.string().trim().optional(),
 });
 
 const fileFields = commonFields.extend({
@@ -158,9 +157,9 @@ export default function NewMediaRoute() {
         <FormInput name="filename" label="Filename" required />
         <FormInput
           type="textarea"
-          help={`This field is used for searching. Some common terms are: ${termsList}`}
+          help={`Add a comma separated list of terms for searching. Some common terms are: ${termsList}`}
           name="comment"
-          label="Comment"
+          label="Search comment"
         />
         <FormInput type="textarea" name="altText" label="Alt text" />
         <SubmitButton />

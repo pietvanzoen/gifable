@@ -9,7 +9,7 @@ import {
   useRouteError,
 } from "@remix-run/react";
 import { withZod } from "@remix-validated-form/with-zod";
-import { forbidden, useHydrated } from "remix-utils";
+import { forbidden, notFound, useHydrated } from "remix-utils";
 import { ValidatedForm, validationError } from "remix-validated-form";
 import { z } from "zod";
 import FormInput from "~/components/FormInput";
@@ -22,8 +22,8 @@ import { requireUser } from "~/utils/session.server";
 const validator = withZod(
   z.object({
     filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
-    comment: z.string().optional(),
-    altText: z.string().optional(),
+    comment: z.string().trim().optional(),
+    altText: z.string().trim().optional(),
   })
 );
 
@@ -66,19 +66,20 @@ export async function loader({ params }: LoaderArgs) {
     where: { id: params.mediaId },
   });
   if (!media) {
-    throw new Response("What a media! Not found.", {
-      status: 404,
-    });
+    throw notFound({ message: "Media not found" });
   }
-  return json({ media });
+  const terms = await getMediaTerms();
+  return json({ media, terms });
 }
 
 export default function MediaRoute() {
-  const { media } = useLoaderData<typeof loader>();
+  const { media, terms } = useLoaderData<typeof loader>();
   const filename = media.url.split("/").pop();
 
   const { url = "", comment = "", altText = "", width, height, color } = media;
   const title = url.split("/").pop();
+
+  const termsList = terms.map(([term]) => `'${term}'`).join(", ");
 
   return (
     <div>
@@ -119,7 +120,12 @@ export default function MediaRoute() {
             help="Changing the filename will break the existing url."
             required
           />
-          <FormInput type="textarea" name="comment" label="Comment" />
+          <FormInput
+            type="textarea"
+            help={`Add a comma separated list of terms for searching. Some common terms are: ${termsList}`}
+            name="comment"
+            label="Search comment"
+          />
           <FormInput type="textarea" name="altText" label="Alt text" />
         </fieldset>
       </ValidatedForm>

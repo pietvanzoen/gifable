@@ -152,6 +152,7 @@ export function getCommonCommentTerms(
   });
 
   return Object.entries(terms)
+    .filter(([, count]) => count > 1)
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit);
 }
