@@ -20,8 +20,8 @@ import {
   getImageData,
   storeBuffer,
   makeThumbnailFilename,
-  getMediaTerms,
 } from "~/utils/media.server";
+import { getMediaTerms } from "~/utils/terms.server";
 import bytes from "bytes";
 import { useState } from "react";
 

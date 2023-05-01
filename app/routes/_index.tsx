@@ -13,7 +13,7 @@ import { requireUserId } from "~/utils/session.server";
 
 import styles from "~/styles/search.css";
 import MediaList from "~/components/MediaList";
-import { getMediaTerms } from "~/utils/media.server";
+import { getMediaTerms } from "~/utils/terms.server";
 import { useState } from "react";
 import { useHydrated } from "remix-utils";
 
