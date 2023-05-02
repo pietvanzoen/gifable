@@ -91,7 +91,15 @@ export default function MediaRoute() {
               name="search"
               placeholder="Search"
               defaultValue={search}
+              list="search-terms"
             />
+            <datalist id="search-terms">
+              {data.terms.map(([term, count]) => (
+                <option key={term} value={term}>
+                  {term}
+                </option>
+              ))}
+            </datalist>
             &nbsp;
             <select name="select" defaultValue={select}>
               <option value="mine">My media</option>
