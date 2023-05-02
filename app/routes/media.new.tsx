@@ -104,7 +104,11 @@ export async function action({ request }: ActionArgs) {
 
 export async function loader({ request }: LoaderArgs) {
   await requireUserId(request);
-  const terms = await getMediaTerms(db, 5);
+  const terms = await getMediaTerms(db, {
+    limit: 5,
+    randomize: true,
+    filter: ([term]) => term.split(" ").length === 1,
+  });
   return json({
     terms,
   });

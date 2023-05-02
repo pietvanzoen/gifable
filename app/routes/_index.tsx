@@ -61,7 +61,10 @@ export async function loader({ request }: LoaderArgs) {
       },
       orderBy: { createdAt: "desc" },
     }),
-    getMediaTerms(db, 40, select === "mine" ? userId : undefined),
+    getMediaTerms(db, {
+      limit: 40,
+      userId: select === "mine" ? userId : undefined,
+    }),
   ]);
 
   return json({

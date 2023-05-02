@@ -5,11 +5,7 @@ export default function MediaCommentInput({
 }: {
   terms: [string, number][];
 }) {
-  const termsList = terms
-    .filter(([term]) => term.split(" ").length === 1)
-    .sort(() => 0.5 - Math.random())
-    .map(([term]) => `'${term}'`)
-    .join(", ");
+  const termsList = terms.map(([term]) => `'${term}'`).join(", ");
   return (
     <FormInput
       type="textarea"
