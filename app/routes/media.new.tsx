@@ -24,6 +24,7 @@ import {
 import { getMediaTerms } from "~/utils/terms.server";
 import bytes from "bytes";
 import { useState } from "react";
+import MediaCommentInput from "~/components/MediaCommentInput";
 
 const commonFields = z.object({
   filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
@@ -104,15 +105,15 @@ export async function action({ request }: ActionArgs) {
 export async function loader({ request }: LoaderArgs) {
   await requireUserId(request);
   const terms = await getMediaTerms(db, 5);
-  return json({ terms });
+  return json({
+    terms,
+  });
 }
 
 export default function NewMediaRoute() {
   const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const [uploadType, setUploadType] = useState<"url" | "file">("url");
-
-  const termsList = data.terms.map(([term]) => `'${term}'`).join(", ");
 
   return (
     <ValidatedForm
@@ -155,12 +156,7 @@ export default function NewMediaRoute() {
           <FormInput name="file" label="File" required type="file" />
         )}
         <FormInput name="filename" label="Filename" required />
-        <FormInput
-          type="textarea"
-          help={`Add a comma separated list of terms for searching. Some common terms are: ${termsList}`}
-          name="comment"
-          label="Search comment"
-        />
+        <MediaCommentInput terms={data.terms} />
         <FormInput type="textarea" name="altText" label="Alt text" />
         <SubmitButton />
       </fieldset>

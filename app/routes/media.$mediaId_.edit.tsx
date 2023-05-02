@@ -19,6 +19,7 @@ import { db } from "~/utils/db.server";
 import { getMediaTerms } from "~/utils/terms.server";
 import { rename } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
+import MediaCommentInput from "~/components/MediaCommentInput";
 
 const validator = withZod(
   z.object({
@@ -80,8 +81,6 @@ export default function MediaRoute() {
   const { url = "", comment = "", altText = "", width, height, color } = media;
   const title = url.split("/").pop();
 
-  const termsList = terms.map(([term]) => `'${term}'`).join(", ");
-
   return (
     <div>
       <h2>
@@ -121,12 +120,7 @@ export default function MediaRoute() {
             help="Changing the filename will break the existing url."
             required
           />
-          <FormInput
-            type="textarea"
-            help={`Add a comma separated list of terms for searching. Some common terms are: ${termsList}`}
-            name="comment"
-            label="Search comment"
-          />
+          <MediaCommentInput terms={terms} />
           <FormInput type="textarea" name="altText" label="Alt text" />
         </fieldset>
       </ValidatedForm>
