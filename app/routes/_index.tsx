@@ -107,11 +107,11 @@ export default function MediaRoute() {
               <option value="not-mine">Not mine</option>
             </select>
             &nbsp;
-            <button type="submit">Search</button>
-            &nbsp;
             <Link role="button" to="/">
               Clear
             </Link>
+            &nbsp;
+            <button type="submit">Search</button>
           </form>
         </center>
         <QuickSearch terms={data.terms} currentSearch={search} />
