@@ -12,6 +12,8 @@ import {
 import { forbidden, notFound, useHydrated } from "remix-utils";
 
 import { db } from "~/utils/db.server";
+import { getTitle } from "~/utils/media";
+import { downloadURL } from "~/utils/media.client";
 import { deleteURL, reparse } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
 
@@ -87,12 +89,11 @@ export default function MediaRoute() {
     height,
     color,
   } = media;
-  const title = url.split("/").pop();
 
   return (
     <div>
       <h2>
-        <center>{title}</center>
+        <center>{getTitle(url)}</center>
       </h2>
       <figure>
         <center>
@@ -108,7 +109,7 @@ export default function MediaRoute() {
 
       <Outlet />
 
-      {useHydrated() && <ShareButtons title={title} media={media} />}
+      {useHydrated() && <ShareButtons media={media} />}
 
       <table style={{ width: "100%" }} role="grid" aria-labelledby="meta-title">
         <caption id="meta-title">
@@ -193,21 +194,21 @@ export default function MediaRoute() {
   );
 }
 
-function ShareButtons({ media }: { media: Media }) {
+function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
   const { url, altText } = media;
 
   return (
     <center>
       <fieldset>
         <legend>
-          <strong>Copy to clipboard</strong>
+          <strong>Share</strong>
         </legend>
         <button
           type="button"
           aria-label="Copy URL to clipboard"
           onClick={() => copyToClipboard(url)}
         >
-          🔗 URL
+          🔗 Copy URL
         </button>
         &nbsp;
         <button
@@ -215,7 +216,7 @@ function ShareButtons({ media }: { media: Media }) {
           aria-label="Copy alt text to clipboard"
           onClick={() => copyToClipboard(altText || "")}
         >
-          💬 Alt text
+          💬 Copy alt text
         </button>
         &nbsp;
         <button
@@ -223,7 +224,11 @@ function ShareButtons({ media }: { media: Media }) {
           aria-label="Copy Markdown to clipboard"
           onClick={() => copyToClipboard(`![${altText || ""}](${url})`)}
         >
-          📝 Markdown
+          📝 Copy markdown
+        </button>
+        &nbsp;
+        <button aria-label="Download image" onClick={() => downloadURL(url)}>
+          ⬇️ Download
         </button>
       </fieldset>
     </center>
