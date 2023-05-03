@@ -1,3 +1,4 @@
+import type { Media } from "@prisma/client";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
@@ -8,7 +9,7 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
-import { forbidden, notFound } from "remix-utils";
+import { forbidden, notFound, useHydrated } from "remix-utils";
 
 import { db } from "~/utils/db.server";
 import { deleteURL, reparse } from "~/utils/media.server";
@@ -107,36 +108,7 @@ export default function MediaRoute() {
 
       <Outlet />
 
-      <center>
-        <fieldset>
-          <legend>
-            <strong>Copy to clipboard</strong>
-          </legend>
-          <button
-            type="button"
-            aria-label="Copy URL to clipboard"
-            onClick={() => copyToClipboard(url)}
-          >
-            🔗 URL
-          </button>
-          &nbsp;
-          <button
-            type="button"
-            aria-label="Copy alt text to clipboard"
-            onClick={() => copyToClipboard(altText || "")}
-          >
-            💬 Alt text
-          </button>
-          &nbsp;
-          <button
-            type="button"
-            aria-label="Copy Markdown to clipboard"
-            onClick={() => copyToClipboard(`![${altText || ""}](${url})`)}
-          >
-            📝 Markdown
-          </button>
-        </fieldset>
-      </center>
+      {useHydrated() && <ShareButtons title={title} media={media} />}
 
       <table style={{ width: "100%" }} role="grid" aria-labelledby="meta-title">
         <caption id="meta-title">
@@ -218,6 +190,43 @@ export default function MediaRoute() {
         </center>
       ) : null}
     </div>
+  );
+}
+
+function ShareButtons({ media }: { media: Media }) {
+  const { url, altText } = media;
+
+  return (
+    <center>
+      <fieldset>
+        <legend>
+          <strong>Copy to clipboard</strong>
+        </legend>
+        <button
+          type="button"
+          aria-label="Copy URL to clipboard"
+          onClick={() => copyToClipboard(url)}
+        >
+          🔗 URL
+        </button>
+        &nbsp;
+        <button
+          type="button"
+          aria-label="Copy alt text to clipboard"
+          onClick={() => copyToClipboard(altText || "")}
+        >
+          💬 Alt text
+        </button>
+        &nbsp;
+        <button
+          type="button"
+          aria-label="Copy Markdown to clipboard"
+          onClick={() => copyToClipboard(`![${altText || ""}](${url})`)}
+        >
+          📝 Markdown
+        </button>
+      </fieldset>
+    </center>
   );
 }
 
