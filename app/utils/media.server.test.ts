@@ -1,4 +1,4 @@
-import { getCommonCommentTerms } from "./terms.server";
+import { getCommonCommentTerms } from "./media.server";
 
 describe("getCommonCommentTerms", () => {
   it("returns the most common terms", () => {

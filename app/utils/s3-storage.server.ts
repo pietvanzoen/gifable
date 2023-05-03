@@ -3,9 +3,10 @@ import * as Minio from "minio";
 import { debug } from "debug";
 import path from "node:path";
 import assert from "node:assert";
-const debugLog = debug("app:file-storage");
+import env from "./env.server";
+const debugLog = debug("app:s3-storage");
 
-export type FileStorageOptions = {
+export type S3StorageOptions = {
   bucket: string;
   storageBaseURL: string;
   basePath?: string;
@@ -24,13 +25,33 @@ export const FILENAME_REGEX =
 
 export type UploadResponse = Minio.UploadedObjectInfo & { url: string };
 
-export default class FileStorage {
+export function storage() {
+  const storageOptions = {
+    bucket: env.require("S3_BUCKET"),
+    basePath: env.get("S3_BASE_PATH"),
+    storageBaseURL: env.require("S3_STORAGE_BASE_URL"),
+    storage: {
+      endPoint: env.require("S3_ENDPOINT"),
+      port: Number(env.get("S3_PORT")) || undefined,
+      useSSL: env.get("S3_USE_SSL")
+        ? env.get("S3_USE_SSL") === "true"
+        : undefined,
+      accessKey: env.require("S3_ACCESS_KEY"),
+      secretKey: env.require("S3_SECRET_KEY"),
+      region: env.get("S3_REGION"),
+    },
+  };
+
+  return new S3Storage(storageOptions);
+}
+
+export default class S3Storage {
   private minioClient: Minio.Client;
   private bucket: string;
   private storageBaseURL: string;
   private basePath?: string;
 
-  constructor(options: FileStorageOptions) {
+  constructor(options: S3StorageOptions) {
     this.minioClient = new Minio.Client(options.storage);
     this.bucket = options.bucket;
     this.basePath = options.basePath;

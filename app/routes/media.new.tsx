@@ -20,8 +20,8 @@ import {
   getImageData,
   storeBuffer,
   makeThumbnailFilename,
+  getMediaTerms,
 } from "~/utils/media.server";
-import { getMediaTerms } from "~/utils/terms.server";
 import bytes from "bytes";
 import { useState } from "react";
 import MediaCommentInput from "~/components/MediaCommentInput";
@@ -104,7 +104,7 @@ export async function action({ request }: ActionArgs) {
 
 export async function loader({ request }: LoaderArgs) {
   await requireUserId(request);
-  const terms = await getMediaTerms(db, {
+  const terms = await getMediaTerms({
     limit: 5,
     randomize: true,
     filter: ([term]) => term.split(" ").length === 1,

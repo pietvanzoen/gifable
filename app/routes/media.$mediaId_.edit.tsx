@@ -16,7 +16,7 @@ import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 
 import { db } from "~/utils/db.server";
-import { getMediaTerms } from "~/utils/terms.server";
+import { getMediaTerms } from "~/utils/media.server";
 import { rename } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
 import MediaCommentInput from "~/components/MediaCommentInput";
@@ -70,7 +70,7 @@ export async function loader({ params }: LoaderArgs) {
   if (!media) {
     throw notFound({ message: "Media not found" });
   }
-  const terms = await getMediaTerms(db);
+  const terms = await getMediaTerms();
   return json({ media, terms });
 }
 

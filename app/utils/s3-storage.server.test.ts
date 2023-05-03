@@ -1,6 +1,6 @@
 import { PassThrough } from "stream";
-import type { FileStorageOptions } from "./file-storage";
-import FileStorage from "./file-storage";
+import type { S3StorageOptions } from "./s3-storage.server";
+import S3Storage from "./s3-storage.server";
 import type { Response } from "fetch-h2";
 import { fetch } from "fetch-h2";
 import * as Minio from "minio";
@@ -8,9 +8,9 @@ import * as Minio from "minio";
 jest.mock("minio");
 jest.mock("fetch-h2");
 
-describe("FileStorage", () => {
-  let storageOptions: FileStorageOptions;
-  let fileStorage: FileStorage;
+describe("S3Storage", () => {
+  let storageOptions: S3StorageOptions;
+  let fileStorage: S3Storage;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -36,7 +36,7 @@ describe("FileStorage", () => {
         secretKey: "test-secret-key",
       },
     };
-    fileStorage = new FileStorage(storageOptions);
+    fileStorage = new S3Storage(storageOptions);
   });
 
   describe("upload", () => {
@@ -107,7 +107,7 @@ describe("FileStorage", () => {
     });
 
     it("works when basePath is empty", () => {
-      fileStorage = new FileStorage({
+      fileStorage = new S3Storage({
         ...storageOptions,
         basePath: "",
       });
