@@ -12,6 +12,7 @@ import {
 import { forbidden, notFound, useHydrated } from "remix-utils";
 
 import { db } from "~/utils/db.server";
+import { formatDate } from "~/utils/format";
 import { getTitle } from "~/utils/media";
 import { downloadURL } from "~/utils/media.client";
 import { deleteURL, reparse } from "~/utils/media.server";
@@ -151,12 +152,7 @@ export default function MediaRoute() {
           <tr role="presentation">
             <th tabIndex={-1}>Added</th>
             <td tabIndex={-1}>
-              <time dateTime={createdAt}>
-                {new Date(createdAt).toLocaleString("GB-en", {
-                  dateStyle: "long",
-                  timeStyle: "short",
-                })}
-              </time>
+              <time dateTime={createdAt}>{formatDate(createdAt)}</time>
             </td>
           </tr>
           {isMine ? null : (
