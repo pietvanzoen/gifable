@@ -159,7 +159,12 @@ export default function NewMediaRoute() {
         ) : (
           <FormInput name="file" label="File" required type="file" />
         )}
-        <FormInput name="filename" label="Filename" required />
+        <FormInput
+          name="filename"
+          label="Filename"
+          autoComplete="off"
+          required
+        />
         <MediaCommentInput terms={data.terms} />
         <FormInput type="textarea" name="altText" label="Alt text" />
         <SubmitButton />

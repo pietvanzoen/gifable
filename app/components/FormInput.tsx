@@ -22,6 +22,7 @@ export type FormInputProps = {
   required?: boolean;
   onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   style?: React.CSSProperties;
+  autoComplete?: string;
 };
 
 export default function FormInput({
@@ -35,6 +36,7 @@ export default function FormInput({
   required,
   onChange,
   style,
+  autoComplete,
 }: FormInputProps) {
   const { error, getInputProps } = useField(name);
   let fieldId = name;
@@ -69,6 +71,7 @@ export default function FormInput({
           ["checkbox", "radio"].includes(type) ? checked : undefined
         }
         onChange={onChange}
+        autoComplete={autoComplete}
       />
       {["radio", "checkbox"].includes(type) && (
         <label htmlFor={fieldId} className="field-label">
