@@ -8,6 +8,7 @@ export type MediaItemProps = {
     "id" | "url" | "thumbnailUrl" | "width" | "height" | "color" | "altText"
   > & { user: Pick<User, "username"> };
   isPlaying: boolean;
+  id?: string;
   setPlayingId: (id: Media["id"]) => void;
   showUser?: boolean;
 };
@@ -17,7 +18,7 @@ export default function MediaItem(props: MediaItemProps) {
   const { id, url, thumbnailUrl, width, height, color, altText } = props.media;
   const { showUser, isPlaying, setPlayingId } = props;
   return (
-    <figure className="media">
+    <figure id={props.id} className="media">
       <div className="img-wrapper">
         <Link prefetch="intent" to={`/media/${id}`}>
           <img

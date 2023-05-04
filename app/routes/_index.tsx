@@ -1,12 +1,7 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
-import {
-  Link,
-  NavLink,
-  useLoaderData,
-  useSearchParams,
-} from "@remix-run/react";
+import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
@@ -16,6 +11,8 @@ import MediaList from "~/components/MediaList";
 import { getMediaTerms } from "~/utils/media.server";
 import { useState } from "react";
 import { useHydrated } from "remix-utils";
+
+const PAGE_SIZE = 50;
 
 type SelectOptions = "all" | "mine" | "not-mine";
 
@@ -27,10 +24,11 @@ export async function loader({ request }: LoaderArgs) {
   const userId = await requireUserId(request);
   const params = new URLSearchParams(request.url.split("?")[1]);
 
-  const where: Prisma.MediaWhereInput = {};
+  const page = parseInt((params.get("page") || "1").trim(), 10);
   const search = (params.get("search") || "").trim();
   const select = (params.get("select") || "mine").trim();
 
+  const where: Prisma.MediaWhereInput = {};
   if (search) {
     where.comment = { contains: search };
   }
@@ -41,8 +39,10 @@ export async function loader({ request }: LoaderArgs) {
     where.userId = { not: userId };
   }
 
-  const [media, terms] = await Promise.all([
+  const [mediaCount, media, terms] = await Promise.all([
+    db.media.count({ where }),
     db.media.findMany({
+      take: page * PAGE_SIZE,
       where,
       select: {
         id: true,
@@ -68,7 +68,7 @@ export async function loader({ request }: LoaderArgs) {
   ]);
 
   return json({
-    userId,
+    mediaCount,
     media,
     terms,
   });
@@ -83,6 +83,7 @@ export default function MediaRoute() {
 
   const search = searchParams.get("search") || "";
   const select = searchParams.get("select") as SelectOptions;
+  const page = parseInt(searchParams.get("page") || "1", 10);
 
   return (
     <div>
@@ -97,7 +98,7 @@ export default function MediaRoute() {
               list="search-terms"
             />
             <datalist id="search-terms">
-              {data.terms.map(([term, count]) => (
+              {data.terms.map(([term]) => (
                 <option key={term} value={term}>
                   {term}
                 </option>
@@ -121,7 +122,13 @@ export default function MediaRoute() {
         <br />
       </header>
 
-      <MediaList media={data.media} showUser={select !== "mine"} />
+      <MediaList
+        media={data.media}
+        showUser={select !== "mine"}
+        mediaCount={data.mediaCount}
+        pageSize={PAGE_SIZE}
+        page={page}
+      />
     </div>
   );
 }

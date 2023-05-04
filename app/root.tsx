@@ -45,7 +45,7 @@ function Document({
         <Links />
       </head>
       <body>
-        <header>
+        <header id="top">
           <h1>🦩 Gifable</h1>
 
           {data?.user ? (
