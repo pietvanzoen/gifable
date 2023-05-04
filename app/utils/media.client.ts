@@ -1,7 +1,7 @@
 import { getTitle } from "./media";
 
 export async function downloadURL(url: string): Promise<void> {
-  const resp = await fetch(url);
+  const resp = await fetch(url, { mode: "no-cors" });
 
   const blob = await resp.blob();
 
