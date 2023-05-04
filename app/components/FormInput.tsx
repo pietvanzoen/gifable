@@ -22,9 +22,10 @@ export type FormInputProps = {
   required?: boolean;
   style?: React.CSSProperties;
   onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
-  autoComplete?: string;
+  autoComplete?: HTMLInputElement["autocomplete"];
   defaultValue?: string;
   onBlur?: FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+  accept?: HTMLInputElement["accept"];
 };
 
 export default function FormInput({

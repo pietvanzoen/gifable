@@ -178,6 +178,7 @@ export default function NewMediaRoute() {
             label="File"
             required
             type="file"
+            accept="image/png,image/jpeg,image/gif"
             onChange={({ target }) => {
               const file = (target as HTMLInputElement).files?.[0];
               if (!file) return;
