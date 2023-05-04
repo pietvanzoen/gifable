@@ -139,3 +139,21 @@ button.link {
 .hidden-unless-focused:focus {
   opacity: 1;
 }
+
+.toast-container {
+  position: fixed;
+  left: unset;
+  right: 1em;
+  top: 1em;
+  margin: 0;
+}
+
+dialog.toast {
+  position: static;
+  width: fit-content;
+  margin: 0 0 0.5em auto;
+}
+
+dialog.toast::backdrop {
+  display: none;
+}

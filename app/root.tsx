@@ -16,6 +16,7 @@ import {
 import stylesUrl from "~/styles/global.css";
 import { getUser } from "./utils/session.server";
 import env from "~/utils/env.server";
+import { ToastContainer } from "./components/Toast";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -82,6 +83,7 @@ function Document({
           </small>
         </footer>
 
+        <ToastContainer />
         <Scripts />
         <ScrollRestoration />
         <LiveReload />

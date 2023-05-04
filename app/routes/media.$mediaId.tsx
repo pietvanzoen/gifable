@@ -10,6 +10,7 @@ import {
   useRouteError,
 } from "@remix-run/react";
 import { forbidden, notFound, useHydrated } from "remix-utils";
+import { useToast } from "~/components/Toast";
 
 import { db } from "~/utils/db.server";
 import { formatDate } from "~/utils/format";
@@ -193,6 +194,8 @@ export default function MediaRoute() {
 function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
   const { url, altText } = media;
 
+  const toast = useToast();
+
   return (
     <center>
       <fieldset>
@@ -202,7 +205,7 @@ function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
         <button
           type="button"
           aria-label="Copy URL to clipboard"
-          onClick={() => copyToClipboard(url)}
+          onClick={() => copyToClipboard(url, () => toast("Copied URL"))}
         >
           🔗 Copy URL
         </button>
@@ -210,7 +213,9 @@ function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
         <button
           type="button"
           aria-label="Copy alt text to clipboard"
-          onClick={() => copyToClipboard(altText || "")}
+          onClick={() =>
+            copyToClipboard(altText || "", () => toast("Copied alt text"))
+          }
         >
           💬 Copy alt text
         </button>
@@ -218,7 +223,11 @@ function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
         <button
           type="button"
           aria-label="Copy Markdown to clipboard"
-          onClick={() => copyToClipboard(`![${altText || ""}](${url})`)}
+          onClick={() =>
+            copyToClipboard(`![${altText || ""}](${url})`, () =>
+              toast("Copied markdown")
+            )
+          }
         >
           📝 Copy markdown
         </button>
@@ -268,9 +277,10 @@ export function ErrorBoundary() {
   }
 }
 
-function copyToClipboard(text: string) {
+function copyToClipboard(text: string, onSuccess: () => void = () => {}) {
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(text);
+    onSuccess();
   } else {
     console.error(`navigator.clipboard.writeText is not supported.`, {
       text,
