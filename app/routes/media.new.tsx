@@ -155,7 +155,7 @@ export default function NewMediaRoute() {
           style={{ display: "inline-block" }}
         />
         {uploadType === "url" ? (
-          <FormInput name="url" label="URL" required />
+          <FormInput type="url" name="url" label="URL" required />
         ) : (
           <FormInput name="file" label="File" required type="file" />
         )}

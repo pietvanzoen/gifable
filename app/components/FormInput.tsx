@@ -10,6 +10,7 @@ export type FormInputProps = {
   variant?: "tag";
   type?:
     | "text"
+    | "url"
     | "password"
     | "radio"
     | "hidden"
