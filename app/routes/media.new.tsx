@@ -66,7 +66,7 @@ export async function action({ request }: ActionArgs) {
   const user = await getUser(request);
   if (!user) throw new Error("User not found");
 
-  const { comment, uploadType, filename } = result.data;
+  const { comment, altText, uploadType, filename } = result.data;
 
   const userFilename = `${user.username}/${filename}`;
 
@@ -93,6 +93,7 @@ export async function action({ request }: ActionArgs) {
       url: mediaUrl,
       thumbnailUrl,
       comment,
+      altText,
       ...imageData,
       size,
       userId,
