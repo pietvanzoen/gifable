@@ -112,6 +112,10 @@ button.play {
   border-color: var(--accent);
 }
 
+.media a:focus img {
+  border-color: var(--accent);
+}
+
 button.link {
   background-color: transparent;
   border: none;
@@ -126,4 +130,12 @@ button.link {
 [role="button"] {
   color: var(--bg) !important;
   text-decoration: none;
+}
+
+.hidden-unless-focused {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+.hidden-unless-focused:focus {
+  opacity: 1;
 }

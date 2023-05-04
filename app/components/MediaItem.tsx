@@ -1,6 +1,7 @@
 import type { Media, User } from "@prisma/client";
 import { Link } from "@remix-run/react";
 import { useHydrated } from "remix-utils";
+import { getTitle } from "~/utils/media";
 
 export type MediaItemProps = {
   media: Pick<
@@ -15,12 +16,13 @@ export type MediaItemProps = {
 
 export default function MediaItem(props: MediaItemProps) {
   const isHydrated = useHydrated();
-  const { id, url, thumbnailUrl, width, height, color, altText } = props.media;
-  const { showUser, isPlaying, setPlayingId } = props;
+  const { showUser, isPlaying, setPlayingId, media, ...restProps } = props;
+  const { id, url, thumbnailUrl, width, height, color, altText } = media;
+  const title = getTitle(url);
   return (
-    <figure id={props.id} className="media">
+    <figure id={props.id} className="media" {...restProps}>
       <div className="img-wrapper">
-        <Link prefetch="intent" to={`/media/${id}`}>
+        <Link prefetch="intent" to={`/media/${id}`} aria-label={`View media`}>
           <img
             loading="lazy"
             src={isPlaying || !thumbnailUrl ? url : thumbnailUrl}
@@ -33,6 +35,7 @@ export default function MediaItem(props: MediaItemProps) {
         {thumbnailUrl && isHydrated ? (
           <button
             className="play"
+            tabIndex={-1}
             onClick={() => setPlayingId(id)}
             dangerouslySetInnerHTML={{
               __html: isPlaying ? "&#x23F8;" : "&#x23F5;",
@@ -41,7 +44,7 @@ export default function MediaItem(props: MediaItemProps) {
         ) : null}
       </div>
       <figcaption>
-        {url.split("/").pop()}
+        {title}
         {showUser ? ` by ${props.media.user.username}` : null}
       </figcaption>
     </figure>

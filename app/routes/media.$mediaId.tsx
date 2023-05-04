@@ -197,7 +197,7 @@ function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
     <center>
       <fieldset>
         <legend>
-          <strong>Share</strong>
+          <strong>Share {getTitle(media.url)}</strong>
         </legend>
         <button
           type="button"

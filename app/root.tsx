@@ -46,6 +46,9 @@ function Document({
       </head>
       <body>
         <header id="top">
+          <a href="#main" className="hidden-unless-focused">
+            Skip to content
+          </a>
           <h1>🦩 Gifable</h1>
 
           {data?.user ? (
@@ -58,7 +61,7 @@ function Document({
           ) : null}
         </header>
 
-        <main>{children}</main>
+        <main id="main">{children}</main>
 
         <footer>
           <small>

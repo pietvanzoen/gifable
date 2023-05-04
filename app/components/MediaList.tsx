@@ -54,18 +54,17 @@ export default function MediaList({
   return (
     <>
       {media.length === 0 ? <p>No results.</p> : null}
-      <div className="results">
+      <div className="results" role="feed">
         {media.map((data, i) => (
-          <>
-            <MediaItem
-              id={i === previousPage * pageSize ? "load-more" : undefined}
-              key={data.id}
-              media={data}
-              showUser={showUser}
-              isPlaying={playingId === data.id}
-              setPlayingId={setPlayingId}
-            />
-          </>
+          <MediaItem
+            id={i === previousPage * pageSize ? "load-more" : undefined}
+            key={data.id}
+            media={data}
+            showUser={showUser}
+            isPlaying={playingId === data.id}
+            setPlayingId={setPlayingId}
+            aria-setsize={mediaCount}
+          />
         ))}
       </div>
       {showLoadMore && (

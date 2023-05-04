@@ -93,6 +93,7 @@ export default function MediaRoute() {
             <input
               type="search"
               name="search"
+              aria-label="Search media"
               placeholder="Search"
               defaultValue={search}
               list="search-terms"
@@ -105,14 +106,18 @@ export default function MediaRoute() {
               ))}
             </datalist>
             &nbsp;
-            <select name="select" defaultValue={select}>
+            <select
+              aria-label="Filter media by owner"
+              name="select"
+              defaultValue={select}
+            >
               <option value="mine">My media</option>
               <option value="all">All media</option>
               <option value="not-mine">Not mine</option>
             </select>
             &nbsp;
-            <Link role="button" to="/">
-              Clear
+            <Link role="button" to="/" aria-label="Reset search">
+              Reset
             </Link>
             &nbsp;
             <button type="submit">Search</button>
@@ -146,29 +151,36 @@ function QuickSearch({
   const termsList = showAllTerms ? terms : terms.slice(0, limit);
   return (
     <center>
-      <small>
-        <strong>Quick search: </strong>
-        {termsList.map(([term, count], i) => (
-          <span key={term}>
-            {i > 0 && ", "}
-            <Link
-              className={currentSearch === term ? "active" : ""}
-              to={`/?search=${term}`}
-            >
-              {term}
-            </Link>
-            {showAllTerms ? <small> ({count})</small> : null}
-          </span>
-        ))}
-        {terms.length > limit && isHydrated && (
-          <span>
-            ,&nbsp;
-            <button className="link" onClick={() => setShowAllTerms((s) => !s)}>
-              {showAllTerms ? "show less" : "show more"}
-            </button>
-          </span>
-        )}
-      </small>
+      <fieldset>
+        <legend>
+          <small>Quick search for term</small>
+        </legend>
+        <small>
+          {termsList.map(([term, count], i) => (
+            <span key={term}>
+              {i > 0 && ", "}
+              <Link
+                className={currentSearch === term ? "active" : ""}
+                to={`/?search=${term}`}
+              >
+                {term}
+              </Link>
+              {showAllTerms ? <small> ({count})</small> : null}
+            </span>
+          ))}
+          {terms.length > limit && isHydrated && (
+            <span>
+              ,&nbsp;
+              <button
+                className="link"
+                onClick={() => setShowAllTerms((s) => !s)}
+              >
+                {showAllTerms ? "show less" : "show more"}
+              </button>
+            </span>
+          )}
+        </small>
+      </fieldset>
     </center>
   );
 }
