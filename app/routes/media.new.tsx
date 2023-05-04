@@ -25,6 +25,7 @@ import {
 import bytes from "bytes";
 import { useState } from "react";
 import MediaCommentInput from "~/components/MediaCommentInput";
+import { getTitle } from "~/utils/media";
 
 const commonFields = z.object({
   filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
@@ -119,6 +120,12 @@ export default function NewMediaRoute() {
   const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const [uploadType, setUploadType] = useState<"url" | "file">("url");
+  const [filename, setFilename] = useState("");
+
+  const setFilenameIfNotSet = (value: string) => {
+    if (filename) return;
+    setFilename(value);
+  };
 
   return (
     <ValidatedForm
@@ -156,14 +163,34 @@ export default function NewMediaRoute() {
           style={{ display: "inline-block" }}
         />
         {uploadType === "url" ? (
-          <FormInput type="url" name="url" label="URL" required />
+          <FormInput
+            type="url"
+            name="url"
+            label="URL"
+            required
+            onBlur={(event) =>
+              setFilenameIfNotSet(getTitle(event.target.value))
+            }
+          />
         ) : (
-          <FormInput name="file" label="File" required type="file" />
+          <FormInput
+            name="file"
+            label="File"
+            required
+            type="file"
+            onChange={({ target }) => {
+              const file = (target as HTMLInputElement).files?.[0];
+              if (!file) return;
+              const filename = file.name;
+              setFilenameIfNotSet(filename);
+            }}
+          />
         )}
         <FormInput
           name="filename"
           label="Filename"
           autoComplete="off"
+          defaultValue={filename}
           required
         />
         <MediaCommentInput terms={data.terms} />

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import type { ChangeEventHandler } from "react";
+import type { ChangeEventHandler, FocusEventHandler } from "react";
 import { useField } from "remix-validated-form";
 
 export type FormInputProps = {
@@ -20,9 +20,11 @@ export type FormInputProps = {
   checked?: boolean;
   options?: { value: string; label: string }[];
   required?: boolean;
-  onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   style?: React.CSSProperties;
+  onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   autoComplete?: string;
+  defaultValue?: string;
+  onBlur?: FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 };
 
 export default function FormInput({
@@ -34,9 +36,8 @@ export default function FormInput({
   value,
   checked,
   required,
-  onChange,
   style,
-  autoComplete,
+  ...inputProps
 }: FormInputProps) {
   const { error, getInputProps } = useField(name);
   let fieldId = name;
@@ -70,8 +71,7 @@ export default function FormInput({
         defaultChecked={
           ["checkbox", "radio"].includes(type) ? checked : undefined
         }
-        onChange={onChange}
-        autoComplete={autoComplete}
+        {...inputProps}
       />
       {["radio", "checkbox"].includes(type) && (
         <label htmlFor={fieldId} className="field-label">
