@@ -152,7 +152,7 @@ dialog.toast {
   position: static;
   width: fit-content;
   margin: 0 0 0.5em auto;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: block;
   transform: translateX(120%);
 }
