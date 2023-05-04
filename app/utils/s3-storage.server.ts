@@ -21,7 +21,7 @@ const EXTENSION_TO_MIME_TYPE: Record<string, string> = {
 };
 
 export const FILENAME_REGEX =
-  /^([a-z0-9_-]+\/)?[a-z0-9_-]+\.(gif|jpg|png|jpeg)$/;
+  /^([a-zA-Z0-9_-]+\/)?[a-zA-Z0-9_-]+\.(gif|jpg|png|jpeg)$/;
 
 export type UploadResponse = Minio.UploadedObjectInfo & { url: string };
 

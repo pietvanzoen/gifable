@@ -28,7 +28,7 @@ import MediaCommentInput from "~/components/MediaCommentInput";
 import { getTitle } from "~/utils/media";
 
 const commonFields = z.object({
-  filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
+  filename: z.string().regex(/^[a-zA-Z0-9-_]+\.(gif|jpg|png|jpeg)$/),
   comment: z.string().trim().optional(),
   altText: z.string().trim().optional(),
 });
