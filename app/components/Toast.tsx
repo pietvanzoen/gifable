@@ -75,7 +75,7 @@ export function ToastItem(toast: Toast) {
     setIsOpen(true);
     const timeout = setTimeout(() => {
       setIsOpen(false);
-      remove(toast.id);
+      setTimeout(() => remove(toast.id), 200);
     }, 3000);
     return () => clearTimeout(timeout);
   }, [remove, toast.id]);

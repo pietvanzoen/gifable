@@ -152,8 +152,15 @@ dialog.toast {
   position: static;
   width: fit-content;
   margin: 0 0 0.5em auto;
+  transition: transform 0.3s ease-in-out;
+  display: block;
+  transform: translateX(120%);
 }
 
 dialog.toast::backdrop {
   display: none;
+}
+
+dialog.toast[open] {
+  transform: translateX(0);
 }
