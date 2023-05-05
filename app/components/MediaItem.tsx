@@ -38,7 +38,7 @@ export default function MediaItem(props: MediaItemProps) {
             tabIndex={-1}
             onClick={() => setPlayingId(id)}
             dangerouslySetInnerHTML={{
-              __html: isPlaying ? "&#x23F8;" : "&#x23F5;",
+              __html: isPlaying ? "&#x23F8;&#xFE0E;" : "&#x23F5;&#xFE0E;",
             }}
           />
         ) : null}
