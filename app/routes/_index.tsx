@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useHydrated } from "remix-utils";
 import { makeTitle } from "~/utils/meta";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 25;
 
 type SelectOptions = "all" | "mine" | "not-mine";
 
