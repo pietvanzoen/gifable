@@ -7,6 +7,7 @@ import styles from "~/styles/search.css";
 import { Link } from "react-router-dom";
 import { useSearchParams } from "@remix-run/react";
 import { useHydrated } from "remix-utils";
+import { useInView } from "react-cool-inview";
 
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
@@ -76,13 +77,7 @@ export default function MediaList({
       {showLoadMore && (
         <center>
           <br />
-          <Link
-            role="button"
-            to={`/?${search}${isHydrated ? "" : "#load-more"}`}
-            preventScrollReset={true}
-          >
-            🎉 Load more
-          </Link>
+          <LoadMoreButton search={search} />
         </center>
       )}
       <center>
@@ -92,5 +87,37 @@ export default function MediaList({
         </small>
       </center>
     </>
+  );
+}
+
+function LoadMoreButton({ search }: { search: URLSearchParams }) {
+  let button: HTMLAnchorElement | null = null;
+  const isHydrated = useHydrated();
+
+  const { observe } = useInView<HTMLAnchorElement>({
+    // For better UX, we can grow the root margin so the data will be loaded earlier
+    rootMargin: "50px 0px",
+    // When the last item comes to the viewport
+    onEnter: ({ unobserve }) => {
+      // Pause observe when loading data
+      unobserve();
+      // Load more data
+      button?.click();
+    },
+  });
+
+  return (
+    <Link
+      ref={(element) => {
+        observe(element);
+        button = element;
+      }}
+      role="button"
+      to={`/?${search}${isHydrated ? "" : "#load-more"}`}
+      preventScrollReset={true}
+      replace={true}
+    >
+      🎉 Load more
+    </Link>
   );
 }
