@@ -1,5 +1,5 @@
 import type { Media } from "@prisma/client";
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
@@ -17,7 +17,12 @@ import { formatDate } from "~/utils/format";
 import { getTitle } from "~/utils/media";
 import { downloadURL } from "~/utils/media.client";
 import { deleteURL, reparse } from "~/utils/media.server";
+import { makeTitle } from "~/utils/meta";
 import { requireUser } from "~/utils/session.server";
+
+export function meta({ data }: V2_MetaArgs<typeof loader>) {
+  return [{ title: makeTitle([getTitle(data.media.url)]) }];
+}
 
 export async function action({ params, request }: ActionArgs) {
   const user = await requireUser(request);

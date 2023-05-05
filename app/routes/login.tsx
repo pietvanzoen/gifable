@@ -18,6 +18,7 @@ import SubmitButton from "~/components/SubmitButton";
 import Alert from "~/components/Alert";
 import debug from "debug";
 import { UserSchema } from "~/utils/validators";
+import { makeTitle } from "~/utils/meta";
 
 const log = debug("app:login");
 
@@ -27,6 +28,13 @@ const validator = withZod(
     redirectTo: z.string().optional(),
   })
 );
+
+export function meta() {
+  return [
+    { title: makeTitle(["Login"]) },
+    { description: "Your personal gif library." },
+  ];
+}
 
 export async function action({ request }: ActionArgs) {
   const form = await request.formData();

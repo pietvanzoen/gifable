@@ -13,6 +13,7 @@ import { db } from "~/utils/db.server";
 import crypto from "crypto";
 import { changePassword, requireUserId } from "~/utils/session.server";
 import { UserSchema } from "~/utils/validators";
+import { makeTitle } from "~/utils/meta";
 
 export const changePasswordValidator = withZod(
   z.object({
@@ -22,6 +23,10 @@ export const changePasswordValidator = withZod(
     confirmNewPassword: z.string().min(4),
   })
 );
+
+export function meta() {
+  return [{ title: makeTitle(["Settings"]) }];
+}
 
 export async function action({ request }: ActionArgs) {
   const userId = await requireUserId(request);

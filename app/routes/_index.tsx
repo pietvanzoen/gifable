@@ -1,4 +1,4 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
 import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
@@ -11,6 +11,7 @@ import MediaList from "~/components/MediaList";
 import { getMediaTerms } from "~/utils/media.server";
 import { useState } from "react";
 import { useHydrated } from "remix-utils";
+import { makeTitle } from "~/utils/meta";
 
 const PAGE_SIZE = 50;
 
@@ -18,6 +19,24 @@ type SelectOptions = "all" | "mine" | "not-mine";
 
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
+}
+
+export function meta({ location }: V2_MetaArgs<typeof loader>) {
+  let title = "Search";
+  const params = new URLSearchParams(location.search);
+  const search = params.get("search");
+
+  if (search) {
+    title = `Search results for '${search}'`;
+  }
+
+  return [
+    { title: makeTitle([title]) },
+    {
+      name: "description",
+      content: "Search for media",
+    },
+  ];
 }
 
 export async function loader({ request }: LoaderArgs) {

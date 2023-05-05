@@ -26,6 +26,7 @@ import bytes from "bytes";
 import { useState } from "react";
 import MediaCommentInput from "~/components/MediaCommentInput";
 import { getTitle } from "~/utils/media";
+import { makeTitle } from "~/utils/meta";
 
 const commonFields = z.object({
   filename: z.string().regex(/^[a-zA-Z0-9-_]+\.(gif|jpg|png|jpeg)$/),
@@ -46,6 +47,10 @@ const urlFields = commonFields.extend({
 const validator = withZod(
   z.discriminatedUnion("uploadType", [fileFields, urlFields])
 );
+
+export function meta() {
+  return [{ title: makeTitle(["Upload media"]) }];
+}
 
 export async function action({ request }: ActionArgs) {
   const formData = await unstable_parseMultipartFormData(
