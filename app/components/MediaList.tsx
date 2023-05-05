@@ -33,7 +33,7 @@ export default function MediaList({
   const previousPage = currentPage - 1;
   search.set("page", (currentPage + 1).toString());
 
-  const showLoadMore = mediaCount && media.length < mediaCount;
+  const showLoadMore = Boolean(mediaCount && media.length < mediaCount);
 
   useEffect(() => {
     if (playingId) {
@@ -51,9 +51,15 @@ export default function MediaList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playingId]);
 
+  if (media.length === 0)
+    return (
+      <center>
+        <p>No results for '{search.get("search")}'. ☹️</p>
+      </center>
+    );
+
   return (
     <>
-      {media.length === 0 ? <p>No results.</p> : null}
       <div className="results" role="feed">
         {media.map((data, i) => (
           <MediaItem
