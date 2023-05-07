@@ -29,7 +29,6 @@ export default function MediaList({
   const [playingId, setPlayingId] = useState<Media["id"]>("");
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
   const [search] = useSearchParams();
-  const isHydrated = useHydrated();
   const currentPage = page;
   const previousPage = currentPage - 1;
   search.set("page", (currentPage + 1).toString());
