@@ -13,7 +13,7 @@ model Media {
   updatedAt  DateTime @updatedAt
   url       String
   thumbnailUrl String?
-  comment    String?
+  labels     String?
   altText    String?
   width      Int?
   height     Int?

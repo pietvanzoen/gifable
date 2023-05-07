@@ -145,12 +145,12 @@ type TermsOptions = {
   randomize?: boolean;
 };
 
-export function getCommonCommentTerms(
-  media: Pick<Media, "comment">[],
+export function getCommonLabelsTerms(
+  media: Pick<Media, "labels">[],
   { limit = 5, filter = () => true, randomize = false }: TermsOptions
 ) {
   const terms = media.reduce((terms, m) => {
-    m.comment?.split(",").forEach((c) => {
+    m.labels?.split(",").forEach((c) => {
       const term = c.trim().toLowerCase();
       terms[term] = (terms[term] || 0) + 1;
     });
@@ -168,7 +168,7 @@ export function getCommonCommentTerms(
     .slice(0, limit);
 }
 
-export async function getMediaTerms(
+export async function getMediaLabels(
   options?: TermsOptions & { userId?: string }
 ) {
   const { userId, ...termsOptions } = options || {};
@@ -176,12 +176,12 @@ export async function getMediaTerms(
   const media = await db.media.findMany({
     where: {
       ...where,
-      OR: [{ comment: { not: null } }, { comment: { not: "" } }],
+      OR: [{ labels: { not: null } }, { labels: { not: "" } }],
     },
     select: {
-      comment: true,
+      labels: true,
     },
   });
 
-  return getCommonCommentTerms(media, termsOptions);
+  return getCommonLabelsTerms(media, termsOptions);
 }

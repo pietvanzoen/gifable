@@ -16,15 +16,15 @@ import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 
 import { db } from "~/utils/db.server";
-import { getMediaTerms } from "~/utils/media.server";
+import { getMediaLabels } from "~/utils/media.server";
 import { rename } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
-import MediaCommentInput from "~/components/MediaCommentInput";
+import MediaLabelsInput from "~/components/MediaLabelsInput";
 
 const validator = withZod(
   z.object({
     filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
-    comment: z.string().trim().optional(),
+    labels: z.string().trim().optional(),
     altText: z.string().trim().optional(),
   })
 );
@@ -37,7 +37,7 @@ export async function action({ params, request }: ActionArgs) {
   if (result.error) return validationError(result.error, result.submittedData);
 
   const { mediaId: id } = params;
-  const { comment, altText } = result.data;
+  const { labels, altText } = result.data;
 
   const [media] = await db.media.findMany({
     where: { id, userId: user.id },
@@ -57,7 +57,7 @@ export async function action({ params, request }: ActionArgs) {
 
   await db.media.update({
     where: { id },
-    data: { comment, altText, ...renameData },
+    data: { labels, altText, ...renameData },
   });
 
   return redirect(`/media/${id}`);
@@ -70,7 +70,7 @@ export async function loader({ params }: LoaderArgs) {
   if (!media) {
     throw notFound({ message: "Media not found" });
   }
-  const terms = await getMediaTerms();
+  const terms = await getMediaLabels();
   return json({ media, terms });
 }
 
@@ -78,7 +78,7 @@ export default function MediaRoute() {
   const { media, terms } = useLoaderData<typeof loader>();
   const filename = media.url.split("/").pop();
 
-  const { url = "", comment = "", altText = "", width, height, color } = media;
+  const { url = "", labels = "", altText = "", width, height, color } = media;
   const title = url.split("/").pop();
 
   return (
@@ -90,7 +90,7 @@ export default function MediaRoute() {
         <center>
           <img
             src={url}
-            alt={comment || ""}
+            alt={labels || ""}
             width={width || 300}
             height={height || 200}
             style={{ backgroundColor: color || "#ccc" }}
@@ -103,7 +103,7 @@ export default function MediaRoute() {
         validator={validator}
         defaultValues={{
           filename,
-          comment: comment || "",
+          labels: labels || "",
           altText: altText || "",
         }}
         method="post"
@@ -120,7 +120,7 @@ export default function MediaRoute() {
             help="Changing the filename will break the existing url."
             required
           />
-          <MediaCommentInput terms={terms} />
+          <MediaLabelsInput terms={terms} />
           <FormInput type="textarea" name="altText" label="Alt text" />
         </fieldset>
       </ValidatedForm>

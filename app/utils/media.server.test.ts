@@ -1,17 +1,17 @@
-import { getCommonCommentTerms } from "./media.server";
+import { getCommonLabelsTerms } from "./media.server";
 
-describe("getCommonCommentTerms", () => {
+describe("getCommonLabelsTerms", () => {
   it("returns the most common terms", () => {
-    const terms = getCommonCommentTerms(
+    const terms = getCommonLabelsTerms(
       [
-        { comment: "b, c" },
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "a, b" },
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "a, b, c" },
+        { labels: "b, c" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "a, b" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "a, b, c" },
       ],
       { limit: 2 }
     );
@@ -23,17 +23,17 @@ describe("getCommonCommentTerms", () => {
   });
 
   it("ignores terms with less than 2 occurrences", () => {
-    const terms = getCommonCommentTerms(
+    const terms = getCommonLabelsTerms(
       [
-        { comment: "b, c" },
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "a, b" },
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "a, b, c" },
-        { comment: "d" },
+        { labels: "b, c" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "a, b" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "a, b, c" },
+        { labels: "d" },
       ],
       { limit: 5 }
     );
@@ -46,13 +46,13 @@ describe("getCommonCommentTerms", () => {
   });
 
   it("accepts an optional filter", () => {
-    const terms = getCommonCommentTerms(
+    const terms = getCommonLabelsTerms(
       [
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "a" },
-        { comment: "d" },
-        { comment: "d" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "a" },
+        { labels: "d" },
+        { labels: "d" },
       ],
       {
         limit: 5,

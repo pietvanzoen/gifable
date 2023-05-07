@@ -8,7 +8,7 @@ import { requireUserId } from "~/utils/session.server";
 
 import styles from "~/styles/search.css";
 import MediaList from "~/components/MediaList";
-import { getMediaTerms } from "~/utils/media.server";
+import { getMediaLabels } from "~/utils/media.server";
 import { useState } from "react";
 import { useHydrated } from "remix-utils";
 import { makeTitle } from "~/utils/meta";
@@ -49,7 +49,7 @@ export async function loader({ request }: LoaderArgs) {
 
   const where: Prisma.MediaWhereInput = {};
   if (search) {
-    where.comment = { contains: search };
+    where.labels = { contains: search };
   }
   if (select === "mine") {
     where.userId = userId;
@@ -58,7 +58,7 @@ export async function loader({ request }: LoaderArgs) {
     where.userId = { not: userId };
   }
 
-  const [mediaCount, media, terms] = await Promise.all([
+  const [mediaCount, media, labels] = await Promise.all([
     db.media.count({ where }),
     db.media.findMany({
       take: page * PAGE_SIZE,
@@ -67,7 +67,7 @@ export async function loader({ request }: LoaderArgs) {
         id: true,
         url: true,
         thumbnailUrl: true,
-        comment: true,
+        labels: true,
         width: true,
         height: true,
         color: true,
@@ -80,7 +80,7 @@ export async function loader({ request }: LoaderArgs) {
       },
       orderBy: { createdAt: "desc" },
     }),
-    getMediaTerms({
+    getMediaLabels({
       limit: 40,
       userId: select === "mine" ? userId : undefined,
     }),
@@ -89,7 +89,7 @@ export async function loader({ request }: LoaderArgs) {
   return json({
     mediaCount,
     media,
-    terms,
+    labels,
   });
 }
 
@@ -115,12 +115,12 @@ export default function MediaRoute() {
               aria-label="Search media"
               placeholder="Search"
               defaultValue={search}
-              list="search-terms"
+              list="search-labels"
             />
-            <datalist id="search-terms">
-              {data.terms.map(([term]) => (
-                <option key={term} value={term}>
-                  {term}
+            <datalist id="search-labels">
+              {data.labels.map(([label]) => (
+                <option key={label} value={label}>
+                  {label}
                 </option>
               ))}
             </datalist>
@@ -142,7 +142,7 @@ export default function MediaRoute() {
             <button type="submit">Search</button>
           </form>
         </center>
-        <QuickSearch terms={data.terms} currentSearch={search} />
+        <QuickSearch labels={data.labels} currentSearch={search} />
         <br />
       </header>
 
@@ -158,43 +158,43 @@ export default function MediaRoute() {
 }
 
 function QuickSearch({
-  terms,
+  labels,
   currentSearch,
 }: {
-  terms: [string, number][];
+  labels: [string, number][];
   currentSearch: string;
 }) {
   const limit = 6;
   const isHydrated = useHydrated();
-  const [showAllTerms, setShowAllTerms] = useState(false);
-  const termsList = showAllTerms ? terms : terms.slice(0, limit);
+  const [showAllLabels, setShowAllLabels] = useState(false);
+  const labelsList = showAllLabels ? labels : labels.slice(0, limit);
   return (
     <center>
       <fieldset>
         <legend>
-          <small>Quick search for term</small>
+          <small>Quick search for label</small>
         </legend>
         <small>
-          {termsList.map(([term, count], i) => (
-            <span key={term}>
+          {labelsList.map(([label, count], i) => (
+            <span key={label}>
               {i > 0 && ", "}
               <Link
-                className={currentSearch === term ? "active" : ""}
-                to={`/?search=${term}`}
+                className={currentSearch === label ? "active" : ""}
+                to={`/?search=${label}`}
               >
-                {term}
+                {label}
               </Link>
-              {showAllTerms ? <small> ({count})</small> : null}
+              {showAllLabels ? <small> ({count})</small> : null}
             </span>
           ))}
-          {terms.length > limit && isHydrated && (
+          {labels.length > limit && isHydrated && (
             <span>
               ,&nbsp;
               <button
                 className="link"
-                onClick={() => setShowAllTerms((s) => !s)}
+                onClick={() => setShowAllLabels((s) => !s)}
               >
-                {showAllTerms ? "show less" : "show more"}
+                {showAllLabels ? "show less" : "show more"}
               </button>
             </span>
           )}

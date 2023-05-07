@@ -26,7 +26,7 @@ export async function loader({ request }: LoaderArgs) {
   const search = (params.get("search") || "").trim();
 
   if (search) {
-    where.comment = { contains: search };
+    where.labels = { contains: search };
   }
 
   const data = await db.media.findMany({
@@ -35,7 +35,7 @@ export async function loader({ request }: LoaderArgs) {
       id: true,
       url: true,
       thumbnailUrl: true,
-      comment: true,
+      labels: true,
       width: true,
       height: true,
       color: true,

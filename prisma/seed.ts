@@ -31,15 +31,15 @@ async function getMedia() {
   return [
     {
       url: "https://xn--vi8h.piet.me/pedro-hug.gif",
-      comment: `Pedro pascal, hug`,
+      labels: `Pedro pascal, hug`,
     },
     {
       url: "https://xn--vi8h.piet.me/happydance.gif",
-      comment: `Seinfeld, happy dance`,
+      labels: `Seinfeld, happy dance`,
     },
     {
       url: "https://xn--vi8h.piet.me/vibes.gif",
-      comment: `Vibes, cat`,
+      labels: `Vibes, cat`,
     },
   ];
 }

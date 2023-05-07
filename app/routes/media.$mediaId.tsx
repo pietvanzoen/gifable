@@ -88,7 +88,7 @@ export default function MediaRoute() {
 
   const {
     url = "",
-    comment = "",
+    labels = "",
     altText = "",
     size,
     createdAt,
@@ -106,7 +106,7 @@ export default function MediaRoute() {
         <center>
           <img
             src={url}
-            alt={comment || ""}
+            alt={labels || ""}
             width={width || 300}
             height={height || 200}
             style={{ backgroundColor: color || "#ccc" }}
@@ -130,9 +130,9 @@ export default function MediaRoute() {
             </td>
           </tr>
           <tr role="presentation">
-            <th tabIndex={-1}>Comment</th>
+            <th tabIndex={-1}>Labels</th>
             <td tabIndex={-1}>
-              {comment?.split(",").map((text, i: number) => {
+              {labels?.split(",").map((text, i: number) => {
                 const term = text.trim().toLowerCase();
                 return (
                   <span key={text + i}>

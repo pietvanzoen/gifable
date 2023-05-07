@@ -20,17 +20,17 @@ import {
   getImageData,
   storeBuffer,
   makeThumbnailFilename,
-  getMediaTerms,
+  getMediaLabels,
 } from "~/utils/media.server";
 import bytes from "bytes";
 import { useState } from "react";
-import MediaCommentInput from "~/components/MediaCommentInput";
+import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { getTitle } from "~/utils/media";
 import { makeTitle } from "~/utils/meta";
 
 const commonFields = z.object({
   filename: z.string().regex(/^[a-zA-Z0-9-_]+\.(gif|jpg|png|jpeg)$/),
-  comment: z.string().trim().optional(),
+  labels: z.string().trim().optional(),
   altText: z.string().trim().optional(),
 });
 
@@ -72,7 +72,7 @@ export async function action({ request }: ActionArgs) {
   const user = await getUser(request);
   if (!user) throw new Error("User not found");
 
-  const { comment, altText, uploadType, filename } = result.data;
+  const { labels, altText, uploadType, filename } = result.data;
 
   const userFilename = `${user.username}/${filename}`;
 
@@ -98,7 +98,7 @@ export async function action({ request }: ActionArgs) {
     data: {
       url: mediaUrl,
       thumbnailUrl,
-      comment,
+      labels,
       altText,
       ...imageData,
       size,
@@ -111,7 +111,7 @@ export async function action({ request }: ActionArgs) {
 
 export async function loader({ request }: LoaderArgs) {
   await requireUserId(request);
-  const terms = await getMediaTerms({
+  const terms = await getMediaLabels({
     limit: 5,
     randomize: true,
     filter: ([term]) => term.split(" ").length === 1,
@@ -146,7 +146,7 @@ export default function NewMediaRoute() {
         </legend>
         <p>
           Select a file from your computer or enter the URL of an image file.
-          You can optionally add a search comment and alt text.
+          You can optionally add a search labels and alt text.
         </p>
         <FormInput
           type="radio"
@@ -199,7 +199,7 @@ export default function NewMediaRoute() {
           defaultValue={filename}
           required
         />
-        <MediaCommentInput terms={data.terms} />
+        <MediaLabelsInput terms={data.terms} />
         <FormInput type="textarea" name="altText" label="Alt text" />
         <SubmitButton />
       </fieldset>
