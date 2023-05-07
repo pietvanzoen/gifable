@@ -73,9 +73,15 @@ function Document({
 
           {data?.user ? (
             <nav>
-              <NavLink to="/">Search</NavLink>
-              <NavLink to="/media/new">Add</NavLink>
-              <NavLink to="/settings">Settings</NavLink>
+              <NavLink prefetch="intent" to="/">
+                Search
+              </NavLink>
+              <NavLink prefetch="intent" to="/media/new">
+                Add
+              </NavLink>
+              <NavLink prefetch="intent" to="/settings">
+                Settings
+              </NavLink>
               <Link to="/logout">Logout</Link>
             </nav>
           ) : null}
