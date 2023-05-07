@@ -288,10 +288,6 @@ function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
         >
           📝 Copy markdown
         </button>
-        &nbsp;
-        <button aria-label="Download image" onClick={() => downloadURL(url)}>
-          ⬇️ Download
-        </button>
       </fieldset>
     </center>
   );
