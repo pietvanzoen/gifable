@@ -63,7 +63,7 @@ export default function MediaList({
       <div className="results" role="feed">
         {media.map((data, i) => (
           <MediaItem
-            id={i === previousPage * pageSize ? "load-more" : undefined}
+            id={i === previousPage * pageSize - 3 ? "load-more" : undefined}
             key={data.id}
             media={data}
             showUser={showUser}
