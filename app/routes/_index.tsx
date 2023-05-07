@@ -116,6 +116,7 @@ export default function MediaRoute() {
               placeholder="Search"
               defaultValue={search}
               list="search-labels"
+              style={{ marginRight: "0.2em" }}
             />
             <datalist id="search-labels">
               {data.labels.map(([label]) => (
@@ -124,21 +125,24 @@ export default function MediaRoute() {
                 </option>
               ))}
             </datalist>
-            &nbsp;
             <select
               aria-label="Filter media by owner"
               name="select"
               defaultValue={select}
+              style={{ marginRight: "0.2em" }}
             >
               <option value="mine">My media</option>
               <option value="all">All media</option>
               <option value="not-mine">Not mine</option>
             </select>
-            &nbsp;
-            <Link role="button" to="/" aria-label="Reset search">
+            <Link
+              role="button"
+              to="/"
+              aria-label="Reset search"
+              style={{ marginRight: "0.2em" }}
+            >
               Reset
             </Link>
-            &nbsp;
             <button type="submit">Search</button>
           </form>
         </center>
