@@ -173,37 +173,33 @@ function QuickSearch({
   const [showAllLabels, setShowAllLabels] = useState(false);
   const labelsList = showAllLabels ? labels : labels.slice(0, limit);
   return (
-    <center>
-      <fieldset>
-        <legend>
-          <small>Quick search for label</small>
-        </legend>
-        <small>
-          {labelsList.map(([label, count], i) => (
-            <span key={label}>
-              {i > 0 && ", "}
-              <Link
-                className={currentSearch === label ? "active" : ""}
-                to={`/?search=${label}`}
-              >
-                {label}
-              </Link>
-              {showAllLabels ? <small> ({count})</small> : null}
-            </span>
-          ))}
-          {labels.length > limit && isHydrated && (
-            <span>
-              ,&nbsp;
-              <button
-                className="link"
-                onClick={() => setShowAllLabels((s) => !s)}
-              >
-                {showAllLabels ? "show less" : "show more"}
-              </button>
-            </span>
-          )}
-        </small>
-      </fieldset>
+    <center role="group" aria-labelledby="quick-search-header">
+      <small>
+        <strong id="quick-search-header">Search for label:</strong>&nbsp;
+        {labelsList.map(([label, count], i) => (
+          <span key={label}>
+            {i > 0 && ", "}
+            <Link
+              className={currentSearch === label ? "active" : ""}
+              to={`/?search=${label}`}
+            >
+              {label}
+            </Link>
+            {showAllLabels ? <small> ({count})</small> : null}
+          </span>
+        ))}
+        {labels.length > limit && isHydrated && (
+          <>
+            &nbsp;&nbsp;
+            <button
+              className="link"
+              onClick={() => setShowAllLabels((s) => !s)}
+            >
+              {showAllLabels ? "show less" : "show more"}
+            </button>
+          </>
+        )}
+      </small>
     </center>
   );
 }
