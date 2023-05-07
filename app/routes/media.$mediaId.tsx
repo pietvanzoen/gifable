@@ -9,7 +9,9 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
+import { useState } from "react";
 import { forbidden, notFound, useHydrated } from "remix-utils";
+import DialogModal from "~/components/DialogModal";
 import { useToast } from "~/components/Toast";
 
 import { db } from "~/utils/db.server";
@@ -98,7 +100,7 @@ export default function MediaRoute() {
   } = media;
 
   return (
-    <div>
+    <>
       <h2>
         <center>{getTitle(url)}</center>
       </h2>
@@ -172,17 +174,18 @@ export default function MediaRoute() {
 
       {isMine ? (
         <center>
-          <Link to={`/media/${media.id}/edit`} role="button">
+          <Link
+            to={`/media/${media.id}/edit`}
+            role="button"
+            aria-label="Edit media info"
+          >
             ✏️ Edit info
           </Link>{" "}
           &nbsp;
-          <form method="post" style={{ display: "inline-block" }}>
-            <button name="intent" type="submit" value="delete">
-              🗑️ Delete
-            </button>
-          </form>
+          <DeleteButton media={media} />
         </center>
       ) : null}
+
       {user.isAdmin ? (
         <center>
           <form method="post" style={{ display: "inline-block" }}>
@@ -192,7 +195,56 @@ export default function MediaRoute() {
           </form>
         </center>
       ) : null}
-    </div>
+    </>
+  );
+}
+
+function DeleteButton({ media }: { media: Pick<Media, "id" | "url"> }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  return (
+    <>
+      <form
+        method="post"
+        style={{ display: "inline-block" }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          setConfirmDelete(true);
+        }}
+      >
+        <button
+          name="intent"
+          type="submit"
+          value="delete"
+          aria-label="Delete media"
+        >
+          🗑️ Delete
+        </button>
+      </form>
+
+      <DialogModal open={confirmDelete} onClose={() => setConfirmDelete(false)}>
+        <h2>Are you sure?</h2>
+        <p>
+          This will delete the media and all its data.
+          <br />
+          This action cannot be undone.
+        </p>
+
+        <form method="post">
+          <button formMethod="dialog" aria-label="Cancel delete">
+            🚫 Cancel
+          </button>
+          &nbsp;&nbsp;
+          <button
+            name="intent"
+            type="submit"
+            value="delete"
+            aria-label="Delete media"
+          >
+            🗑️ Delete
+          </button>
+        </form>
+      </DialogModal>
+    </>
   );
 }
 
