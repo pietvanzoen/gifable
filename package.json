@@ -10,7 +10,8 @@
     "typecheck": "tsc",
     "test": "jest app",
     "test:watch": "jest app --watch",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx ."
   },
   "dependencies": {
     "@prisma/client": "^4.12.0",
