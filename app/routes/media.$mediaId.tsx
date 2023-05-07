@@ -172,7 +172,7 @@ export default function MediaRoute() {
 
       {isMine ? (
         <center>
-          <Link to={`/media/${media.id}/edit`} className="button">
+          <Link to={`/media/${media.id}/edit`} role="button">
             ✏️ Edit info
           </Link>{" "}
           &nbsp;

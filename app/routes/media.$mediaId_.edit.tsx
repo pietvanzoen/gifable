@@ -126,11 +126,11 @@ export default function MediaRoute() {
       </ValidatedForm>
 
       <center>
-        <Link to={`/media/${media.id}`} className="button">
-          Cancel
+        <Link to={`/media/${media.id}`} role="button">
+          🚫 Cancel
         </Link>
         &nbsp;
-        <SubmitButton formId="edit-form" />
+        <SubmitButton formId="edit-form">✅ Save</SubmitButton>
       </center>
     </div>
   );
