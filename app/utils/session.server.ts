@@ -28,18 +28,18 @@ export async function register({ username, password, isAdmin }: LoginForm) {
 }
 
 export async function changePassword({
-  username,
+  userId,
   password,
 }: {
-  username: string;
+  userId: string;
   password: string;
 }) {
   const passwordHash = await hashPassword(password);
   await db.user.update({
-    where: { username },
+    where: { id: userId },
     data: { passwordHash },
   });
-  log("changed password for user %s", username);
+  log("changed password for user %s", userId);
 }
 
 export async function login({ username, password }: LoginForm) {

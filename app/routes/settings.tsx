@@ -4,14 +4,13 @@ import { json } from "@remix-run/node";
 import { useActionData, useLoaderData } from "@remix-run/react";
 import { withZod } from "@remix-validated-form/with-zod";
 import { notFound } from "remix-utils";
-import { ValidatedForm, validationError } from "remix-validated-form";
+import { ValidatedForm } from "remix-validated-form";
 import { z } from "zod";
 import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 import { db } from "~/utils/db.server";
 import crypto from "crypto";
-import { changePassword, requireUserId } from "~/utils/session.server";
-import { UserSchema } from "~/utils/validators";
+import { requireUserId } from "~/utils/session.server";
 import { makeTitle } from "~/utils/meta";
 import { useEffect } from "react";
 import { useToast } from "~/components/Toast";
@@ -21,15 +20,11 @@ import {
   SettingsForm,
   SETTINGS_INTENT,
 } from "~/components/SettingsForm";
-
-export const changePasswordValidator = withZod(
-  z.object({
-    intent: z.literal("change-password"),
-    username: UserSchema.shape.username,
-    newPassword: z.string().min(4),
-    confirmNewPassword: z.string().min(4),
-  })
-);
+import {
+  changePasswordAction,
+  ChangePasswordForm,
+  CHANGE_PASSWORD_INTENT,
+} from "~/components/ChangePasswordForm";
 
 export const apiTokenValidator = withZod(
   z.object({
@@ -49,25 +44,8 @@ export async function action({ request }: ActionArgs) {
   const intent = form.get("intent");
 
   switch (intent) {
-    case "change-password":
-      const result = await changePasswordValidator.validate(form);
-
-      if (result.error) return validationError(result.error);
-
-      const { username, newPassword, confirmNewPassword } = result.data;
-
-      if (newPassword !== confirmNewPassword) {
-        return validationError({
-          fieldErrors: {
-            newPassword: "Passwords do not match",
-            confirmNewPassword: "Passwords do not match",
-          },
-        });
-      }
-
-      await changePassword({ username, password: newPassword });
-
-      return json({ success: true, intent });
+    case CHANGE_PASSWORD_INTENT:
+      return changePasswordAction({ userId, form });
 
     case "generate-api-token":
       const apiToken = crypto.randomBytes(24).toString("hex");
@@ -152,38 +130,11 @@ export default function AdminRoute() {
         }}
       />
 
-      <ValidatedForm
-        validator={changePasswordValidator}
-        method="post"
-        resetAfterSubmit={true}
-        id="change-password"
-      >
-        <fieldset>
-          <legend>
-            <h4>Change Password</h4>
-          </legend>
-          <FormInput
-            name="intent"
-            type="hidden"
-            value="changePassword"
-            required
-          />
-          <FormInput name="username" type="hidden" value={user?.username} />
-          <FormInput
-            name="newPassword"
-            type="password"
-            label="New Password"
-            required
-          />
-          <FormInput
-            name="confirmNewPassword"
-            type="password"
-            label="Confirm New Password"
-            required
-          />
-          <SubmitButton>Change Password</SubmitButton>
-        </fieldset>
-      </ValidatedForm>
+      <ChangePasswordForm
+        defaultValues={{
+          username: "",
+        }}
+      />
 
       <fieldset>
         <legend>
