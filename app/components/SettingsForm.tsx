@@ -56,7 +56,7 @@ export function SettingsForm({
     >
       <fieldset>
         <legend>
-          <h4>General</h4>
+          <h3>General</h3>
         </legend>
         <FormInput name="intent" type="hidden" value="settings" required />
         <FormInput

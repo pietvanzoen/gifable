@@ -44,26 +44,17 @@ export async function changePasswordAction({
   return json({ success: true, intent: CHANGE_PASSWORD_INTENT });
 }
 
-type ChangePasswordDefaultValues = {
-  username: string;
-};
-
-export function ChangePasswordForm({
-  defaultValues,
-}: {
-  defaultValues: ChangePasswordDefaultValues;
-}) {
+export function ChangePasswordForm() {
   return (
     <ValidatedForm
       validator={validator}
       method="post"
       resetAfterSubmit={true}
       id="change-password"
-      defaultValues={defaultValues}
     >
       <fieldset>
         <legend>
-          <h4>Change Password</h4>
+          <h3>Change Password</h3>
         </legend>
         <FormInput
           name="intent"
