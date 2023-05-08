@@ -146,9 +146,10 @@ export async function loader({ request }: LoaderArgs) {
 export default function NewMediaRoute() {
   const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
+  const isHydrated = useHydrated();
   const [uploadType, setUploadType] = useState<"url" | "file">("url");
   const [filename, setFilename] = useState("");
-  const [image, setImage] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const setFilenameIfNotSet = (value: string) => {
     if (filename) return;
@@ -160,7 +161,7 @@ export default function NewMediaRoute() {
       validator={validator}
       defaultValues={actionData?.repopulateFields}
       method="post"
-      noValidate={useHydrated()}
+      noValidate={isHydrated}
       encType="multipart/form-data"
     >
       <fieldset>
@@ -200,7 +201,7 @@ export default function NewMediaRoute() {
                 required
                 onBlur={(event) => {
                   setFilenameIfNotSet(getTitle(event.target.value));
-                  setImage(event.target.value);
+                  setPreviewImage(event.target.value);
                 }}
               />
             ) : (
@@ -215,7 +216,7 @@ export default function NewMediaRoute() {
                   if (!file) return;
                   const filename = file.name;
                   setFilenameIfNotSet(filename);
-                  setImage(URL.createObjectURL(file));
+                  setPreviewImage(URL.createObjectURL(file));
                 }}
               />
             )}
@@ -228,13 +229,15 @@ export default function NewMediaRoute() {
             />
           </div>
           <div className="file-preview">
-            <figure>
-              {image ? (
-                <img src={image} alt="Preview" />
-              ) : (
-                <div className="file-placeholder" />
-              )}
-            </figure>
+            {isHydrated && (
+              <figure>
+                {previewImage ? (
+                  <img src={previewImage} alt="Preview" />
+                ) : (
+                  <div className="file-placeholder" />
+                )}
+              </figure>
+            )}
           </div>
         </div>
         <MediaLabelsInput terms={data.terms} />
