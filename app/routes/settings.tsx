@@ -1,7 +1,6 @@
 import type { User } from "@prisma/client";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
 import { useActionData, useLoaderData } from "@remix-run/react";
 import { withZod } from "@remix-validated-form/with-zod";
 import { notFound } from "remix-utils";
@@ -17,6 +16,11 @@ import { makeTitle } from "~/utils/meta";
 import { useEffect } from "react";
 import { useToast } from "~/components/Toast";
 import { copyToClipboard } from "~/utils/helpers.client";
+import {
+  settingsAction,
+  SettingsForm,
+  SETTINGS_INTENT,
+} from "~/components/SettingsForm";
 
 export const changePasswordValidator = withZod(
   z.object({
@@ -24,13 +28,6 @@ export const changePasswordValidator = withZod(
     username: UserSchema.shape.username,
     newPassword: z.string().min(4),
     confirmNewPassword: z.string().min(4),
-  })
-);
-
-export const settingsValidator = withZod(
-  z.object({
-    intent: z.literal("settings"),
-    preferredLabels: z.string().trim().toLowerCase(),
   })
 );
 
@@ -81,21 +78,8 @@ export async function action({ request }: ActionArgs) {
 
       return json({ success: true, intent, apiToken });
 
-    case "settings":
-      const settingsResult = await settingsValidator.validate(form);
-
-      if (settingsResult.error) {
-        return validationError(settingsResult.error);
-      }
-
-      const { preferredLabels } = settingsResult.data;
-
-      await db.user.update({
-        where: { id: userId },
-        data: { preferredLabels },
-      });
-
-      return json({ success: true, intent });
+    case SETTINGS_INTENT:
+      return settingsAction({ userId, form });
 
     default:
       throw notFound({ message: "Invalid intent" });
@@ -144,7 +128,7 @@ export default function AdminRoute() {
         toast("Password changed");
         break;
 
-      case "settings":
+      case SETTINGS_INTENT:
         toast("Settings updated");
         break;
 
@@ -162,28 +146,11 @@ export default function AdminRoute() {
     <div>
       <h1>Settings</h1>
 
-      <ValidatedForm
-        validator={settingsValidator}
-        method="post"
+      <SettingsForm
         defaultValues={{
           preferredLabels: user?.preferredLabels || "",
         }}
-      >
-        <fieldset>
-          <legend>
-            <h4>General</h4>
-          </legend>
-          <FormInput name="intent" type="hidden" value="settings" required />
-          <FormInput
-            name="preferredLabels"
-            type="textarea"
-            label="Preferred Labels"
-            placeholder="e.g. 'yay, oh no, excited'"
-            help="Comma separated list of labels to use for quick search."
-          />
-          <SubmitButton>Save</SubmitButton>
-        </fieldset>
-      </ValidatedForm>
+      />
 
       <ValidatedForm
         validator={changePasswordValidator}
