@@ -17,7 +17,6 @@ import { useToast } from "~/components/Toast";
 import { db } from "~/utils/db.server";
 import { formatDate } from "~/utils/format";
 import { getTitle } from "~/utils/media";
-import { downloadURL } from "~/utils/media.client";
 import { deleteURL, reparse } from "~/utils/media.server";
 import { makeTitle } from "~/utils/meta";
 import { requireUser } from "~/utils/session.server";

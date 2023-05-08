@@ -1,0 +1,25 @@
+@media only screen and (min-width: 720px) {
+  .file-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1em;
+  }
+}
+
+.file-preview {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.file-preview figure > * {
+  max-width: 300px;
+  max-height: 100%;
+}
+
+.file-placeholder {
+  width: 300px;
+  aspect-ratio: 5/3;
+  background-color: var(--accent-bg);
+  border-radius: var(--standard-border-radius);
+}

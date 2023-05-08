@@ -29,6 +29,8 @@ import { getTitle } from "~/utils/media";
 import { makeTitle } from "~/utils/meta";
 import Alert from "~/components/Alert";
 import { conflict } from "~/utils/request.server";
+import style from "~/styles/new.css";
+
 const commonFields = z.object({
   filename: z.string().regex(/^[a-zA-Z0-9-_]+\.(gif|jpg|png|jpeg)$/),
   labels: z.string().trim().optional(),
@@ -48,6 +50,10 @@ const urlFields = commonFields.extend({
 const validator = withZod(
   z.discriminatedUnion("uploadType", [fileFields, urlFields])
 );
+
+export function links() {
+  return [{ rel: "stylesheet", href: style }];
+}
 
 export function meta() {
   return [{ title: makeTitle(["Upload media"]) }];
@@ -142,6 +148,7 @@ export default function NewMediaRoute() {
   const actionData = useActionData<typeof action>();
   const [uploadType, setUploadType] = useState<"url" | "file">("url");
   const [filename, setFilename] = useState("");
+  const [image, setImage] = useState<string | null>(null);
 
   const setFilenameIfNotSet = (value: string) => {
     if (filename) return;
@@ -183,38 +190,53 @@ export default function NewMediaRoute() {
           onChange={() => setUploadType("file")}
           style={{ display: "inline-block" }}
         />
-        {uploadType === "url" ? (
-          <FormInput
-            type="url"
-            name="url"
-            label="URL"
-            required
-            onBlur={(event) =>
-              setFilenameIfNotSet(getTitle(event.target.value))
-            }
-          />
-        ) : (
-          <FormInput
-            name="file"
-            label="File"
-            required
-            type="file"
-            accept="image/png,image/jpeg,image/gif"
-            onChange={({ target }) => {
-              const file = (target as HTMLInputElement).files?.[0];
-              if (!file) return;
-              const filename = file.name;
-              setFilenameIfNotSet(filename);
-            }}
-          />
-        )}
-        <FormInput
-          name="filename"
-          label="Filename"
-          autoComplete="off"
-          defaultValue={filename}
-          required
-        />
+        <div className="file-box">
+          <div className="file-input">
+            {uploadType === "url" ? (
+              <FormInput
+                type="url"
+                name="url"
+                label="URL"
+                required
+                onBlur={(event) => {
+                  setFilenameIfNotSet(getTitle(event.target.value));
+                  setImage(event.target.value);
+                }}
+              />
+            ) : (
+              <FormInput
+                name="file"
+                label="File"
+                required
+                type="file"
+                accept="image/png,image/jpeg,image/gif"
+                onChange={({ target }) => {
+                  const file = (target as HTMLInputElement).files?.[0];
+                  if (!file) return;
+                  const filename = file.name;
+                  setFilenameIfNotSet(filename);
+                  setImage(URL.createObjectURL(file));
+                }}
+              />
+            )}
+            <FormInput
+              name="filename"
+              label="Filename"
+              autoComplete="off"
+              defaultValue={filename}
+              required
+            />
+          </div>
+          <div className="file-preview">
+            <figure>
+              {image ? (
+                <img src={image} alt="Preview" />
+              ) : (
+                <div className="file-placeholder" />
+              )}
+            </figure>
+          </div>
+        </div>
         <MediaLabelsInput terms={data.terms} />
         <FormInput type="textarea" name="altText" label="Alt text" />
         <Alert>{actionData?.formError}</Alert>
