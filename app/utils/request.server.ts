@@ -16,3 +16,5 @@ export const payloadTooLarge = <T>(data: T) => json<T>(data, { status: 413 });
 export const unauthorized = <T>(data: T) => json<T>(data, { status: 401 });
 
 export const forbidden = <T>(data: T) => json<T>(data, { status: 403 });
+
+export const conflict = <T>(data: T) => json<T>(data, { status: 409 });

@@ -27,7 +27,8 @@ import { useState } from "react";
 import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { getTitle } from "~/utils/media";
 import { makeTitle } from "~/utils/meta";
-
+import Alert from "~/components/Alert";
+import { conflict } from "~/utils/request.server";
 const commonFields = z.object({
   filename: z.string().regex(/^[a-zA-Z0-9-_]+\.(gif|jpg|png|jpeg)$/),
   labels: z.string().trim().optional(),
@@ -76,13 +77,28 @@ export async function action({ request }: ActionArgs) {
 
   const userFilename = `${user.username}/${filename}`;
 
-  const { url: mediaUrl, size } =
-    uploadType === "url"
-      ? await storeURL(result.data.url, userFilename)
-      : await storeBuffer(
-          Buffer.from(await result.data.file.arrayBuffer()),
-          userFilename
-        );
+  let mediaUrl: string;
+  let size: number;
+
+  try {
+    const resp =
+      uploadType === "url"
+        ? await storeURL(result.data.url, userFilename)
+        : await storeBuffer(
+            Buffer.from(await result.data.file.arrayBuffer()),
+            userFilename
+          );
+    mediaUrl = resp.url;
+    size = resp.size;
+  } catch (error: any) {
+    if (error?.message === "File already exists") {
+      return conflict({
+        repopulateFields: result.data,
+        formError: `Filename ${filename} already exists`,
+      });
+    }
+    throw error;
+  }
 
   const { thumbnail, ...imageData } = await getImageData(mediaUrl);
 
@@ -201,6 +217,7 @@ export default function NewMediaRoute() {
         />
         <MediaLabelsInput terms={data.terms} />
         <FormInput type="textarea" name="altText" label="Alt text" />
+        <Alert>{actionData?.formError}</Alert>
         <SubmitButton />
       </fieldset>
     </ValidatedForm>

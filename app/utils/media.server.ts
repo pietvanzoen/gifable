@@ -24,6 +24,12 @@ export async function storeURL(
     },
   });
 
+  const exists = await storage().exists(filename);
+
+  if (exists) {
+    throw new Error("File already exists");
+  }
+
   const { url } = await storage().upload(buffer, filename);
 
   return { url, size: buffer.length };
@@ -33,6 +39,12 @@ export async function storeBuffer(
   buffer: Buffer,
   filename: string
 ): Promise<{ url: string; size: number }> {
+  const exists = await storage().exists(filename);
+
+  if (exists) {
+    throw new Error("File already exists");
+  }
+
   const { url } = await storage().upload(buffer, filename);
   return { url, size: buffer.length };
 }
