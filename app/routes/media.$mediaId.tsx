@@ -15,7 +15,8 @@ import DialogModal from "~/components/DialogModal";
 import { useToast } from "~/components/Toast";
 
 import { db } from "~/utils/db.server";
-import { formatDate } from "~/utils/format";
+import { formatBytes, formatDate } from "~/utils/format";
+import { copyToClipboard } from "~/utils/helpers.client";
 import { getTitle } from "~/utils/media";
 import { deleteURL, reparse } from "~/utils/media.server";
 import { makeTitle } from "~/utils/meta";
@@ -153,7 +154,7 @@ export default function MediaRoute() {
           <tr role="presentation">
             <th tabIndex={-1}>Size</th>
             <td tabIndex={-1}>
-              {width} ⅹ {height} • {bytesToSize(size)}
+              {width} ⅹ {height} • {formatBytes(size)}
             </td>
           </tr>
           <tr role="presentation">
@@ -327,23 +328,4 @@ export function ErrorBoundary() {
   } else {
     return <h1>Unknown Error</h1>;
   }
-}
-
-function copyToClipboard(text: string, onSuccess: () => void = () => {}) {
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(text);
-    onSuccess();
-  } else {
-    console.error(`navigator.clipboard.writeText is not supported.`, {
-      text,
-    });
-  }
-}
-
-function bytesToSize(bytes?: number | null | undefined) {
-  if (!bytes) return "";
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  if (bytes === 0) return "0 Byte";
-  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)).toString());
-  return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
 }

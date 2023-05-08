@@ -16,6 +16,7 @@ import { UserSchema } from "~/utils/validators";
 import { makeTitle } from "~/utils/meta";
 import { useEffect } from "react";
 import { useToast } from "~/components/Toast";
+import { copyToClipboard } from "~/utils/helpers.client";
 
 export const changePasswordValidator = withZod(
   z.object({
@@ -312,16 +313,4 @@ function Users({
       </table>
     </section>
   );
-}
-
-function copyToClipboard(text: string | null, onSuccess = () => {}) {
-  if (!text) return;
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(text);
-    onSuccess();
-  } else {
-    console.error(`navigator.clipboard.writeText is not supported.`, {
-      text,
-    });
-  }
 }
