@@ -43,29 +43,17 @@ export async function changePassword({
 }
 
 export async function login({ username, password }: LoginForm) {
-  const validPassword = await checkPassword({ username, password });
-  if (!validPassword) return null;
-  const user = await db.user.update({
-    where: { username },
-    data: { lastLogin: new Date() },
-  });
-  log("logged in user", username);
-  return { id: user.id, username };
-}
-
-export async function checkPassword({
-  username,
-  password,
-}: {
-  username: string;
-  password: string;
-}) {
   const user = await db.user.findUnique({
     where: { username },
   });
-  if (!user) return false;
-  const isCorrectPassword = await bcrypt.compare(password, user.passwordHash);
-  return isCorrectPassword;
+  if (!user) return null;
+
+  const validPassword = await bcrypt.compare(password, user.passwordHash);
+  if (!validPassword) return null;
+
+  log("logged in user", username);
+  const { id, isAdmin } = user;
+  return { id, isAdmin, username };
 }
 
 const storage = createCookieSessionStorage({
@@ -147,6 +135,10 @@ export async function logout(request: Request) {
 export async function createUserSession(userId: string, redirectTo: string) {
   const session = await storage.getSession();
   session.set("userId", userId);
+  await db.user.update({
+    where: { id: userId },
+    data: { lastLogin: new Date() },
+  });
   log("created session for user", userId);
   return redirect(redirectTo, {
     headers: {
