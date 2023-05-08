@@ -104,6 +104,7 @@ export default function AdminRoute() {
       default:
         break;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionData]);
 
   const { user, users } = data;
