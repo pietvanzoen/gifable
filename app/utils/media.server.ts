@@ -170,12 +170,12 @@ export function getCommonLabelsTerms(
   }, {} as Record<string, number>);
 
   return Object.entries(terms)
-    .filter(([term, count]) => count > 1 && filter([term, count]))
+    .filter(([term, count]) => count > 1 && term && filter([term, count]))
     .sort((a, b) => {
       if (randomize) {
         return Math.random() - 0.5;
       }
-      return b[1] - a[1];
+      return a[0].localeCompare(b[0]);
     })
     .slice(0, limit);
 }

@@ -14,13 +14,28 @@ import crypto from "crypto";
 import { changePassword, requireUserId } from "~/utils/session.server";
 import { UserSchema } from "~/utils/validators";
 import { makeTitle } from "~/utils/meta";
+import { useEffect } from "react";
+import { useToast } from "~/components/Toast";
 
 export const changePasswordValidator = withZod(
   z.object({
-    intent: z.enum(["change-password", "generate-api-token"]),
+    intent: z.literal("change-password"),
     username: UserSchema.shape.username,
     newPassword: z.string().min(4),
     confirmNewPassword: z.string().min(4),
+  })
+);
+
+export const settingsValidator = withZod(
+  z.object({
+    intent: z.literal("settings"),
+    preferredLabels: z.string().trim().toLowerCase(),
+  })
+);
+
+export const apiTokenValidator = withZod(
+  z.object({
+    intent: z.literal("generate-api-token"),
   })
 );
 
@@ -34,6 +49,7 @@ export async function action({ request }: ActionArgs) {
   const form = await request.formData();
 
   const intent = form.get("intent");
+
   switch (intent) {
     case "change-password":
       const result = await changePasswordValidator.validate(form);
@@ -56,11 +72,29 @@ export async function action({ request }: ActionArgs) {
       return json({ success: true, intent });
 
     case "generate-api-token":
+      const apiToken = crypto.randomBytes(24).toString("hex");
       await db.user.update({
         where: { id: userId },
-        data: { apiToken: crypto.randomBytes(32).toString("hex") },
+        data: { apiToken },
       });
-      return redirect("/settings");
+
+      return json({ success: true, intent, apiToken });
+
+    case "settings":
+      const settingsResult = await settingsValidator.validate(form);
+
+      if (settingsResult.error) {
+        return validationError(settingsResult.error);
+      }
+
+      const { preferredLabels } = settingsResult.data;
+
+      await db.user.update({
+        where: { id: userId },
+        data: { preferredLabels },
+      });
+
+      return json({ success: true, intent });
 
     default:
       throw notFound({ message: "Invalid intent" });
@@ -77,6 +111,7 @@ export async function loader({ request }: LoaderArgs) {
       lastLogin: true,
       isAdmin: true,
       apiToken: true,
+      preferredLabels: true,
     },
   });
 
@@ -98,6 +133,28 @@ export async function loader({ request }: LoaderArgs) {
 export default function AdminRoute() {
   const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
+  const toast = useToast();
+
+  const apiToken = actionData?.apiToken || data.user?.apiToken;
+
+  useEffect(() => {
+    switch (actionData?.intent) {
+      case "change-password":
+        toast("Password changed");
+        break;
+
+      case "settings":
+        toast("Settings updated");
+        break;
+
+      case "generate-api-token":
+        toast("API token updated");
+        break;
+
+      default:
+        break;
+    }
+  }, [actionData]);
 
   const { user, users } = data;
   return (
@@ -105,13 +162,37 @@ export default function AdminRoute() {
       <h1>Settings</h1>
 
       <ValidatedForm
-        validator={changePasswordValidator}
+        validator={settingsValidator}
         method="post"
-        resetAfterSubmit={true}
+        defaultValues={{
+          preferredLabels: user?.preferredLabels || "",
+        }}
       >
         <fieldset>
           <legend>
-            <h3>Change Password</h3>
+            <h4>General</h4>
+          </legend>
+          <FormInput name="intent" type="hidden" value="settings" required />
+          <FormInput
+            name="preferredLabels"
+            type="textarea"
+            label="Preferred Labels"
+            placeholder="e.g. 'yay, oh no, excited'"
+            help="Comma separated list of labels to use for quick search."
+          />
+          <SubmitButton>Save</SubmitButton>
+        </fieldset>
+      </ValidatedForm>
+
+      <ValidatedForm
+        validator={changePasswordValidator}
+        method="post"
+        resetAfterSubmit={true}
+        id="change-password"
+      >
+        <fieldset>
+          <legend>
+            <h4>Change Password</h4>
           </legend>
           <FormInput
             name="intent"
@@ -132,29 +213,30 @@ export default function AdminRoute() {
             label="Confirm New Password"
             required
           />
-          {actionData?.success ? (
-            <p style={{ color: "green" }}>Password changed successfully</p>
-          ) : null}
           <SubmitButton>Change Password</SubmitButton>
         </fieldset>
       </ValidatedForm>
 
-      <div>
+      <fieldset>
         <legend>
-          <h3>API Token</h3>
+          <h4>API Token</h4>
         </legend>
         <p>
           You can search your media via the endpoint <code>/api/media</code>.
           Pass your search query using the <code>search</code> query param.
         </p>
 
-        {user?.apiToken ? (
+        {apiToken ? (
           <details>
             <summary>Reveal Token</summary>
             <pre>
-              <code>{user?.apiToken}</code>
+              <code>{apiToken}</code>
             </pre>
-            <button onClick={() => copyToClipboard(user?.apiToken)}>
+            <button
+              onClick={() =>
+                copyToClipboard(apiToken, () => toast("Copied token"))
+              }
+            >
               Copy token
             </button>
           </details>
@@ -165,12 +247,24 @@ export default function AdminRoute() {
           </div>
         )}
 
-        <form method="post" style={{ display: "inline-block" }}>
-          <button name="intent" type="submit" value="generate-api-token">
-            Generate New Token
-          </button>
-        </form>
-      </div>
+        <ValidatedForm
+          id="generate-api-token"
+          validator={apiTokenValidator}
+          method="post"
+          style={{ display: "inline-block" }}
+        >
+          <FormInput
+            name="intent"
+            type="hidden"
+            value="generate-api-token"
+            required
+          />
+          {apiToken ? (
+            <p>⚠️ Generating a new API token will invalidate your old token.</p>
+          ) : null}
+          <SubmitButton>Generate new token</SubmitButton>
+        </ValidatedForm>
+      </fieldset>
 
       {user?.isAdmin && users ? <Users users={users as User[]} /> : null}
     </div>
@@ -220,10 +314,11 @@ function Users({
   );
 }
 
-function copyToClipboard(text: string | null) {
+function copyToClipboard(text: string | null, onSuccess = () => {}) {
   if (!text) return;
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(text);
+    onSuccess();
   } else {
     console.error(`navigator.clipboard.writeText is not supported.`, {
       text,

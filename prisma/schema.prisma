@@ -33,4 +33,5 @@ model User {
   isAdmin      Boolean  @default(false)
   lastLogin    DateTime?
   apiToken     String?
+  preferredLabels String?
 }

@@ -58,7 +58,11 @@ export async function loader({ request }: LoaderArgs) {
     where.userId = { not: userId };
   }
 
-  const [mediaCount, media, labels] = await Promise.all([
+  const [user, mediaCount, media, labels] = await Promise.all([
+    db.user.findUnique({
+      where: { id: userId },
+      select: { preferredLabels: true },
+    }),
     db.media.count({ where }),
     db.media.findMany({
       take: page * PAGE_SIZE,
@@ -81,12 +85,13 @@ export async function loader({ request }: LoaderArgs) {
       orderBy: { createdAt: "desc" },
     }),
     getMediaLabels({
-      limit: 40,
+      limit: 100,
       userId: select === "mine" ? userId : undefined,
     }),
   ]);
 
   return json({
+    user,
     mediaCount,
     media,
     labels,
@@ -146,7 +151,11 @@ export default function MediaRoute() {
             <button type="submit">Search</button>
           </form>
         </center>
-        <QuickSearch labels={data.labels} currentSearch={search} />
+        <QuickSearch
+          labels={data.labels}
+          preferredLabels={data.user?.preferredLabels || ""}
+          currentSearch={search}
+        />
         <br />
       </header>
 
@@ -164,14 +173,27 @@ export default function MediaRoute() {
 function QuickSearch({
   labels,
   currentSearch,
+  preferredLabels = "",
 }: {
   labels: [string, number][];
+  preferredLabels?: string;
   currentSearch: string;
 }) {
   const limit = 6;
   const isHydrated = useHydrated();
   const [showAllLabels, setShowAllLabels] = useState(false);
-  const labelsList = showAllLabels ? labels : labels.slice(0, limit);
+
+  const preferredLabelsList = preferredLabels
+    .split(",")
+    .filter(Boolean)
+    .map((s) => [s.trim(), 0]);
+
+  const sortedLabels = [...labels].sort((a, b) => b[1] - a[1]);
+
+  const labelsList = showAllLabels
+    ? labels
+    : preferredLabelsList.concat([...sortedLabels]).slice(0, limit);
+
   return (
     <center role="group" aria-labelledby="quick-search-header">
       <small>

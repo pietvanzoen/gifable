@@ -26,6 +26,7 @@ export type FormInputProps = {
   defaultValue?: string;
   onBlur?: FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   accept?: HTMLInputElement["accept"];
+  placeholder?: string;
 };
 
 export default function FormInput({

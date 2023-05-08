@@ -45,6 +45,18 @@ describe("getCommonLabelsTerms", () => {
     ]);
   });
 
+  it("ignores empty strings", () => {
+    const terms = getCommonLabelsTerms(
+      [{ labels: "b, c," }, { labels: "b, c," }, { labels: "b, c," }],
+      { limit: 5 }
+    );
+
+    expect(terms).toEqual([
+      ["b", 3],
+      ["c", 3],
+    ]);
+  });
+
   it("accepts an optional filter", () => {
     const terms = getCommonLabelsTerms(
       [
