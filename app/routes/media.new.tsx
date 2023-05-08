@@ -23,7 +23,7 @@ import {
   getMediaLabels,
 } from "~/utils/media.server";
 import bytes from "bytes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { getTitle } from "~/utils/media";
 import { makeTitle } from "~/utils/meta";
@@ -138,7 +138,15 @@ export async function loader({ request }: LoaderArgs) {
     randomize: true,
     filter: ([term]) => term.split(" ").length === 1,
   });
+  const prepopulateData = Object.fromEntries(
+    new URLSearchParams(request.url.split("?")[1])
+  );
+  if (prepopulateData.url) {
+    prepopulateData.uploadType = "url";
+    prepopulateData.filename = getTitle(prepopulateData.url);
+  }
   return json({
+    prepopulateData,
     terms,
   });
 }
@@ -148,7 +156,7 @@ export default function NewMediaRoute() {
   const actionData = useActionData<typeof action>();
   const isHydrated = useHydrated();
   const [uploadType, setUploadType] = useState<"url" | "file">("url");
-  const [filename, setFilename] = useState("");
+  const [filename, setFilename] = useState(data.prepopulateData.filename || "");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const setFilenameIfNotSet = (value: string) => {
@@ -156,10 +164,19 @@ export default function NewMediaRoute() {
     setFilename(value);
   };
 
+  useEffect(() => {
+    if (actionData?.repopulateFields) {
+      return;
+    }
+    if (data.prepopulateData.url) {
+      setPreviewImage(data.prepopulateData.url);
+    }
+  }, [data, actionData]);
+
   return (
     <ValidatedForm
       validator={validator}
-      defaultValues={actionData?.repopulateFields}
+      defaultValues={actionData?.repopulateFields || data.prepopulateData}
       method="post"
       noValidate={isHydrated}
       encType="multipart/form-data"

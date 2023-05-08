@@ -184,7 +184,21 @@ export default function MediaRoute() {
           &nbsp;
           <DeleteButton media={media} />
         </center>
-      ) : null}
+      ) : (
+        <center>
+          <Link
+            to={`/media/new?url=${encodeURIComponent(
+              media.url
+            )}&labels=${encodeURIComponent(
+              media.labels || ""
+            )}&altText=${encodeURIComponent(media.altText || "")}`}
+            role="button"
+            aria-label="Add to my collection"
+          >
+            📥 Add to my collection
+          </Link>
+        </center>
+      )}
 
       {user.isAdmin ? (
         <center>
