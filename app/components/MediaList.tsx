@@ -28,10 +28,12 @@ export default function MediaList({
 }) {
   const [playingId, setPlayingId] = useState<Media["id"]>("");
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
-  const [search] = useSearchParams();
+  const [params] = useSearchParams();
   const currentPage = page;
   const previousPage = currentPage - 1;
-  search.set("page", (currentPage + 1).toString());
+  params.set("page", (currentPage + 1).toString());
+
+  const currentSearch = params.get("search") || "";
 
   const showLoadMore = Boolean(mediaCount && media.length < mediaCount);
 
@@ -54,7 +56,7 @@ export default function MediaList({
   if (media.length === 0)
     return (
       <center>
-        <p>No results for '{search.get("search")}'. ☹️</p>
+        <p>No results{currentSearch ? <> for '{currentSearch}'</> : null} ☹️</p>
       </center>
     );
 
@@ -76,7 +78,7 @@ export default function MediaList({
       {showLoadMore && (
         <center>
           <br />
-          <LoadMoreButton search={search} />
+          <LoadMoreButton params={params} />
         </center>
       )}
       <center>
@@ -89,7 +91,7 @@ export default function MediaList({
   );
 }
 
-function LoadMoreButton({ search }: { search: URLSearchParams }) {
+function LoadMoreButton({ params }: { params: URLSearchParams }) {
   let button: HTMLAnchorElement | null = null;
   const isHydrated = useHydrated();
 
@@ -112,7 +114,7 @@ function LoadMoreButton({ search }: { search: URLSearchParams }) {
         button = element;
       }}
       role="button"
-      to={`/?${search}${isHydrated ? "" : "#load-more"}`}
+      to={`/?${params}${isHydrated ? "" : "#load-more"}`}
       preventScrollReset={true}
       replace={true}
     >
