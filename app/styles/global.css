@@ -165,6 +165,6 @@ dialog.toast[open] {
   transform: translateX(0);
 }
 
-.auto-load-progress::-webkit-progress-value {
-  transition: width 5s ease-in-out;
+progress::-webkit-progress-value {
+  transition: width 0.2s ease-in-out;
 }
