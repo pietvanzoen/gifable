@@ -155,6 +155,7 @@ export default function MediaRoute() {
           labels={data.labels}
           preferredLabels={data.user?.preferredLabels || ""}
           currentSearch={search}
+          currentSelect={select}
         />
         <br />
       </header>
@@ -174,10 +175,12 @@ function QuickSearch({
   labels,
   currentSearch,
   preferredLabels = "",
+  currentSelect,
 }: {
   labels: [string, number][];
   preferredLabels?: string;
   currentSearch: string;
+  currentSelect: SelectOptions;
 }) {
   const limit = 6;
   const isHydrated = useHydrated();
@@ -203,7 +206,7 @@ function QuickSearch({
             {i > 0 && ", "}
             <Link
               className={currentSearch === label ? "active" : ""}
-              to={`/?search=${label}`}
+              to={`/?search=${label}&select=${currentSelect}`}
             >
               {label}
             </Link>
