@@ -23,7 +23,7 @@ import { makeTitle } from "~/utils/meta";
 import { requireUser } from "~/utils/session.server";
 
 export function meta({ data }: V2_MetaArgs<typeof loader>) {
-  return [{ title: makeTitle([getTitle(data.media.url)]) }];
+  return [{ title: makeTitle([getTitle(data?.media?.url)]) }];
 }
 
 export async function action({ params, request }: ActionArgs) {
@@ -36,7 +36,7 @@ export async function action({ params, request }: ActionArgs) {
   if (!media) {
     throw notFound({ message: "Media not found" });
   }
-  if (media.userId !== user.id || !user.isAdmin) {
+  if (media.userId !== user.id && !user.isAdmin) {
     throw forbidden({ message: "You can't do that" });
   }
 
