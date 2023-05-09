@@ -53,17 +53,17 @@ type ImageData = {
   color: string | null;
   width: number;
   height: number;
-  thumbnail?: Buffer;
+  thumbnail: Buffer;
 };
 
 export async function getImageData(url: string): Promise<ImageData> {
   const image = await Jimp.read(url);
   const { width, height } = image.bitmap;
-  let thumbnail: Buffer | undefined;
 
-  if (url.endsWith(".gif")) {
-    thumbnail = await image.getBufferAsync(Jimp.MIME_JPEG);
-  }
+  const thumbnail = await image
+    .resize(500, Jimp.AUTO)
+    .quality(80)
+    .getBufferAsync(Jimp.MIME_JPEG);
 
   return {
     color: await getPrimaryColor(url),
@@ -84,11 +84,10 @@ export async function reparse(media: Media) {
 
   const { width, height, color, thumbnail } = await getImageData(media.url);
 
-  let thumbnailUrl = media.thumbnailUrl;
-  if (media.url.endsWith(".gif") && !thumbnailUrl && thumbnail) {
-    const { url } = await storage().upload(thumbnail, filename);
-    thumbnailUrl = url;
-  }
+  const { url: thumbnailUrl } = await storage().upload(
+    thumbnail,
+    makeThumbnailFilename(filename)
+  );
 
   return {
     width,

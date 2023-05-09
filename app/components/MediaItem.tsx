@@ -32,7 +32,7 @@ export default function MediaItem(props: MediaItemProps) {
             style={{ backgroundColor: color || "#0e0e0e" }}
           />
         </Link>
-        {thumbnailUrl && isHydrated ? (
+        {url.endsWith(".gif") && isHydrated ? (
           <button
             className="play"
             tabIndex={-1}
