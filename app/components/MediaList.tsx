@@ -4,8 +4,7 @@ import type { MediaItemProps } from "./MediaItem";
 import MediaItem from "./MediaItem";
 
 import styles from "~/styles/search.css";
-import { Link } from "react-router-dom";
-import { useSearchParams } from "@remix-run/react";
+import { Link, useSearchParams, useNavigate } from "@remix-run/react";
 import { useHydrated } from "remix-utils";
 import { useInView } from "react-cool-inview";
 
@@ -26,6 +25,7 @@ export default function MediaList({
   pageSize: number;
   showUser: boolean;
 }) {
+  const isHydrated = useHydrated();
   const [playingId, setPlayingId] = useState<Media["id"]>("");
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
   const [params] = useSearchParams();
@@ -76,10 +76,14 @@ export default function MediaList({
         ))}
       </div>
       {showLoadMore && (
-        <center>
+        <>
           <br />
-          <LoadMoreButton params={params} />
-        </center>
+          {isHydrated ? (
+            <AutoLoadMore params={params} />
+          ) : (
+            <LoadMoreButton params={params} />
+          )}
+        </>
       )}
       <center>
         <small>
@@ -92,33 +96,58 @@ export default function MediaList({
 }
 
 function LoadMoreButton({ params }: { params: URLSearchParams }) {
-  let button: HTMLAnchorElement | null = null;
-  const isHydrated = useHydrated();
+  return (
+    <center>
+      <Link
+        role="button"
+        to={`/?${params}#load-more`}
+        preventScrollReset={true}
+        replace={true}
+      >
+        🎉 Load more
+      </Link>
+    </center>
+  );
+}
 
-  const { observe } = useInView<HTMLAnchorElement>({
-    // For better UX, we can grow the root margin so the data will be loaded earlier
-    rootMargin: "50px 0px",
-    // When the last item comes to the viewport
+function AutoLoadMore({ params }: { params: URLSearchParams }) {
+  const navigate = useNavigate();
+  const TIMEOUT_SECONDS = 5;
+  const [autoLoadEnabled, setAutoLoadEnabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { observe } = useInView<HTMLProgressElement>({
     onEnter: ({ unobserve }) => {
-      // Pause observe when loading data
       unobserve();
-      // Load more data
-      button?.click();
+      setIsLoading(true);
     },
   });
 
+  useEffect(() => {
+    if (!isLoading) return;
+    const timeout = setTimeout(() => {
+      if (!autoLoadEnabled) return;
+      navigate(`/?${params}`, { replace: true, preventScrollReset: true });
+      setIsLoading(false);
+      observe();
+    }, TIMEOUT_SECONDS * 1000);
+
+    return () => clearTimeout(timeout);
+  }, [autoLoadEnabled, isLoading]);
+
   return (
-    <Link
-      ref={(element) => {
-        observe(element);
-        button = element;
-      }}
-      role="button"
-      to={`/?${params}${isHydrated ? "" : "#load-more"}`}
-      preventScrollReset={true}
-      replace={true}
-    >
-      🎉 Load more
-    </Link>
+    <div ref={observe}>
+      <label>Auto loading more media...</label>
+      <button onClick={() => setAutoLoadEnabled(false)}>
+        Cancel auto loading
+      </button>
+      {isLoading && (
+        <progress
+          className="auto-load-progress"
+          value="100"
+          max="100"
+        ></progress>
+      )}
+    </div>
   );
 }
