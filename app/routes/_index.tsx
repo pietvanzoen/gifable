@@ -15,7 +15,7 @@ import { makeTitle } from "~/utils/meta";
 
 const PAGE_SIZE = 25;
 
-type SelectOptions = "all" | "mine" | "not-mine";
+type SelectOptions = "" | "all" | "not-mine";
 
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
@@ -45,13 +45,13 @@ export async function loader({ request }: LoaderArgs) {
 
   const page = parseInt((params.get("page") || "1").trim(), 10);
   const search = (params.get("search") || "").trim();
-  const select = (params.get("select") || "mine").trim();
+  const select = (params.get("select") || "").trim();
 
   const where: Prisma.MediaWhereInput = {};
   if (search) {
     where.labels = { contains: search };
   }
-  if (select === "mine") {
+  if (select === "") {
     where.userId = userId;
   }
   if (select === "not-mine") {
@@ -86,7 +86,12 @@ export async function loader({ request }: LoaderArgs) {
     }),
     getMediaLabels({
       limit: 100,
-      userId: select === "mine" ? userId : undefined,
+      userId:
+        select === ""
+          ? userId
+          : select === "not-mine"
+          ? { not: userId }
+          : undefined,
     }),
   ]);
 
@@ -102,7 +107,7 @@ export default function MediaRoute() {
   const data = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams({
     search: "",
-    select: "mine",
+    select: "",
   });
 
   const search = searchParams.get("search") || "";
@@ -110,7 +115,7 @@ export default function MediaRoute() {
   const page = parseInt(searchParams.get("page") || "1", 10);
 
   return (
-    <div>
+    <>
       <header>
         <center>
           <form method="get" action="/">
@@ -130,27 +135,37 @@ export default function MediaRoute() {
                 </option>
               ))}
             </datalist>
-            <select
-              aria-label="Filter media by owner"
-              name="select"
-              defaultValue={select}
-              style={{ marginRight: "0.2em" }}
-            >
-              <option value="mine">My media</option>
-              <option value="all">All media</option>
-              <option value="not-mine">Not mine</option>
-            </select>
-            <Link
-              role="button"
-              to="/"
-              aria-label="Reset search"
-              style={{ marginRight: "0.2em" }}
-            >
-              Reset
-            </Link>
-            <button type="submit">Search</button>
+            <div className="button-group">
+              <Link
+                role="button"
+                className={select === "" ? "active" : ""}
+                to={`/?search=${search}`}
+              >
+                Mine
+              </Link>
+              <Link
+                role="button"
+                className={select === "not-mine" ? "active" : ""}
+                to={`/?search=${search}&select=not-mine`}
+              >
+                Not Mine
+              </Link>
+              <Link
+                role="button"
+                className={select === "all" ? "active" : ""}
+                to={`/?search=${search}&select=all`}
+              >
+                All
+              </Link>
+            </div>
+            &nbsp;
+            <input type="hidden" name="select" value={select} tabIndex={-1} />
+            <button type="submit" aira-label="Submit search">
+              🔎 Search
+            </button>
           </form>
         </center>
+
         <QuickSearch
           labels={data.labels}
           preferredLabels={data.user?.preferredLabels || ""}
@@ -162,12 +177,12 @@ export default function MediaRoute() {
 
       <MediaList
         media={data.media}
-        showUser={select !== "mine"}
+        showUser={select !== ""}
         mediaCount={data.mediaCount}
         pageSize={PAGE_SIZE}
         page={page}
       />
-    </div>
+    </>
   );
 }
 
@@ -200,12 +215,17 @@ function QuickSearch({
   return (
     <center role="group" aria-labelledby="quick-search-header">
       <small>
-        <strong id="quick-search-header">Search for label:</strong>&nbsp;
+        {labelsList.length ? (
+          <>
+            <strong id="quick-search-header">Search for label:</strong>&nbsp;
+          </>
+        ) : null}
         {labelsList.map(([label, count], i) => (
           <span key={label}>
             {i > 0 && ", "}
             <Link
               className={currentSearch === label ? "active" : ""}
+              onClick={() => setShowAllLabels(false)}
               to={`/?search=${label}&select=${currentSelect}`}
             >
               {label}

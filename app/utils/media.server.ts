@@ -180,7 +180,7 @@ export function getCommonLabelsTerms(
 }
 
 export async function getMediaLabels(
-  options?: TermsOptions & { userId?: string }
+  options?: TermsOptions & { userId?: string | { not: string } }
 ) {
   const { userId, ...termsOptions } = options || {};
   const where = userId ? { userId } : {};

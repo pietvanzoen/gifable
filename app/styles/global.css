@@ -146,6 +146,29 @@ button.link {
   text-decoration: none;
 }
 
+a[role="button"].active {
+  color: var(--accent) !important;
+  background-color: var(--accent-bg) !important;
+}
+
+.button-group {
+  display: inline-block;
+}
+
+.button-group a,
+.button-group button {
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.button-group a:first-child,
+.button-group button:first-child {
+  border-radius: 0.5em 0 0 0.5em;
+}
+.button-group a:last-child,
+.button-group button:last-child {
+  border-radius: 0 0.5em 0.5em 0;
+}
+
 .skip-to-content {
   position: absolute;
   top: 1em;
