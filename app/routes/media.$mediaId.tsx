@@ -139,7 +139,10 @@ export default function MediaRoute() {
                 return (
                   <span key={text + i}>
                     {i > 0 ? ", " : ""}
-                    <Link to={`/?search=${term}`} title={`Search for ${term}`}>
+                    <Link
+                      to={`/?search=${term}${isMine ? "" : "&select=all"}`}
+                      title={`Search for ${term}`}
+                    >
                       {term}
                     </Link>
                   </span>
