@@ -1,3 +1,4 @@
+import type { Media } from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
 import { register } from "~/utils/session.server";
 const db = new PrismaClient();
@@ -13,9 +14,22 @@ async function seed() {
   const user = await register({ username, password, isAdmin: true });
   const media = await getMedia();
   await Promise.all(
-    media.map((media: any) => {
-      return db.media.create({ data: { ...media, userId: user.id } });
-    })
+    media.map(
+      ({ url, thumbnailUrl, altText, labels, width, height, color }: Media) => {
+        return db.media.create({
+          data: {
+            url,
+            thumbnailUrl,
+            altText,
+            labels,
+            width,
+            height,
+            color,
+            userId: user.id,
+          },
+        });
+      }
+    )
   );
 }
 
