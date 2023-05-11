@@ -73,14 +73,6 @@ input.field-error {
   color: var(--text-light);
   margin: 0.2em 0 0.5em;
 }
-.field--tag {
-  display: inline-block;
-  margin: 0.2em 0.5em;
-  padding: 0.2em 0.5em;
-  border-radius: 0.2em;
-  background-color: var(--accent-bg);
-  color: var(--text);
-}
 
 center legend {
   margin-left: auto;
@@ -162,11 +154,11 @@ a[role="button"].active {
 }
 .button-group a:first-child,
 .button-group button:first-child {
-  border-radius: 0.5em 0 0 0.5em;
+  border-radius: var(--standard-border-radius) 0 0 var(--standard-border-radius);
 }
 .button-group a:last-child,
 .button-group button:last-child {
-  border-radius: 0 0.5em 0.5em 0;
+  border-radius: 0 var(--standard-border-radius) var(--standard-border-radius) 0;
 }
 
 .skip-to-content {
