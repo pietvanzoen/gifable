@@ -68,10 +68,10 @@ function Document({
       </head>
       <body>
         <header id="top">
-          <a href="#main" className="hidden-unless-focused">
+          <a href="#main" className="skip-to-content">
             Skip to content
           </a>
-          <h1>🦩 Gifable</h1>
+          <h1><Link className="title-link" to="/">🦩 Gifable</Link></h1>
 
           {data?.user ? (
             <nav>
