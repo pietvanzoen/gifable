@@ -23,15 +23,24 @@ export function links() {
 
 export function meta({ location }: V2_MetaArgs<typeof loader>) {
   let title = "Search";
+  let selectTitle = "";
   const params = new URLSearchParams(location.search);
   const search = params.get("search");
+  const select = params.get("select");
 
   if (search) {
     title = `Search results for '${search}'`;
   }
 
+  if (select === "not-mine") {
+    selectTitle = "not mine";
+  }
+  if (select === "all") {
+    selectTitle = "all";
+  }
+
   return [
-    { title: makeTitle([title]) },
+    { title: makeTitle([title, selectTitle].filter(Boolean)) },
     {
       name: "description",
       content: "Search for media",
