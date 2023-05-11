@@ -61,6 +61,8 @@ function Document({
           href="/favicon-16x16.png"
         />
         <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#2b2b2b" media="(prefers-color-scheme: dark)"/>
+        <meta name="theme-color" content="#f5f7ff" media="(prefers-color-scheme: light)"/>
         <Meta />
         <Links />
       </head>
