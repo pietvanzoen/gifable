@@ -2,10 +2,11 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
-    "prebuild": "prisma generate",
-    "postinstall": "cp node_modules/simpledotcss/simple.min.css public/css/simple.min.css",
+    "prebuild": "prisma generate && npm run install:css",
+    "install:css": "cp node_modules/simpledotcss/simple.min.css public/css/simple.min.css",
     "build": "remix build",
     "dev": "DEBUG=app:* remix dev",
+    "predev": "prisma generate && npm run install:css",
     "prestart": "prisma migrate deploy",
     "start": "remix-serve build",
     "typecheck": "tsc",
