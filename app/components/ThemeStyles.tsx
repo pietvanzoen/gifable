@@ -59,18 +59,18 @@ export default function ThemeStyles({ theme }: { theme: Theme }) {
         dangerouslySetInnerHTML={{
           __html: `
             :root, ::backdrop {
-              ${["system", "dark"].includes(theme) ? lightTheme : darkTheme}
+              ${theme === 'dark' ? darkTheme : lightTheme}
             }
             @media (prefers-color-scheme: dark) {
               :root,
               ::backdrop {
                 color-scheme: dark;
-                ${["dark", "system"].includes(theme) ? darkTheme : lightTheme}
+                ${theme === 'light' ? lightTheme : darkTheme}
               }
               ${
-                ["dark", "system"].includes(theme)
-                  ? darkThemeImg
-                  : lightThemeImg
+                theme === 'light'
+                  ? lightThemeImg
+                  : darkThemeImg
               }
             }`.replace(/\s+/g, " "),
         }}
