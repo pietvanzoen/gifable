@@ -34,4 +34,5 @@ model User {
   lastLogin    DateTime?
   apiToken     String?
   preferredLabels String?
+  theme        String?
 }

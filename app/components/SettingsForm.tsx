@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "~/utils/db.server";
 import FormInput from "./FormInput";
 import SubmitButton from "./SubmitButton";
+import type {Theme} from "./ThemeStyles";
 
 export const SETTINGS_INTENT = "settings";
 
@@ -13,6 +14,7 @@ const validator = withZod(
   z.object({
     intent: z.literal(SETTINGS_INTENT),
     preferredLabels: z.string().trim().toLowerCase(),
+    theme: z.enum(["system", "light", "dark"]),
   })
 );
 
@@ -29,11 +31,11 @@ export async function settingsAction({
     return validationError(settingsResult.error);
   }
 
-  const { preferredLabels } = settingsResult.data;
+  const { preferredLabels, theme } = settingsResult.data;
 
   await db.user.update({
     where: { id: userId },
-    data: { preferredLabels },
+    data: { preferredLabels, theme },
   });
 
   return json({ success: true, intent: SETTINGS_INTENT });
@@ -41,6 +43,7 @@ export async function settingsAction({
 
 type SettingsDefaultValues = {
   preferredLabels: string;
+  theme: Theme
 };
 
 export function SettingsForm({
@@ -65,6 +68,16 @@ export function SettingsForm({
           label="Preferred Labels"
           placeholder="e.g. 'yay, oh no, excited'"
           help="Comma separated list of labels to use for quick search."
+        />
+        <FormInput
+          name="theme"
+          type="select"
+          label="Theme"
+          options={[
+            { value: "system", label: "System" },
+            { value: "light", label: "Light" },
+            { value: "dark", label: "Dark" },
+          ]}
         />
         <SubmitButton>Save</SubmitButton>
       </fieldset>

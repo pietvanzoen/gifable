@@ -16,7 +16,8 @@ export type FormInputProps = {
     | "hidden"
     | "textarea"
     | "file"
-    | "checkbox";
+    | "checkbox"
+    | "select";
   checked?: boolean;
   options?: { value: string; label: string }[];
   required?: boolean;
@@ -39,7 +40,8 @@ export default function FormInput({
   checked,
   required,
   style,
-  ...inputProps
+  options,
+  ...restProps
 }: FormInputProps) {
   const { error, getInputProps } = useField(name);
   let fieldId = name;
@@ -48,6 +50,15 @@ export default function FormInput({
   }
 
   const Tag = type === "textarea" ? "textarea" : "input";
+
+  const inputProps: Record<string, unknown> = {
+    ...getInputProps({ id: fieldId, type, value, required }),
+    'aria-invalid': Boolean(error),
+    className: error ? "field-error" : "",
+    'aria-errormessage': error ? `${fieldId}-error` : undefined,
+    defaultChecked: ["checkbox", "radio"].includes(type) ? checked : undefined,
+    ...restProps,
+  };
 
   return (
     <div
@@ -65,16 +76,17 @@ export default function FormInput({
           {help && <div className="field-help">{help}</div>}
         </label>
       )}
-      <Tag
-        {...getInputProps({ id: fieldId, type, value, required })}
-        aria-invalid={Boolean(error)}
-        className={error ? "field-error" : ""}
-        aria-errormessage={error ? `${fieldId}-error` : undefined}
-        defaultChecked={
-          ["checkbox", "radio"].includes(type) ? checked : undefined
-        }
-        {...inputProps}
-      />
+      {type === "select" ? (
+        <select {...inputProps}>
+          {options?.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <Tag {...inputProps} />
+      )}
       {["radio", "checkbox"].includes(type) && (
         <label htmlFor={fieldId} className="field-label">
           &nbsp;{label}

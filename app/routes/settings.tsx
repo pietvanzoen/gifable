@@ -62,6 +62,7 @@ export async function loader({ request }: LoaderArgs) {
       isAdmin: true,
       apiToken: true,
       preferredLabels: true,
+      theme: true,
     },
   });
 
@@ -115,6 +116,7 @@ export default function AdminRoute() {
       <SettingsForm
         defaultValues={{
           preferredLabels: user?.preferredLabels || "",
+          theme: user?.theme || "system",
         }}
       />
 

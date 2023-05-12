@@ -18,6 +18,8 @@ import stylesUrl from "~/styles/global.css";
 import { getUser } from "./utils/session.server";
 import env from "~/utils/env.server";
 import { ToastContainer } from "./components/Toast";
+import type { Theme } from "./components/ThemeStyles";
+import ThemeStyles from "./components/ThemeStyles";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -61,17 +63,20 @@ function Document({
           href="/favicon-16x16.png"
         />
         <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#2b2b2b" media="(prefers-color-scheme: dark)"/>
-        <meta name="theme-color" content="#f5f7ff" media="(prefers-color-scheme: light)"/>
         <Meta />
         <Links />
+        <ThemeStyles theme={data?.user?.theme as Theme || 'system'} />
       </head>
       <body>
         <header id="top">
           <a href="#main" className="skip-to-content">
             Skip to content
           </a>
-          <h1><Link className="title-link" to="/">🦩 Gifable</Link></h1>
+          <h1>
+            <Link className="title-link" to="/">
+              🦩 Gifable
+            </Link>
+          </h1>
 
           {data?.user ? (
             <nav>
