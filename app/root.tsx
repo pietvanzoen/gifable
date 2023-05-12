@@ -62,6 +62,20 @@ function Document({
           sizes="16x16"
           href="/favicon-16x16.png"
         />
+        <link
+          rel="preload"
+          href="/fonts/fira-sans-v16-latin-regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/fira-sans-v16-latin-800.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <link rel="manifest" href="/site.webmanifest" />
         <Meta />
         <link rel="stylesheet" href="/css/simple.min.css" />
