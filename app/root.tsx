@@ -66,7 +66,7 @@ function Document({
         <Meta />
         <link rel="stylesheet" href="/css/simple.min.css" />
         <Links />
-        <ThemeStyles theme={data?.user?.theme as Theme || 'system'} />
+        <ThemeStyles theme={(data?.user?.theme as Theme) || "system"} />
       </head>
       <body>
         <header id="top">
