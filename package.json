@@ -3,6 +3,7 @@
   "sideEffects": false,
   "scripts": {
     "prebuild": "prisma generate",
+    "postinstall": "cp node_modules/simpledotcss/simple.min.css public/css/simple.min.css",
     "build": "remix build",
     "dev": "DEBUG=app:* remix dev",
     "prestart": "prisma migrate deploy",
@@ -35,6 +36,7 @@
     "react-dom": "^18.2.0",
     "remix-utils": "^6.1.0",
     "remix-validated-form": "^4.6.11",
+    "simpledotcss": "https://github.com/kevquirk/simple.css",
     "zod": "^3.21.4",
     "zustand": "^4.3.8"
   },

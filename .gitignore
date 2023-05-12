@@ -365,3 +365,4 @@ $RECYCLE.BIN/
 prisma/*.db*
 build/
 public/build/
+public/css/simple.min.css

@@ -64,6 +64,7 @@ function Document({
         />
         <link rel="manifest" href="/site.webmanifest" />
         <Meta />
+        <link rel="stylesheet" href="/css/simple.min.css" />
         <Links />
         <ThemeStyles theme={data?.user?.theme as Theme || 'system'} />
       </head>
