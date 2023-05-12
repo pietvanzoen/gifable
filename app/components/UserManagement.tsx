@@ -6,10 +6,8 @@ export function UserMangement({
   users: Pick<User, "id" | "username" | "lastLogin" | "isAdmin">[];
 }) {
   return (
-    <fieldset>
-      <legend>
-        <h3>Users</h3>
-      </legend>
+    <>
+      <h3>Users</h3>
 
       <table style={{ width: "100%" }}>
         <thead>
@@ -41,6 +39,6 @@ export function UserMangement({
           })}
         </tbody>
       </table>
-    </fieldset>
+    </>
   );
 }
