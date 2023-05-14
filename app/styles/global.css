@@ -207,3 +207,12 @@ dialog.toast::backdrop {
 dialog.toast[open] {
   transform: translateX(0);
 }
+
+.icon-link svg {
+  fill: var(--accent);
+  width: 2em;
+  height: 2em;
+}
+.icon-link:hover svg {
+  filter: brightness(1.4);
+}
