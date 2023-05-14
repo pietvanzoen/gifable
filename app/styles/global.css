@@ -50,6 +50,16 @@ nav a.active {
 .title-link:hover {
   color: var(--accent) !important;
 }
+.title-link:before {
+  content: "";
+  background-image: url("/images/rainbow.gif");
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-size: contain;
+  vertical-align: text-top;
+  margin-right: 0.1em;
+}
 
 
 .field {

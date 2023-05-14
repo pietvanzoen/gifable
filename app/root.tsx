@@ -32,13 +32,7 @@ export async function loader({ request }: LoaderArgs) {
   });
 }
 
-function Document({
-  children,
-  title = `🦩 Gifable`,
-}: {
-  children: React.ReactNode;
-  title?: string;
-}) {
+function Document({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>();
   return (
     <html lang="en">
@@ -48,19 +42,19 @@ function Document({
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/apple-touch-icon.png"
+          href="/images/apple-touch-icon.png"
         />
         <link
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href="/favicon-32x32.png"
+          href="/images/favicon-32x32.png"
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href="/favicon-16x16.png"
+          href="/images/favicon-16x16.png"
         />
         <link
           rel="preload"
@@ -89,7 +83,7 @@ function Document({
           </a>
           <h1>
             <Link className="title-link" to="/">
-              🦩 Gifable
+              Gifable
             </Link>
           </h1>
 

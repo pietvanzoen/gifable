@@ -3,10 +3,10 @@ export type Theme = "light" | "dark" | "system";
 const lightTheme = `
   --bg: #fff;
   --accent-bg: #f5f7ff;
-  --text: #212121;
+  --text: #333;
   --text-light: #585858;
   --border: #898EA4;
-  --accent: color(display-p3 0.05 0.28 0.63);
+  --accent: color(display-p3 0.5 0.2 1);
   --code: color(display-p3 0.84 0.1 0.37);
   --preformatted: #444;
   --marked: #ffdd33;
@@ -24,7 +24,7 @@ const darkTheme = `
   --disabled: #111;
 `;
 
-const lightThemeImg = `img, video { opacity: 0.8; }`;
+const lightThemeImg = `img, video { opacity: 1; }`;
 const darkThemeImg = `img, video { opacity: 0.8; }`;
 
 export default function ThemeStyles({ theme }: { theme: Theme }) {
