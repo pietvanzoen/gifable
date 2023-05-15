@@ -172,6 +172,14 @@ export default function MediaRoute() {
               <td tabIndex={-1}>{media.user.username}</td>
             </tr>
           )}
+          {user.isAdmin ? (
+            <tr role="presentation">
+              <th tabIndex={-1}>Hash</th>
+              <td tabIndex={-1}>
+                <code>{media.fileHash}</code>
+              </td>
+            </tr>
+          ) : null}
         </tbody>
       </table>
 

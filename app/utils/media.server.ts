@@ -10,10 +10,16 @@ const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes("10MB");
 
+type UploadOutput = {
+  url: string;
+  size: number;
+  hash: string;
+};
+
 export async function storeURL(
   originalURL: string,
   filename: string
-): Promise<{ url: string; size: number }> {
+): Promise<UploadOutput> {
   const buffer = await storage().download(originalURL, {
     progress(size) {
       if (size > MAX_FILE_SIZE) {
@@ -30,23 +36,23 @@ export async function storeURL(
     throw new Error("File already exists");
   }
 
-  const { url } = await storage().upload(buffer, filename);
+  const { url, hash } = await storage().upload(buffer, filename);
 
-  return { url, size: buffer.length };
+  return { url, size: buffer.length, hash };
 }
 
 export async function storeBuffer(
   buffer: Buffer,
   filename: string
-): Promise<{ url: string; size: number }> {
+): Promise<UploadOutput> {
   const exists = await storage().exists(filename);
 
   if (exists) {
     throw new Error("File already exists");
   }
 
-  const { url } = await storage().upload(buffer, filename);
-  return { url, size: buffer.length };
+  const { url, hash } = await storage().upload(buffer, filename);
+  return { url, size: buffer.length, hash };
 }
 
 type ImageData = {
@@ -89,12 +95,18 @@ export async function reparse(media: Media) {
     makeThumbnailFilename(filename)
   );
 
+  let fileHash = media.fileHash;
+  if (!fileHash) {
+    fileHash = await storage().getHash(buffer);
+  }
+
   return {
     width,
     height,
     color,
     thumbnailUrl,
     size: buffer.length,
+    fileHash,
   };
 }
 

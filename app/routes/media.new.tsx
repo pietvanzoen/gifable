@@ -83,6 +83,7 @@ export async function action({ request }: ActionArgs) {
 
   const userFilename = `${user.username}/${filename}`;
 
+  let fileHash: string;
   let mediaUrl: string;
   let size: number;
 
@@ -95,6 +96,7 @@ export async function action({ request }: ActionArgs) {
             userFilename
           );
     mediaUrl = resp.url;
+    fileHash = resp.hash;
     size = resp.size;
   } catch (error: any) {
     if (error?.message === "File already exists") {
@@ -125,6 +127,7 @@ export async function action({ request }: ActionArgs) {
       ...imageData,
       size,
       userId,
+      fileHash,
     },
   });
 

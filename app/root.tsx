@@ -119,7 +119,12 @@ function Document({ children }: { children: React.ReactNode }) {
             </p>
 
             <div>
-              <a href="https://github.com/pietvanzoen/gifable" aria-label="Github" title="Gifable on Github" className="icon-link">
+              <a
+                href="https://github.com/pietvanzoen/gifable"
+                aria-label="Github"
+                title="Gifable on Github"
+                className="icon-link"
+              >
                 <svg
                   version="1.1"
                   xmlns="http://www.w3.org/2000/svg"

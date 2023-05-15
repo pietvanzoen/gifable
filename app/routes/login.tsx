@@ -116,7 +116,13 @@ export default function Login() {
           <h1>Login or Register?</h1>
         </legend>
         <FormInput label="Redirect to" type="hidden" name="redirectTo" />
-        <FormInput name="loginType" label="Login" type="radio" value="login" checked />
+        <FormInput
+          name="loginType"
+          label="Login"
+          type="radio"
+          value="login"
+          checked
+        />
         <FormInput
           name="loginType"
           label="Register"

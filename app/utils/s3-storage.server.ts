@@ -4,6 +4,7 @@ import { debug } from "debug";
 import path from "node:path";
 import assert from "node:assert";
 import env from "./env.server";
+import hasha from "hasha";
 const debugLog = debug("app:s3-storage");
 
 export type S3StorageOptions = {
@@ -23,7 +24,10 @@ const EXTENSION_TO_MIME_TYPE: Record<string, string> = {
 export const FILENAME_REGEX =
   /^([a-zA-Z0-9_-]+\/)?[a-zA-Z0-9_-]+\.(gif|jpg|png|jpeg)$/;
 
-export type UploadResponse = Minio.UploadedObjectInfo & { url: string };
+export type UploadResponse = Minio.UploadedObjectInfo & {
+  url: string;
+  hash: string;
+};
 
 export function storage() {
   const storageOptions = {
@@ -80,17 +84,21 @@ export default class S3Storage {
       "Cache-Control": "max-age=86400",
     };
 
-    const data = await this.minioClient.putObject(
-      this.bucket,
-      filePath,
-      buffer,
-      buffer.length,
-      metaData
-    );
+    const [data, hash] = await Promise.all([
+      this.minioClient.putObject(
+        this.bucket,
+        filePath,
+        buffer,
+        buffer.length,
+        metaData
+      ),
+      this.getHash(buffer),
+    ]);
 
     return {
       ...data,
       url: this.makeFileURL(filePath),
+      hash,
     };
   }
 
@@ -171,5 +179,9 @@ export default class S3Storage {
     return {
       url: this.makeFileURL(newFilePath),
     };
+  }
+
+  async getHash(buffer: Buffer): Promise<string> {
+    return hasha.async(buffer, { algorithm: "md5" });
   }
 }

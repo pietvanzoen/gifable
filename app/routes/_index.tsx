@@ -136,17 +136,13 @@ export default function MediaRoute() {
 
   useEffect(() => {
     setSearchValue(search);
-  }, [search])
+  }, [search]);
 
   return (
     <>
       <header>
         <center>
-          <ValidatedForm
-            action="/"
-            method="get"
-            validator={searchValidator}
-          >
+          <ValidatedForm action="/" method="get" validator={searchValidator}>
             <input
               type="search"
               name="search"

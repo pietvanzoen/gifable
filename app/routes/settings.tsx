@@ -24,7 +24,7 @@ import {
   API_TOKEN_INTENT,
 } from "~/components/APITokenForm";
 import { UserMangement } from "~/components/UserManagement";
-import type {Theme} from "~/components/ThemeStyles";
+import type { Theme } from "~/components/ThemeStyles";
 
 export function meta() {
   return [{ title: makeTitle(["Settings"]) }];
@@ -117,7 +117,7 @@ export default function AdminRoute() {
       <SettingsForm
         defaultValues={{
           preferredLabels: user?.preferredLabels || "",
-          theme: user?.theme as Theme || "system",
+          theme: (user?.theme as Theme) || "system",
         }}
       />
 

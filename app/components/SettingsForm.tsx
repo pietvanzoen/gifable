@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "~/utils/db.server";
 import FormInput from "./FormInput";
 import SubmitButton from "./SubmitButton";
-import type {Theme} from "./ThemeStyles";
+import type { Theme } from "./ThemeStyles";
 
 export const SETTINGS_INTENT = "settings";
 
@@ -43,7 +43,7 @@ export async function settingsAction({
 
 type SettingsDefaultValues = {
   preferredLabels: string;
-  theme: Theme
+  theme: Theme;
 };
 
 export function SettingsForm({

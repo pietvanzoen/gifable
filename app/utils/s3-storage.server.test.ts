@@ -44,6 +44,7 @@ describe("S3Storage", () => {
     let filename: string;
 
     beforeEach(() => {
+      fileStorage.getHash = jest.fn().mockReturnValue("test-hash");
       buffer = Buffer.from("test");
       filename = "test.jpg";
     });
@@ -54,6 +55,7 @@ describe("S3Storage", () => {
         url: "https://test-bucket.s3.amazonaws.com/test-base-path/test.jpg",
         etag: "test-etag",
         versionId: "test-version-id",
+        hash: "test-hash",
       });
     });
 

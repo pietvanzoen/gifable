@@ -118,7 +118,7 @@ function LoadMoreButton({ params }: { params: URLSearchParams }) {
       preventScrollReset={true}
       replace={true}
     >
-      🎉 {isHydrated ? 'Loading more...' : 'Load more'}
+      🎉 {isHydrated ? "Loading more..." : "Load more"}
     </Link>
   );
 }

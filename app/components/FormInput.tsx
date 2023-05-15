@@ -53,9 +53,9 @@ export default function FormInput({
 
   const inputProps: Record<string, unknown> = {
     ...getInputProps({ id: fieldId, type, value, required }),
-    'aria-invalid': Boolean(error),
+    "aria-invalid": Boolean(error),
     className: error ? "field-error" : "",
-    'aria-errormessage': error ? `${fieldId}-error` : undefined,
+    "aria-errormessage": error ? `${fieldId}-error` : undefined,
     defaultChecked: ["checkbox", "radio"].includes(type) ? checked : undefined,
     ...restProps,
   };
