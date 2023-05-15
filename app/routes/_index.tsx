@@ -9,13 +9,22 @@ import { requireUserId } from "~/utils/session.server";
 import styles from "~/styles/search.css";
 import MediaList from "~/components/MediaList";
 import { getMediaLabels } from "~/utils/media.server";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useHydrated } from "remix-utils";
 import { makeTitle } from "~/utils/meta";
+import { withZod } from "@remix-validated-form/with-zod";
+import { z } from "zod";
+import { ValidatedForm } from "remix-validated-form";
 
 const PAGE_SIZE = 25;
 
 type SelectOptions = "" | "all" | "not-mine";
+
+const searchValidator = withZod(
+  z.object({
+    search: z.string().optional(),
+  })
+);
 
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
@@ -123,17 +132,28 @@ export default function MediaRoute() {
   const select = searchParams.get("select") as SelectOptions;
   const page = parseInt(searchParams.get("page") || "1", 10);
 
+  const [searchValue, setSearchValue] = useState(search);
+
+  useEffect(() => {
+    setSearchValue(search);
+  }, [search])
+
   return (
     <>
       <header>
         <center>
-          <form method="get" action="/">
+          <ValidatedForm
+            action="/"
+            method="get"
+            validator={searchValidator}
+          >
             <input
               type="search"
               name="search"
               aria-label="Search media"
               placeholder="Search"
-              defaultValue={search}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
               list="search-labels"
               style={{ marginRight: "0.2em" }}
             />
@@ -172,7 +192,7 @@ export default function MediaRoute() {
             <button type="submit" aira-label="Submit search">
               🔎 Search
             </button>
-          </form>
+          </ValidatedForm>
         </center>
 
         <QuickSearch
