@@ -36,7 +36,7 @@ export default function MediaItem(props: MediaItemProps) {
           <button
             className="play"
             tabIndex={-1}
-            onClick={() => setPlayingId(id)}
+            onClick={() => setPlayingId(isPlaying ? "" : id)}
             dangerouslySetInnerHTML={{
               __html: isPlaying ? "&#x23F8;&#xFE0E;" : "&#x23F5;&#xFE0E;",
             }}
