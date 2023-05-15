@@ -1,11 +1,7 @@
 import type { LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
-import {
-  Link,
-  useLoaderData,
-  useSearchParams,
-} from "@remix-run/react";
+import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
@@ -233,6 +229,8 @@ function QuickSearch({
     ? labels
     : preferredLabelsList.concat([...sortedLabels]).slice(0, limit);
 
+  const maxCount = sortedLabels[0]?.[1] || 0;
+
   return (
     <center role="group" aria-labelledby="quick-search-header">
       <small>
@@ -248,6 +246,11 @@ function QuickSearch({
               className={currentSearch === label ? "active" : ""}
               onClick={() => setShowAllLabels(false)}
               to={`/?search=${label}&select=${currentSelect}`}
+              style={
+                showAllLabels
+                  ? { fontSize: getFontSize(count as number, maxCount) }
+                  : undefined
+              }
             >
               {label}
             </Link>
@@ -261,13 +264,23 @@ function QuickSearch({
               className="link"
               onClick={() => setShowAllLabels((s) => !s)}
             >
-              {showAllLabels ? "show less" : "show more"}
+              <strong>
+                {showAllLabels ? "show less" : "show more"}
+              </strong>
             </button>
           </>
         )}
       </small>
     </center>
   );
+}
+
+
+function getFontSize(count: number, max: number) {
+  const minSize = 1;
+  const maxSize = 1.8;
+  const size = minSize + (maxSize - minSize) * (count / max);
+  return `${size}em`;
 }
 
 export function ErrorBoundary() {
