@@ -19,6 +19,7 @@ import Alert from "~/components/Alert";
 import debug from "debug";
 import { UserSchema } from "~/utils/validators";
 import { makeTitle } from "~/utils/meta";
+import styles from "~/styles/login.css";
 
 const log = debug("app:login");
 
@@ -28,6 +29,10 @@ const validator = withZod(
     redirectTo: z.string().optional(),
   })
 );
+
+export function links() {
+  return [{ rel: "stylesheet", href: styles }];
+}
 
 export function meta() {
   return [
