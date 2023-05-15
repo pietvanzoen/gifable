@@ -1,7 +1,11 @@
 import type { LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
-import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useSearchParams,
+} from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
@@ -150,16 +154,8 @@ export default function MediaRoute() {
               placeholder="Search"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              list="search-labels"
               style={{ marginRight: "0.2em" }}
             />
-            <datalist id="search-labels">
-              {data.labels.map(([label]) => (
-                <option key={label} value={label}>
-                  {label}
-                </option>
-              ))}
-            </datalist>
             <div className="button-group">
               <Link
                 role="button"
