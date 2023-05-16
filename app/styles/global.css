@@ -36,6 +36,10 @@ body > header > h1 {
   margin-bottom: 0;
 }
 
+code {
+  word-wrap: anywhere;
+}
+
 a.active {
   color: var(--text-light);
   text-decoration: none;
