@@ -5,7 +5,12 @@ import {
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { useActionData, useLoaderData } from "@remix-run/react";
+import {
+  Link,
+  useActionData,
+  useLoaderData,
+  useSearchParams,
+} from "@remix-run/react";
 import { withZod } from "@remix-validated-form/with-zod";
 import { useHydrated } from "remix-utils";
 import { ValidatedForm, validationError } from "remix-validated-form";
@@ -158,9 +163,14 @@ export default function NewMediaRoute() {
   const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const isHydrated = useHydrated();
-  const [uploadType, setUploadType] = useState<"url" | "file">("url");
   const [filename, setFilename] = useState(data.prepopulateData.filename || "");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [searchParams] = useSearchParams({
+    uploadType: "url",
+  });
+  const uploadType = (searchParams.get("uploadType") || "url") as
+    | "url"
+    | "file";
 
   const setFilenameIfNotSet = (value: string) => {
     if (filename) return;
@@ -189,27 +199,29 @@ export default function NewMediaRoute() {
           <h1>Add a file</h1>
         </legend>
         <p>
-          Select a file from your computer or enter the URL of an image file.
-          You can optionally add a search labels and alt text.
+          Add a file to your collection by selecting a file from your computer
+          or entering the URL of an image file.
         </p>
+        <div className="button-group">
+          <Link
+            role="button"
+            to="?uploadType=url"
+            className={uploadType === "url" ? "active" : ""}
+          >
+            URL
+          </Link>
+          <Link
+            role="button"
+            to="?uploadType=file"
+            className={uploadType === "file" ? "active" : ""}
+          >
+            File
+          </Link>
+        </div>
         <FormInput
-          type="radio"
+          type="hidden"
           name="uploadType"
-          label="URL"
-          value="url"
-          checked={uploadType === "url"}
-          onChange={() => setUploadType("url")}
-          style={{ display: "inline-block" }}
-        />
-        &nbsp;
-        <FormInput
-          type="radio"
-          name="uploadType"
-          label="File"
-          value="file"
-          checked={uploadType === "file"}
-          onChange={() => setUploadType("file")}
-          style={{ display: "inline-block" }}
+          value={uploadType || "url"}
         />
         <div className="file-box">
           <div className="file-input">
