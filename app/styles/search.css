@@ -7,6 +7,9 @@ body {
   grid-template-columns: 1fr 1fr;
   grid-gap: 1em;
 }
+.results figcaption {
+  margin: 0;
+}
 
 @media (min-width: 40em) {
   .results {
