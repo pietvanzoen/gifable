@@ -32,6 +32,9 @@ body > header {
   padding-top: 1rem;
   padding-bottom: 0.5rem;
 }
+body > header > h1 {
+  margin-bottom: 0;
+}
 
 a.active {
   color: var(--text-light);
