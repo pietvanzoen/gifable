@@ -155,11 +155,6 @@ button.link {
   text-decoration: none;
 }
 
-a[role="button"].active {
-  color: var(--accent) !important;
-  background-color: var(--accent-bg) !important;
-}
-
 .button-group {
   display: inline-block;
 }
@@ -168,7 +163,17 @@ a[role="button"].active {
 .button-group button {
   border-radius: 0;
   box-shadow: inset 0 0 0 1px var(--accent);
+  color: var(--accent) !important;
+  background-color: var(--accent-bg) !important;
+  margin-right: -1px;
 }
+
+.button-group a.active,
+.button-group button.active {
+  color: var(--accent-bg) !important;
+  background-color: var(--accent) !important;
+}
+
 .button-group a:first-child,
 .button-group button:first-child {
   border-radius: var(--standard-border-radius) 0 0 var(--standard-border-radius);
@@ -176,6 +181,7 @@ a[role="button"].active {
 .button-group a:last-child,
 .button-group button:last-child {
   border-radius: 0 var(--standard-border-radius) var(--standard-border-radius) 0;
+  margin-right: 0;
 }
 
 .skip-to-content {
