@@ -150,8 +150,10 @@ export async function loader({ request }: LoaderArgs) {
     new URLSearchParams(request.url.split("?")[1])
   );
   if (prepopulateData.url) {
-    prepopulateData.uploadType = "url";
     prepopulateData.filename = getTitle(prepopulateData.url);
+  }
+  if (!prepopulateData.uploadType) {
+    prepopulateData.uploadType = "url";
   }
   return json({
     prepopulateData,
@@ -165,12 +167,8 @@ export default function NewMediaRoute() {
   const isHydrated = useHydrated();
   const [filename, setFilename] = useState(data.prepopulateData.filename || "");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [searchParams] = useSearchParams({
-    uploadType: "url",
-  });
-  const uploadType = (searchParams.get("uploadType") || "url") as
-    | "url"
-    | "file";
+  const uploadType =
+    actionData?.repopulateFields?.uploadType || data.prepopulateData.uploadType;
 
   const setFilenameIfNotSet = (value: string) => {
     if (filename) return;
@@ -207,6 +205,8 @@ export default function NewMediaRoute() {
             role="button"
             to="?uploadType=url"
             className={uploadType === "url" ? "active" : ""}
+            preventScrollReset={true}
+            replace={true}
           >
             URL
           </Link>
@@ -214,15 +214,13 @@ export default function NewMediaRoute() {
             role="button"
             to="?uploadType=file"
             className={uploadType === "file" ? "active" : ""}
+            preventScrollReset={true}
+            replace={true}
           >
             File
           </Link>
         </div>
-        <FormInput
-          type="hidden"
-          name="uploadType"
-          value={uploadType || "url"}
-        />
+        <FormInput type="hidden" name="uploadType" />
         <div className="file-box">
           <div className="file-input">
             {uploadType === "url" ? (
