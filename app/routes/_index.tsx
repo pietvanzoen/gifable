@@ -240,7 +240,7 @@ function QuickSearch({
           </>
         ) : null}
         {labelsList.map(([label, count], i) => (
-          <span key={label}>
+          <span key={`${label}-${count}`}>
             {i > 0 && ", "}
             <Link
               className={currentSearch === label ? "active" : ""}
