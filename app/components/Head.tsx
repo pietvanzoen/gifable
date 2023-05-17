@@ -107,7 +107,7 @@ export default function Head({ theme }: { theme: Theme }) {
       <meta charSet="utf-8" />
       <meta name="viewport" content="width=device-width" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-title" content="Gifable"/>
+      <meta name="apple-mobile-web-app-title" content="Gifable" />
 
       {LINKS.map((link, i) => (
         <link key={i} {...link} />

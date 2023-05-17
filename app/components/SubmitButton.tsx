@@ -12,7 +12,12 @@ export default function SubmitButton({
 }: SubmitButtonProps = {}) {
   const isSubmitting = useIsSubmitting(formId);
   return (
-    <button form={formId} type="submit" disabled={isSubmitting} {...buttonProps}>
+    <button
+      form={formId}
+      type="submit"
+      disabled={isSubmitting}
+      {...buttonProps}
+    >
       {isSubmitting ? "Submitting..." : children || "Submit"}
     </button>
   );

@@ -213,7 +213,7 @@ export default function MediaRoute() {
 
       {user.isAdmin ? (
         <center>
-          <br/>
+          <br />
           <form method="post" style={{ display: "inline-block" }}>
             <button name="intent" type="submit" value="reparse">
               🔁 Reparse
