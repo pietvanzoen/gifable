@@ -273,7 +273,7 @@ export default function NewMediaRoute() {
         <MediaLabelsInput terms={data.terms} />
         <FormInput type="textarea" name="altText" label="Alt text" />
         <Alert>{actionData?.formError}</Alert>
-        <SubmitButton />
+        <SubmitButton aria-label="Submit">✅ Submit</SubmitButton>
       </fieldset>
     </ValidatedForm>
   );

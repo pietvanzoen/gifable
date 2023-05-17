@@ -183,36 +183,37 @@ export default function MediaRoute() {
         </tbody>
       </table>
 
-      {isMine ? (
-        <center>
-          <Link
-            to={`/media/${media.id}/edit`}
-            role="button"
-            aria-label="Edit media info"
-          >
-            ✏️ Edit info
-          </Link>{" "}
-          &nbsp;
-          <DeleteButton media={media} />
-        </center>
-      ) : (
-        <center>
-          <Link
-            to={`/media/new?url=${encodeURIComponent(
-              media.url
-            )}&labels=${encodeURIComponent(
-              media.labels || ""
-            )}&altText=${encodeURIComponent(media.altText || "")}`}
-            role="button"
-            aria-label="Add to my collection"
-          >
-            📥 Add to my collection
-          </Link>
-        </center>
-      )}
+      <center>
+        {isMine && (
+          <>
+            <Link
+              to={`/media/${media.id}/edit`}
+              role="button"
+              aria-label="Edit media info"
+            >
+              ✏️ Edit info
+            </Link>
+            &nbsp;
+          </>
+        )}
+        <Link
+          to={`/media/new?url=${encodeURIComponent(
+            media.url
+          )}&labels=${encodeURIComponent(
+            media.labels || ""
+          )}&altText=${encodeURIComponent(media.altText || "")}`}
+          role="button"
+          aria-label="Add to my collection"
+        >
+          {isMine ? "👯 Duplicate" : "📥 Add to my collection"}
+        </Link>
+        &nbsp;
+        {isMine && <DeleteButton media={media} />}
+      </center>
 
       {user.isAdmin ? (
         <center>
+          <br/>
           <form method="post" style={{ display: "inline-block" }}>
             <button name="intent" type="submit" value="reparse">
               🔁 Reparse

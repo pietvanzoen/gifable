@@ -8,10 +8,11 @@ type SubmitButtonProps = {
 export default function SubmitButton({
   formId,
   children,
+  ...buttonProps
 }: SubmitButtonProps = {}) {
   const isSubmitting = useIsSubmitting(formId);
   return (
-    <button form={formId} type="submit" disabled={isSubmitting}>
+    <button form={formId} type="submit" disabled={isSubmitting} {...buttonProps}>
       {isSubmitting ? "Submitting..." : children || "Submit"}
     </button>
   );
