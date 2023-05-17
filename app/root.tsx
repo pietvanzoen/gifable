@@ -3,9 +3,7 @@ import { json } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   Link,
-  Links,
   LiveReload,
-  Meta,
   NavLink,
   Outlet,
   Scripts,
@@ -19,7 +17,7 @@ import { getUser } from "./utils/session.server";
 import env from "~/utils/env.server";
 import { ToastContainer } from "./components/Toast";
 import type { Theme } from "./components/ThemeStyles";
-import ThemeStyles from "./components/ThemeStyles";
+import Head from "./components/Head";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -36,46 +34,7 @@ function Document({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>();
   return (
     <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width" />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/images/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/images/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/images/favicon-16x16.png"
-        />
-        <link
-          rel="preload"
-          href="/fonts/fira-sans-v16-latin-regular.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/fira-sans-v16-latin-800.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link rel="manifest" href="/site.webmanifest" />
-        <Meta />
-        <link rel="stylesheet" href="/css/simple.min.css" />
-        <Links />
-        <ThemeStyles theme={(data?.user?.theme as Theme) || "system"} />
-      </head>
+      <Head theme={data?.user?.theme as Theme} />
       <body>
         <header id="top">
           <a href="#main" className="skip-to-content">
