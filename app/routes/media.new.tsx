@@ -9,7 +9,6 @@ import {
   Link,
   useActionData,
   useLoaderData,
-  useSearchParams,
 } from "@remix-run/react";
 import { withZod } from "@remix-validated-form/with-zod";
 import { useHydrated } from "remix-utils";
