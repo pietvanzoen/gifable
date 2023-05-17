@@ -24,3 +24,10 @@ figure {
 figure img {
   width: 100%;
 }
+
+.notice {
+  text-align: center;
+}
+.notice h3 {
+  margin: 0;
+}

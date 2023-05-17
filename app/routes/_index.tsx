@@ -122,7 +122,7 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function MediaRoute() {
-  const data = useLoaderData<typeof loader>();
+  const { media, mediaCount, user, labels } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams({
     search: "",
     select: "",
@@ -133,6 +133,8 @@ export default function MediaRoute() {
   const page = parseInt(searchParams.get("page") || "1", 10);
 
   const [searchValue, setSearchValue] = useState(search);
+
+  const emptyUserCollection = select === "" && mediaCount === 0;
 
   useEffect(() => {
     setSearchValue(search);
@@ -184,8 +186,8 @@ export default function MediaRoute() {
         </center>
 
         <QuickSearch
-          labels={data.labels}
-          preferredLabels={data.user?.preferredLabels || ""}
+          labels={labels}
+          preferredLabels={user?.preferredLabels || ""}
           currentSearch={search}
           currentSelect={select}
         />
@@ -193,12 +195,22 @@ export default function MediaRoute() {
       </header>
 
       <MediaList
-        media={data.media}
+        media={media}
         showUser={select !== ""}
-        mediaCount={data.mediaCount}
+        mediaCount={mediaCount}
         pageSize={PAGE_SIZE}
         page={page}
       />
+
+      {emptyUserCollection && (
+        <div className="notice">
+          <h3>Hi! Looks like you're new here 👋</h3>
+          <p><strong>Welcome!</strong> Would you like to...</p>
+          <Link role="button" to="/media/new">🚀 Add a file to your collection</Link>
+          &nbsp;or&nbsp;
+          <Link role="button" to="/?select=all">💡 Check out files added by other users</Link>
+        </div>
+      )}
     </>
   );
 }
@@ -264,9 +276,7 @@ function QuickSearch({
               className="link"
               onClick={() => setShowAllLabels((s) => !s)}
             >
-              <strong>
-                {showAllLabels ? "show less" : "show more"}
-              </strong>
+              <strong>{showAllLabels ? "show less" : "show more"}</strong>
             </button>
           </>
         )}
@@ -274,7 +284,6 @@ function QuickSearch({
     </center>
   );
 }
-
 
 function getFontSize(count: number, max: number) {
   const minSize = 1;
