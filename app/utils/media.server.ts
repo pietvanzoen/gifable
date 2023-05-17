@@ -6,6 +6,8 @@ import Jimp from "jimp";
 import { debug } from "debug";
 import type { Media } from "@prisma/client";
 import { db } from "./db.server";
+import { LRUCache } from "lru-cache";
+import ms from "ms";
 const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes("10MB");
@@ -168,10 +170,12 @@ type TermsOptions = {
   randomize?: boolean;
 };
 
+type LabelsList = [string, number][];
+
 export function getCommonLabelsTerms(
   media: Pick<Media, "labels">[],
   { limit = 5, filter = () => true, randomize = false }: TermsOptions
-) {
+): LabelsList {
   const terms = media.reduce((terms, m) => {
     m.labels?.split(",").forEach((c) => {
       const term = c.trim().toLowerCase();
@@ -191,10 +195,32 @@ export function getCommonLabelsTerms(
     .slice(0, limit);
 }
 
+declare global {
+  var labelsCache: LRUCache<string, LabelsList>;
+}
+
+global.labelsCache =
+  global.labelsCache ||
+  new LRUCache<string, LabelsList>({
+    max: 40,
+    ttl: ms("5m"),
+  });
+
 export async function getMediaLabels(
   options?: TermsOptions & { userId?: string | { not: string } }
 ) {
+  const cacheKey = JSON.stringify(options);
+
+  const cached = labelsCache.get(cacheKey);
+  if (cached) {
+    log("Using cached labels", { cacheKey });
+    return cached;
+  }
+
   const { userId, ...termsOptions } = options || {};
+
+  log("Fetching labels", { cacheKey });
+
   const where = userId ? { userId } : {};
   const media = await db.media.findMany({
     where: {
@@ -206,5 +232,7 @@ export async function getMediaLabels(
     },
   });
 
-  return getCommonLabelsTerms(media, termsOptions);
+  labelsCache.set(cacheKey, getCommonLabelsTerms(media, termsOptions));
+
+  return labelsCache.get(cacheKey);
 }
