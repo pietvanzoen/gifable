@@ -1,7 +1,12 @@
 import type { LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
-import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useNavigation,
+  useSearchParams,
+} from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
@@ -14,7 +19,7 @@ import { useHydrated } from "remix-utils";
 import { makeTitle } from "~/utils/meta";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
-import { ValidatedForm } from "remix-validated-form";
+import { useIsSubmitting, ValidatedForm } from "remix-validated-form";
 
 const PAGE_SIZE = 25;
 
@@ -76,12 +81,13 @@ export async function loader({ request }: LoaderArgs) {
     where.userId = { not: userId };
   }
 
-  const [user, mediaCount, media, labels] = await Promise.all([
+  const [user, mediaCount, totalMediaCount, media, labels] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       select: { preferredLabels: true },
     }),
     db.media.count({ where }),
+    select === "" ? db.media.count({ where: { userId } }) : null,
     db.media.findMany({
       take: page * PAGE_SIZE,
       where,
@@ -116,13 +122,15 @@ export async function loader({ request }: LoaderArgs) {
   return json({
     user,
     mediaCount,
+    totalMediaCount,
     media,
     labels,
   });
 }
 
 export default function MediaRoute() {
-  const { media, mediaCount, user, labels } = useLoaderData<typeof loader>();
+  const { media, mediaCount, totalMediaCount, user, labels } =
+    useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams({
     search: "",
     select: "",
@@ -133,8 +141,24 @@ export default function MediaRoute() {
   const page = parseInt(searchParams.get("page") || "1", 10);
 
   const [searchValue, setSearchValue] = useState(search);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
+  const isSubmitting = useIsSubmitting("search-form");
 
-  const emptyUserCollection = select === "" && mediaCount === 0;
+  const emptyUserCollection = select === "" && totalMediaCount === 0;
+
+  useEffect(() => {
+    if (navigation.state !== "loading") {
+      setIsLoading(false);
+      return;
+    }
+    const timeoutId = setTimeout(() => {
+      if (navigation.state === "loading") {
+        setIsLoading(true);
+      }
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [isSubmitting, navigation.state]);
 
   useEffect(() => {
     setSearchValue(search);
@@ -144,7 +168,12 @@ export default function MediaRoute() {
     <>
       <header>
         <center>
-          <ValidatedForm action="/" method="get" validator={searchValidator}>
+          <ValidatedForm
+            id="search-form"
+            action="/"
+            method="get"
+            validator={searchValidator}
+          >
             <input
               type="search"
               name="search"
@@ -205,11 +234,21 @@ export default function MediaRoute() {
       {emptyUserCollection && (
         <div className="notice">
           <h3>Hi! Looks like you're new here 👋</h3>
-          <p><strong>Welcome!</strong> Would you like to...</p>
-          <Link role="button" to="/media/new">🚀 Add a file to your collection</Link>
-          &nbsp;or&nbsp;
-          <Link role="button" to="/?select=all">💡 Check out files added by other users</Link>
+          <p>
+            <strong>Welcome!</strong> Would you like to...
+          </p>
+          <Link role="button" to="/media/new" style={{ lineBreak: "normal" }}>
+            🚀 Add a file
+          </Link>
+          <p>or</p>
+          <Link role="button" to="/?select=all">
+            💡 Find some inspiration
+          </Link>
         </div>
+      )}
+
+      {isLoading && (
+        <div tabIndex={-1} aria-hidden="true" className="loader"></div>
       )}
     </>
   );

@@ -31,3 +31,30 @@ figure img {
 .notice h3 {
   margin: 0;
 }
+
+.loader {
+  position: fixed;
+  font-size: 0.8em;
+  bottom: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5em 1em;
+  background-color: var(--accent-bg);
+  border-radius: var(--standard-border-radius);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.loader:before {
+  background-image: url(/images/loading.gif);
+  background-size: contain;
+  content: "";
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  vertical-align: middle;
+}
+.loader:after {
+  content: "Loading...";
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.5em;
+}
