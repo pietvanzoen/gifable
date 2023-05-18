@@ -53,6 +53,7 @@ function Document({ children }: { children: React.ReactNode }) {
             <h1>
               <Link
                 className="title-link"
+                tabIndex={-1}
                 onClick={() => setNavOpen(false)}
                 to="/"
               >
