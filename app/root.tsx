@@ -84,6 +84,7 @@ function Document({ children }: { children: React.ReactNode }) {
               <NavLink
                 prefetch="intent"
                 onClick={() => setNavOpen(false)}
+                aria-label="Search media"
                 to="/"
               >
                 Search
@@ -91,6 +92,7 @@ function Document({ children }: { children: React.ReactNode }) {
               <NavLink
                 prefetch="intent"
                 onClick={() => setNavOpen(false)}
+                aria-label="Add media"
                 to="/media/new"
               >
                 Add

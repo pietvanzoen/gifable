@@ -162,6 +162,7 @@ export default function MediaRoute() {
               <Link
                 role="button"
                 className={select === "" ? "active" : ""}
+                aria-label="Search my media"
                 to={`/?search=${search}`}
               >
                 Mine
@@ -169,6 +170,7 @@ export default function MediaRoute() {
               <Link
                 role="button"
                 className={select === "not-mine" ? "active" : ""}
+                aria-label="Search media I didn't upload"
                 to={`/?search=${search}&select=not-mine`}
               >
                 Not Mine
@@ -176,13 +178,14 @@ export default function MediaRoute() {
               <Link
                 role="button"
                 className={select === "all" ? "active" : ""}
+                aria-label="Search all media"
                 to={`/?search=${search}&select=all`}
               >
                 All
               </Link>
             </div>
             &nbsp;
-            <button type="submit" aira-label="Submit search">
+            <button type="submit" aria-label="Submit search">
               🔎 Search
             </button>
           </ValidatedForm>
@@ -260,29 +263,35 @@ function QuickSearch({
             <strong id="quick-search-header">Search for label:</strong>&nbsp;
           </>
         ) : null}
-        {labelsList.map(([label, count], i) => (
-          <span key={`${label}-${count}`}>
-            {i > 0 && ", "}
-            <Link
-              className={currentSearch === label ? "active" : ""}
-              onClick={() => setShowAllLabels(false)}
-              to={`/?search=${label}&select=${currentSelect}`}
-              style={
-                showAllLabels
-                  ? { fontSize: getFontSize(count as number, maxCount) }
-                  : undefined
-              }
-            >
-              {label}
-            </Link>
-            {showAllLabels ? <small> ({count})</small> : null}
-          </span>
-        ))}
+        <span id="quick-search-labels">
+          {labelsList.map(([label, count], i) => (
+            <span key={`${label}-${count}`}>
+              {i > 0 && ", "}
+              <Link
+                className={currentSearch === label ? "active" : ""}
+                onClick={() => setShowAllLabels(false)}
+                to={`/?search=${label}&select=${currentSelect}`}
+                aria-label={`Search for media with label "${label}"`}
+                style={
+                  showAllLabels
+                    ? { fontSize: getFontSize(count as number, maxCount) }
+                    : undefined
+                }
+              >
+                {label}
+              </Link>
+              {showAllLabels ? <small> ({count})</small> : null}
+            </span>
+          ))}
+        </span>
         {labels.length > limit && isHydrated && (
           <>
             &nbsp;&nbsp;
             <button
               className="link"
+              aria-label="Toggle show more labels"
+              aria-expanded={showAllLabels}
+              aria-controls="quick-search-labels"
               onClick={() => setShowAllLabels((s) => !s)}
             >
               <strong>{showAllLabels ? "show less" : "show more"}</strong>
@@ -290,7 +299,11 @@ function QuickSearch({
           </>
         )}
         <br />
-        <Link prefetch="intent" to="/media/random">
+        <Link
+          prefetch="intent"
+          to="/media/random"
+          aria-label="Suprise me! Go to random media"
+        >
           <strong>Suprise me!</strong>
         </Link>
       </small>
