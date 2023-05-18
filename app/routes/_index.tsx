@@ -147,12 +147,7 @@ export default function MediaRoute() {
     <>
       <header>
         <center>
-          <ValidatedForm
-            id="search-form"
-            action="/"
-            method="get"
-            validator={searchValidator}
-          >
+          <ValidatedForm action="/" method="get" validator={searchValidator}>
             <input
               type="search"
               name="search"
@@ -294,6 +289,10 @@ function QuickSearch({
             </button>
           </>
         )}
+        <br />
+        <Link prefetch="intent" to="/media/random">
+          <strong>Suprise me!</strong>
+        </Link>
       </small>
     </center>
   );

@@ -8,6 +8,7 @@ import {
   Outlet,
   useLoaderData,
   useRouteError,
+  useSearchParams,
 } from "@remix-run/react";
 import { useState } from "react";
 import { forbidden, notFound, useHydrated } from "remix-utils";
@@ -86,6 +87,7 @@ export async function loader({ request, params }: LoaderArgs) {
 
 export default function MediaRoute() {
   const { user, media } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
   const isMine = media.userId === user.id;
 
   const {
@@ -101,9 +103,16 @@ export default function MediaRoute() {
 
   return (
     <>
-      <h2>
+      {searchParams.get("random") ? (
+        <center>
+          <Link to="/media/random">
+            <strong>Suprise me again!</strong>
+          </Link>
+        </center>
+      ) : null}
+      <h1>
         <center>{getTitle(url)}</center>
-      </h2>
+      </h1>
       <figure>
         <center>
           <img
