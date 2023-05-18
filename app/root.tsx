@@ -18,6 +18,7 @@ import env from "~/utils/env.server";
 import { ToastContainer } from "./components/Toast";
 import type { Theme } from "./components/ThemeStyles";
 import Head from "./components/Head";
+import NavigationLoader from "./components/NavigationLoader";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -98,6 +99,7 @@ function Document({ children }: { children: React.ReactNode }) {
           </small>
         </footer>
 
+        <NavigationLoader />
         <ToastContainer />
         <Scripts />
         <ScrollRestoration />

@@ -215,7 +215,7 @@ export default function NewMediaRoute() {
             File
           </Link>
         </div>
-        <FormInput type="hidden" name="uploadType" />
+        <FormInput type="hidden" name="uploadType" value={uploadType} />
         <div className="file-box">
           <div className="file-input">
             {uploadType === "url" ? (

@@ -1,12 +1,7 @@
 import type { LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
-import {
-  Link,
-  useLoaderData,
-  useNavigation,
-  useSearchParams,
-} from "@remix-run/react";
+import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
@@ -19,7 +14,7 @@ import { useHydrated } from "remix-utils";
 import { makeTitle } from "~/utils/meta";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
-import { useIsSubmitting, ValidatedForm } from "remix-validated-form";
+import { ValidatedForm } from "remix-validated-form";
 
 const PAGE_SIZE = 25;
 
@@ -141,24 +136,8 @@ export default function MediaRoute() {
   const page = parseInt(searchParams.get("page") || "1", 10);
 
   const [searchValue, setSearchValue] = useState(search);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
-  const isSubmitting = useIsSubmitting("search-form");
 
   const emptyUserCollection = select === "" && totalMediaCount === 0;
-
-  useEffect(() => {
-    if (navigation.state !== "loading") {
-      setIsLoading(false);
-      return;
-    }
-    const timeoutId = setTimeout(() => {
-      if (navigation.state === "loading") {
-        setIsLoading(true);
-      }
-    }, 100);
-    return () => clearTimeout(timeoutId);
-  }, [isSubmitting, navigation.state]);
 
   useEffect(() => {
     setSearchValue(search);
@@ -215,7 +194,7 @@ export default function MediaRoute() {
         </center>
 
         <QuickSearch
-          labels={labels}
+          labels={labels || []}
           preferredLabels={user?.preferredLabels || ""}
           currentSearch={search}
           currentSelect={select}
@@ -245,10 +224,6 @@ export default function MediaRoute() {
             💡 Find some inspiration
           </Link>
         </div>
-      )}
-
-      {isLoading && (
-        <div tabIndex={-1} aria-hidden="true" className="loader"></div>
       )}
     </>
   );
