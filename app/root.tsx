@@ -19,6 +19,8 @@ import { ToastContainer } from "./components/Toast";
 import type { Theme } from "./components/ThemeStyles";
 import Head from "./components/Head";
 import NavigationLoader from "./components/NavigationLoader";
+import { useState } from "react";
+import { useHydrated } from "remix-utils";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -33,6 +35,9 @@ export async function loader({ request }: LoaderArgs) {
 
 function Document({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>();
+  const isHydrated = useHydrated();
+  const showNav = Boolean(data?.user);
+  const [navOpen, setNavOpen] = useState(false);
   return (
     <html lang="en">
       <Head theme={data?.user?.theme as Theme} />
@@ -41,24 +46,65 @@ function Document({ children }: { children: React.ReactNode }) {
           <a href="#main" className="skip-to-content">
             Skip to content
           </a>
-          <h1>
-            <Link className="title-link" to="/">
-              Gifable
-            </Link>
-          </h1>
 
-          {data?.user ? (
-            <nav>
-              <NavLink prefetch="intent" to="/">
+          <div className="title-row">
+            <div>{/* ensure css grid works */}</div>
+
+            <h1>
+              <Link
+                className="title-link"
+                onClick={() => setNavOpen(false)}
+                to="/"
+              >
+                Gifable
+              </Link>
+            </h1>
+
+            {showNav ? (
+              <button
+                onClick={() => setNavOpen(!navOpen)}
+                className="mobile-nav"
+                aria-label="Toggle navigation"
+                aria-expanded={navOpen}
+                aria-controls="site-menu"
+                hidden={!isHydrated}
+              >
+                {navOpen ? "✕" : "☰"}
+              </button>
+            ) : (
+              <div></div>
+            )}
+          </div>
+
+          {showNav ? (
+            <nav
+              id="site-menu"
+              className={navOpen || !isHydrated ? "open" : "closed"}
+            >
+              <NavLink
+                prefetch="intent"
+                onClick={() => setNavOpen(false)}
+                to="/"
+              >
                 Search
               </NavLink>
-              <NavLink prefetch="intent" to="/media/new">
+              <NavLink
+                prefetch="intent"
+                onClick={() => setNavOpen(false)}
+                to="/media/new"
+              >
                 Add
               </NavLink>
-              <NavLink prefetch="intent" to="/settings">
+              <NavLink
+                prefetch="intent"
+                onClick={() => setNavOpen(false)}
+                to="/settings"
+              >
                 Settings
               </NavLink>
-              <Link to="/logout">Logout</Link>
+              <Link onClick={() => setNavOpen(false)} to="/logout">
+                Logout
+              </Link>
             </nav>
           ) : null}
         </header>

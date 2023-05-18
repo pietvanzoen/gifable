@@ -145,9 +145,10 @@ export default function MediaRoute() {
 
   return (
     <>
-      <header>
+      <header id="search">
         <center>
           <ValidatedForm action="/" method="get" validator={searchValidator}>
+            <input type="hidden" name="select" value={select} tabIndex={-1} />
             <input
               type="search"
               name="search"
@@ -181,7 +182,6 @@ export default function MediaRoute() {
               </Link>
             </div>
             &nbsp;
-            <input type="hidden" name="select" value={select} tabIndex={-1} />
             <button type="submit" aira-label="Submit search">
               🔎 Search
             </button>
