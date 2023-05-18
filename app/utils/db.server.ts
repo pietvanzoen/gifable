@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
 
 let db: PrismaClient;
@@ -7,7 +8,7 @@ declare global {
 }
 
 const prismaOptions = {
-  log: ["query", "info", "warn", "error"],
+  log: ["query", "info", "warn", "error"] as Prisma.LogLevel[],
 };
 
 // this is needed because in development we don't want to restart
