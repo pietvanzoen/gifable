@@ -23,6 +23,13 @@ const LINKS = [
       "anonymous" as LinkHTMLAttributes<HTMLLinkElement>["crossOrigin"],
   },
   {
+    rel: "preload",
+    href: "/images/loading.gif",
+    as: "image",
+    crossOrigin:
+      "anonymous" as LinkHTMLAttributes<HTMLLinkElement>["crossOrigin"],
+  },
+  {
     rel: "apple-touch-icon",
     sizes: "180x180",
     href: "/images/apple-touch-icon.png",

@@ -22,5 +22,9 @@ export default function Loader() {
     return null;
   }
 
-  return <div tabIndex={-1} aria-hidden="true" className="loader"></div>;
+  return (
+    <div tabIndex={-1} aria-hidden="true" className="loader">
+      {navigation.state === "submitting" ? "Submitting..." : "Loading..."}
+    </div>
+  );
 }
