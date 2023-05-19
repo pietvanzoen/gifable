@@ -158,11 +158,16 @@ export default function MediaRoute() {
               onChange={(e) => setSearchValue(e.target.value)}
               style={{ marginRight: "0.2em" }}
             />
-            <div className="button-group">
+            <div
+              className="button-group"
+              role="group"
+              aria-label="Filter results by owner"
+              title="Filter results by owner"
+            >
               <Link
                 role="button"
                 className={select === "" ? "active" : ""}
-                aria-label="Search my media"
+                aria-current={select === "" ? "page" : undefined}
                 to={`/?search=${search}`}
               >
                 Mine
@@ -170,7 +175,7 @@ export default function MediaRoute() {
               <Link
                 role="button"
                 className={select === "not-mine" ? "active" : ""}
-                aria-label="Search media I didn't upload"
+                aria-current={select === "not-mine" ? "page" : undefined}
                 to={`/?search=${search}&select=not-mine`}
               >
                 Not Mine
@@ -178,7 +183,7 @@ export default function MediaRoute() {
               <Link
                 role="button"
                 className={select === "all" ? "active" : ""}
-                aria-label="Search all media"
+                aria-current={select === "all" ? "page" : undefined}
                 to={`/?search=${search}&select=all`}
               >
                 All
