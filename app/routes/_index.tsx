@@ -16,7 +16,7 @@ import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
 import { ValidatedForm } from "remix-validated-form";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 42;
 
 type SelectOptions = "" | "all" | "not-mine";
 

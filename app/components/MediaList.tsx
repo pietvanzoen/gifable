@@ -3,15 +3,9 @@ import { useEffect, useState } from "react";
 import type { MediaItemProps } from "./MediaItem";
 import MediaItem from "./MediaItem";
 
-import styles from "~/styles/search.css";
 import { Link } from "react-router-dom";
-import { useSearchParams } from "@remix-run/react";
+import { useNavigation, useSearchParams } from "@remix-run/react";
 import { useHydrated } from "remix-utils";
-import { useInView } from "react-cool-inview";
-
-export function links() {
-  return [{ rel: "stylesheet", href: styles }];
-}
 
 export default function MediaList({
   media,
@@ -75,6 +69,13 @@ export default function MediaList({
           />
         ))}
       </div>
+      <center>
+        <p>
+          <small>
+            Viewing {media.length} of {mediaCount} results.
+          </small>
+        </p>
+      </center>
       {showLoadMore && (
         <center>
           <br />
@@ -92,33 +93,19 @@ export default function MediaList({
 }
 
 function LoadMoreButton({ params }: { params: URLSearchParams }) {
-  let button: HTMLAnchorElement | null = null;
   const isHydrated = useHydrated();
-
-  const { observe } = useInView<HTMLAnchorElement>({
-    // For better UX, we can grow the root margin so the data will be loaded earlier
-    rootMargin: "50px 0px",
-    // When the last item comes to the viewport
-    onEnter: ({ unobserve }) => {
-      // Pause observe when loading data
-      unobserve();
-      // Load more data
-      button?.click();
-    },
-  });
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
 
   return (
     <Link
-      ref={(element) => {
-        observe(element);
-        button = element;
-      }}
       role="button"
       to={`/?${params}${isHydrated ? "" : "#load-more"}`}
       preventScrollReset={true}
       replace={true}
+      aria-disabled={isLoading}
     >
-      🎉 {isHydrated ? "Loading more..." : "Load more"}
+      🎉 {isLoading ? "Loading..." : "Load more"}
     </Link>
   );
 }
