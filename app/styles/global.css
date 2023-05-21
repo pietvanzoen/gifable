@@ -66,10 +66,15 @@ header > nav a {
   grid-template-columns: 1fr 4fr 1fr;
 }
 
-@media only screen and (max-width: 720px) {
+@media only screen and (orientation: portrait) and (max-width: 720px) {
   body > header {
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
+}
+
+@media only screen and (max-width: 720px) {
   .mobile-nav {
     display: block;
   }
@@ -79,10 +84,14 @@ header > nav a {
   nav.closed {
     display: none;
   }
+  body > header {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+  }
   body > header h1 {
     margin-top: 0;
-    font-size: 2rem;
-    line-height: 2rem;
+    font-size: 1.8rem;
+    line-height: 1.8rem;
   }
   body > header > nav {
     padding-top: 0.5rem;
