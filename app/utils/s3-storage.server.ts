@@ -5,7 +5,6 @@ import path from "node:path";
 import assert from "node:assert";
 import env from "./env.server";
 import hasha from "hasha";
-import { FILENAME_REGEX } from "./validators";
 const debugLog = debug("app:s3-storage");
 
 export type S3StorageOptions = {
@@ -71,8 +70,6 @@ export default class S3Storage {
   }
 
   async upload(buffer: Buffer, filename: string): Promise<UploadResponse> {
-    assert(FILENAME_REGEX.test(filename), `Invalid filename "${filename}"`);
-
     const filePath = this.makeFilePath(filename);
 
     debugLog("uploading file", filePath);

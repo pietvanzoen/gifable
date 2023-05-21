@@ -59,13 +59,6 @@ describe("S3Storage", () => {
       });
     });
 
-    it("throws an error if filename is invalid", async () => {
-      const filename = "test.txt";
-      await expect(fileStorage.upload(buffer, filename)).rejects.toThrow(
-        "Invalid filename"
-      );
-    });
-
     it("allows single directory in filename", async () => {
       const filename = "test/test.jpg";
       await fileStorage.upload(buffer, filename);
