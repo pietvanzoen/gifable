@@ -102,14 +102,12 @@ code {
   word-wrap: anywhere;
 }
 
-a.active {
-  color: var(--text-light);
+a[aria-current="page"] {
+  color: var(--text);
   text-decoration: none;
 }
-
-nav a.active {
-  color: var(--accent) !important;
-  border-color: var(--accent) !important;
+a[aria-current="page"]:hover {
+  color: var(--accent);
 }
 
 .title-link {

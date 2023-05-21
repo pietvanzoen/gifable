@@ -273,7 +273,7 @@ function QuickSearch({
             <span key={`${label}-${count}`}>
               {i > 0 && ", "}
               <Link
-                className={currentSearch === label ? "active" : ""}
+                aria-current={currentSearch === label ? "page" : "false"}
                 onClick={() => setShowAllLabels(false)}
                 to={`/?search=${label}&select=${currentSelect}`}
                 aria-label={`Search for media with label "${label}"`}
