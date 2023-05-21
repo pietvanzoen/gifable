@@ -164,30 +164,32 @@ export default function MediaRoute() {
               aria-label="Filter results by owner"
               title="Filter results by owner"
             >
-              <Link
-                role="button"
-                className={select === "" ? "active" : ""}
-                aria-current={select === "" ? "page" : undefined}
-                to={`/?search=${search}`}
-              >
-                Mine
-              </Link>
-              <Link
-                role="button"
-                className={select === "not-mine" ? "active" : ""}
-                aria-current={select === "not-mine" ? "page" : undefined}
-                to={`/?search=${search}&select=not-mine`}
-              >
-                Not Mine
-              </Link>
-              <Link
-                role="button"
-                className={select === "all" ? "active" : ""}
-                aria-current={select === "all" ? "page" : undefined}
-                to={`/?search=${search}&select=all`}
-              >
-                All
-              </Link>
+              {["", "not-mine", "all"].map((option) => {
+                const active = select === option;
+
+                // Include active search query when switching filter,
+                // unless the filter is already active. Then clear the search.
+                let to = `/?select=${option}`;
+                if (!active) {
+                  to += `&search=${search}`;
+                }
+
+                return (
+                  <Link
+                    key={option}
+                    role="button"
+                    className={active ? "active" : ""}
+                    aria-current={active ? "page" : undefined}
+                    to={to}
+                  >
+                    {option === "not-mine"
+                      ? "Not Mine"
+                      : option === "all"
+                      ? "All"
+                      : "Mine"}
+                  </Link>
+                );
+              })}
             </div>
             &nbsp;
             <button type="submit" aria-label="Submit search">
