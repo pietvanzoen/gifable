@@ -260,8 +260,13 @@ export default function NewMediaRoute() {
             )}
           </div>
         </div>
-        <MediaLabelsInput terms={data.terms} />
-        <FormInput type="textarea" name="altText" label="Alt text" />
+        <MediaLabelsInput terms={data.terms || []} />
+        <FormInput
+          type="textarea"
+          name="altText"
+          label="Alt text"
+          help="Provide a descriptive alternative text (alt text) for the image. Alt text is used to convey the content of an image to folks who are visually impaired or unable to view the image."
+        />
         <Alert>{actionData?.formError}</Alert>
         <SubmitButton aria-label="Submit">✅ Submit</SubmitButton>
       </fieldset>

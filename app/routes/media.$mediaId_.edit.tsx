@@ -115,8 +115,13 @@ export default function MediaRoute() {
             help="Changing the filename will break the existing url."
             required
           />
-          <MediaLabelsInput terms={terms} />
-          <FormInput type="textarea" name="altText" label="Alt text" />
+          <MediaLabelsInput terms={terms || []} />
+          <FormInput
+            type="textarea"
+            name="altText"
+            label="Alt text"
+            help="Provide a descriptive alternative text (alt text) for the image. Alt text is used to convey the content of an image to folks who are visually impaired or unable to view the image."
+          />
         </fieldset>
       </ValidatedForm>
 
