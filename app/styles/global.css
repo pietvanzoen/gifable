@@ -75,14 +75,28 @@ header > nav a {
 }
 
 @media only screen and (max-width: 720px) {
+  .title-row {
+    padding-bottom: 0.8rem;
+  }
+  body > header > nav {
+    display: block;
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
+    padding-top: 0 !important;
+  }
+  body > header {
+    padding-bottom: 0 !important;
+  }
   .mobile-nav {
     display: block;
   }
   nav.open {
-    display: block;
+    max-height: 3em;
+    padding-bottom: 0.5rem;
   }
   nav.closed {
-    display: none;
+    padding-top: 0;
+    max-height: 0;
   }
   body > header {
     padding-top: 0.8rem;

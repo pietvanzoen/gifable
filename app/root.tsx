@@ -2,9 +2,7 @@ import type { LinksFunction, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   isRouteErrorResponse,
-  Link,
   LiveReload,
-  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -19,8 +17,7 @@ import { ToastContainer } from "./components/Toast";
 import type { Theme } from "./components/ThemeStyles";
 import Head from "./components/Head";
 import NavigationLoader from "./components/NavigationLoader";
-import { useState } from "react";
-import { useHydrated } from "remix-utils";
+import Header from "./components/Header";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -35,82 +32,11 @@ export async function loader({ request }: LoaderArgs) {
 
 function Document({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>();
-  const isHydrated = useHydrated();
-  const showNav = Boolean(data?.user);
-  const [navOpen, setNavOpen] = useState(false);
   return (
     <html lang="en">
       <Head theme={data?.user?.theme as Theme} />
       <body>
-        <header id="top">
-          <a href="#main" className="skip-to-content">
-            Skip to content
-          </a>
-
-          <div className="title-row">
-            <div>{/* ensure css grid works */}</div>
-
-            <h1>
-              <Link
-                className="title-link"
-                tabIndex={-1}
-                onClick={() => setNavOpen(false)}
-                to="/"
-              >
-                Gifable
-              </Link>
-            </h1>
-
-            {showNav ? (
-              <button
-                onClick={() => setNavOpen(!navOpen)}
-                className="mobile-nav"
-                aria-label="Toggle navigation"
-                aria-expanded={navOpen}
-                aria-controls="site-menu"
-                hidden={!isHydrated}
-              >
-                {navOpen ? "✕" : "☰"}
-              </button>
-            ) : (
-              <div></div>
-            )}
-          </div>
-
-          {showNav ? (
-            <nav
-              id="site-menu"
-              className={navOpen || !isHydrated ? "open" : "closed"}
-            >
-              <NavLink
-                prefetch="intent"
-                onClick={() => setNavOpen(false)}
-                aria-label="Search media"
-                to="/"
-              >
-                Search
-              </NavLink>
-              <NavLink
-                prefetch="intent"
-                onClick={() => setNavOpen(false)}
-                aria-label="Add media"
-                to="/media/new"
-              >
-                Add
-              </NavLink>
-              <NavLink
-                prefetch="intent"
-                onClick={() => setNavOpen(false)}
-                to="/settings"
-              >
-                Settings
-              </NavLink>
-              <Link onClick={() => setNavOpen(false)} to="/logout">
-                Logout
-              </Link>
-            </nav>
-          ) : null}
-        </header>
+        <Header showNav={Boolean(data?.user)} />
 
         <main id="main">{children}</main>
 
