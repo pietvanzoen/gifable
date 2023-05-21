@@ -5,6 +5,7 @@ import path from "node:path";
 import assert from "node:assert";
 import env from "./env.server";
 import hasha from "hasha";
+import { FILENAME_REGEX } from "./validators";
 const debugLog = debug("app:s3-storage");
 
 export type S3StorageOptions = {
@@ -20,9 +21,6 @@ const EXTENSION_TO_MIME_TYPE: Record<string, string> = {
   png: "image/png",
   gif: "image/gif",
 };
-
-export const FILENAME_REGEX =
-  /^([a-zA-Z0-9_-]+\/)?[a-zA-Z0-9_-]+\.(gif|jpg|png|jpeg)$/;
 
 export type UploadResponse = Minio.UploadedObjectInfo & {
   url: string;

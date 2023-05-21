@@ -30,19 +30,14 @@ import { makeTitle } from "~/utils/meta";
 import Alert from "~/components/Alert";
 import { conflict } from "~/utils/request.server";
 import style from "~/styles/new.css";
+import { MediaSchema } from "~/utils/validators";
 
-const commonFields = z.object({
-  filename: z.string().regex(/^[a-zA-Z0-9-_]+\.(gif|jpg|png|jpeg)$/),
-  labels: z.string().trim().optional(),
-  altText: z.string().trim().optional(),
-});
-
-const fileFields = commonFields.extend({
+const fileFields = MediaSchema.extend({
   uploadType: z.literal("file"),
   file: z.any(),
 });
 
-const urlFields = commonFields.extend({
+const urlFields = MediaSchema.extend({
   uploadType: z.literal("url"),
   url: z.string().url(),
 });

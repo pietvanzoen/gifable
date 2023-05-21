@@ -20,14 +20,9 @@ import { getMediaLabels } from "~/utils/media.server";
 import { rename } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
 import MediaLabelsInput from "~/components/MediaLabelsInput";
+import { MediaSchema } from "~/utils/validators";
 
-const validator = withZod(
-  z.object({
-    filename: z.string().regex(/^[a-z0-9-_]+\.(gif|jpg|png)$/),
-    labels: z.string().trim().optional(),
-    altText: z.string().trim().optional(),
-  })
-);
+const validator = withZod(MediaSchema);
 
 export async function action({ params, request }: ActionArgs) {
   const user = await requireUser(request);
