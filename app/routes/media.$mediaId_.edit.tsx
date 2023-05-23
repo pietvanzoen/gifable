@@ -11,8 +11,6 @@ import {
 import { withZod } from "@remix-validated-form/with-zod";
 import { forbidden, notFound, useHydrated } from "remix-utils";
 import { ValidatedForm, validationError } from "remix-validated-form";
-import { z } from "zod";
-import FormInput from "~/components/FormInput";
 import SubmitButton from "~/components/SubmitButton";
 
 import { db } from "~/utils/db.server";
@@ -21,6 +19,7 @@ import { rename } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
 import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { MediaSchema } from "~/utils/validators";
+import FormInput from "~/components/FormInput";
 
 const validator = withZod(MediaSchema);
 

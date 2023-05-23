@@ -1,7 +1,5 @@
-import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
-dotenv.config();
 
 const BUILD_SHA = fs.readFileSync(path.resolve("./build_sha"), "utf8").trim();
 

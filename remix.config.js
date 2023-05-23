@@ -1,4 +1,6 @@
 /** @type {import('@remix-run/dev').AppConfig} */
+require("dotenv").config({ path: process.env.ENV_FILE || ".env" });
+
 module.exports = {
   ignoredRouteFiles: ["**/.*"],
   // appDirectory: "app",
