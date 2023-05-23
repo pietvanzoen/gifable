@@ -19,6 +19,7 @@ import { rename } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
 import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { MediaSchema } from "~/utils/validators";
+import FormInput from "~/components/FormInput";
 
 const validator = withZod(MediaSchema);
 
