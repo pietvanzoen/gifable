@@ -31,6 +31,7 @@ import Alert from "~/components/Alert";
 import { conflict } from "~/utils/request.server";
 import style from "~/styles/new.css";
 import { MediaSchema } from "~/utils/validators";
+import { formatBytes } from "~/utils/format";
 
 const fileFields = MediaSchema.extend({
   uploadType: z.literal("file"),
@@ -157,6 +158,10 @@ export default function NewMediaRoute() {
   const isHydrated = useHydrated();
   const [filename, setFilename] = useState(data.prepopulateData.filename || "");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [fileSize, setFileSize] = useState<number | null>(null);
+  const [fileDimentions, setFileDimentions] = useState<[number, number] | null>(
+    null
+  );
   const uploadType =
     actionData?.repopulateFields?.uploadType || data.prepopulateData.uploadType;
 
@@ -219,26 +224,31 @@ export default function NewMediaRoute() {
                 name="url"
                 label="URL"
                 required
-                onBlur={(event) => {
-                  setFilenameIfNotSet(getTitle(event.target.value));
-                  setPreviewImage(event.target.value);
+                onBlur={async (event) => {
+                  const url = event.target.value;
+                  setFilenameIfNotSet(getTitle(url));
+                  setPreviewImage(url);
+                  setFileSize(url ? await getFileSize(url) : null);
                 }}
               />
             ) : (
-              <FormInput
-                name="file"
-                label="File"
-                required
-                type="file"
-                accept="image/png,image/jpeg,image/gif"
-                onChange={({ target }) => {
-                  const file = (target as HTMLInputElement).files?.[0];
-                  if (!file) return;
-                  const filename = file.name;
-                  setFilenameIfNotSet(filename);
-                  setPreviewImage(URL.createObjectURL(file));
-                }}
-              />
+              <>
+                <FormInput
+                  name="file"
+                  label="File"
+                  required
+                  type="file"
+                  accept="image/png,image/jpeg,image/gif"
+                  onChange={({ target }) => {
+                    const file = (target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+                    const filename = file.name;
+                    setFilenameIfNotSet(filename);
+                    setPreviewImage(URL.createObjectURL(file));
+                    setFileSize(file.size);
+                  }}
+                />
+              </>
             )}
             <FormInput
               name="filename"
@@ -252,9 +262,26 @@ export default function NewMediaRoute() {
             {isHydrated && (
               <figure>
                 {previewImage ? (
-                  <img src={previewImage} alt="Preview" />
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    onLoad={({ target }) => {
+                      const img = target as HTMLImageElement;
+                      if (!img.naturalWidth) {
+                        setFileDimentions(null);
+                        return;
+                      }
+                      setFileDimentions([img.naturalWidth, img.naturalHeight]);
+                    }}
+                  />
                 ) : (
                   <div className="file-placeholder" />
+                )}
+                {(fileSize || fileDimentions) && (
+                  <figcaption>
+                    Size: {fileDimentions?.join(" ⅹ ")} •{" "}
+                    {formatBytes(fileSize)}
+                  </figcaption>
                 )}
               </figure>
             )}
@@ -272,4 +299,14 @@ export default function NewMediaRoute() {
       </fieldset>
     </ValidatedForm>
   );
+}
+
+async function getFileSize(url: string): Promise<number | null> {
+  try {
+    const resp = await fetch(url, { method: "HEAD" });
+    const contentLength = resp.headers.get("content-length");
+    return contentLength ? Number(contentLength) : null;
+  } catch (error: any) {
+    return null;
+  }
 }
