@@ -33,6 +33,7 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
 
+RUN apk add --update curl && rm -rf /var/cache/apk/*
 ADD prisma .
 RUN npx prisma generate
 
