@@ -272,6 +272,13 @@ button.link {
   right: 1em;
   top: 1em;
   margin: 0;
+  z-index: 100;
+}
+
+@media only screen and (max-width: 720px) {
+  .toast-container {
+    top: 4em;
+  }
 }
 
 dialog.toast {
