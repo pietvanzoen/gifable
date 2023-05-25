@@ -15,6 +15,7 @@ import { makeTitle } from "~/utils/meta";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
 import { ValidatedForm } from "remix-validated-form";
+import classNames from "classnames";
 
 const PAGE_SIZE = 42;
 
@@ -177,8 +178,7 @@ export default function MediaRoute() {
                 return (
                   <Link
                     key={option}
-                    role="button"
-                    className={active ? "active" : ""}
+                    className={classNames({ active }, "button")}
                     aria-current={active ? "page" : undefined}
                     to={to}
                   >
@@ -221,11 +221,15 @@ export default function MediaRoute() {
           <p>
             <strong>Welcome!</strong> Would you like to...
           </p>
-          <Link role="button" to="/media/new" style={{ lineBreak: "normal" }}>
+          <Link
+            className="button"
+            to="/media/new"
+            style={{ lineBreak: "normal" }}
+          >
             🚀 Add a file
           </Link>
           <p>or</p>
-          <Link role="button" to="/?select=all">
+          <Link className="button" to="/?select=all">
             💡 Find some inspiration
           </Link>
         </div>

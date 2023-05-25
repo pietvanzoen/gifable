@@ -99,7 +99,7 @@ function LoadMoreButton({ params }: { params: URLSearchParams }) {
 
   return (
     <Link
-      role="button"
+      className="button"
       to={`/?${params}${isHydrated ? "" : "#load-more"}`}
       preventScrollReset={true}
       replace={true}

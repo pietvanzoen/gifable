@@ -32,6 +32,7 @@ import { conflict } from "~/utils/request.server";
 import style from "~/styles/new.css";
 import { MediaSchema } from "~/utils/validators";
 import { formatBytes } from "~/utils/format";
+import classNames from "classnames";
 
 const fileFields = MediaSchema.extend({
   uploadType: z.literal("file"),
@@ -196,24 +197,24 @@ export default function NewMediaRoute() {
           or entering the URL of an image file.
         </p>
         <div className="button-group">
-          <Link
-            role="button"
-            to="?uploadType=url"
-            className={uploadType === "url" ? "active" : ""}
-            preventScrollReset={true}
-            replace={true}
-          >
-            URL
-          </Link>
-          <Link
-            role="button"
-            to="?uploadType=file"
-            className={uploadType === "file" ? "active" : ""}
-            preventScrollReset={true}
-            replace={true}
-          >
-            File
-          </Link>
+          {[
+            ["url", "URL"],
+            ["file", "File"],
+          ].map(([value, label]) => {
+            const active = uploadType === value;
+            return (
+              <Link
+                key={value}
+                to={`?uploadType=${value}`}
+                aria-current={active ? "page" : undefined}
+                className={classNames({ active }, "button")}
+                preventScrollReset={true}
+                replace={true}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
         <FormInput type="hidden" name="uploadType" value={uploadType} />
         <div className="file-box">

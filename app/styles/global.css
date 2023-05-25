@@ -224,11 +224,6 @@ button.link {
   cursor: pointer;
 }
 
-[role="button"] {
-  color: var(--bg) !important;
-  text-decoration: none;
-}
-
 .button-group {
   display: inline-block;
   margin: 0.5rem 0;

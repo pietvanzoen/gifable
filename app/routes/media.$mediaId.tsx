@@ -197,7 +197,7 @@ export default function MediaRoute() {
           <>
             <Link
               to={`/media/${media.id}/edit`}
-              role="button"
+              className="button"
               aria-label="Edit media info"
             >
               ✏️ Edit info
@@ -211,7 +211,7 @@ export default function MediaRoute() {
           )}&labels=${encodeURIComponent(
             media.labels || ""
           )}&altText=${encodeURIComponent(media.altText || "")}`}
-          role="button"
+          className="button"
           aria-label="Add to my collection"
         >
           {isMine ? "👯 Duplicate" : "📥 Add to my collection"}
