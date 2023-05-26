@@ -1,5 +1,5 @@
 # base node image
-FROM node:18-alpine as base
+FROM node:20-alpine as base
 
 # Install openssl for Prisma
 RUN apk add --update openssl && rm -rf /var/cache/apk/*
