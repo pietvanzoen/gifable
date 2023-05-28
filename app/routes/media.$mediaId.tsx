@@ -182,12 +182,41 @@ export default function MediaRoute() {
             </tr>
           )}
           {user.isAdmin ? (
-            <tr role="presentation">
-              <th tabIndex={-1}>Hash</th>
-              <td tabIndex={-1}>
-                <code>{media.fileHash}</code>
-              </td>
-            </tr>
+            <>
+              <tr role="presentation">
+                <th tabIndex={-1}>Hash</th>
+                <td tabIndex={-1}>
+                  <code>{media.fileHash}</code>
+                </td>
+              </tr>
+              <tr role="presentation">
+                <th tabIndex={-1}>Color</th>
+                <td tabIndex={-1}>
+                  {media.color && (
+                    <>
+                      <code>{media.color}</code> &nbsp;
+                      <svg
+                        width="20"
+                        height="20"
+                        version="1.1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        style={{ verticalAlign: "middle" }}
+                      >
+                        <rect
+                          x="0"
+                          y="0"
+                          width="20"
+                          height="20"
+                          stroke="#ccc"
+                          fill={media.color || ""}
+                          strokeWidth="1"
+                        />
+                      </svg>
+                    </>
+                  )}
+                </td>
+              </tr>
+            </>
           ) : null}
         </tbody>
       </table>
