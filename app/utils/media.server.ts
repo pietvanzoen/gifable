@@ -1,13 +1,12 @@
 import { payloadTooLarge } from "./request.server";
 import bytes from "bytes";
 import { storage } from "./s3-storage.server";
-import { getColor } from "colorthief";
-import Jimp from "jimp";
 import { debug } from "debug";
 import type { Media } from "@prisma/client";
 import { db } from "./db.server";
 import { LRUCache } from "lru-cache";
 import ms from "ms";
+import { getImageData } from "./image.server";
 const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes("10MB");
@@ -18,11 +17,8 @@ type UploadOutput = {
   hash: string;
 };
 
-export async function storeURL(
-  originalURL: string,
-  filename: string
-): Promise<UploadOutput> {
-  const buffer = await storage().download(originalURL, {
+export async function downloadUrl(originalURL: string): Promise<Buffer> {
+  return storage().download(originalURL, {
     progress(size) {
       if (size > MAX_FILE_SIZE) {
         throw payloadTooLarge({
@@ -31,16 +27,6 @@ export async function storeURL(
       }
     },
   });
-
-  const exists = await storage().exists(filename);
-
-  if (exists) {
-    throw new Error("File already exists");
-  }
-
-  const { url, hash } = await storage().upload(buffer, filename);
-
-  return { url, size: buffer.length, hash };
 }
 
 export async function storeBuffer(
@@ -57,30 +43,6 @@ export async function storeBuffer(
   return { url, size: buffer.length, hash };
 }
 
-type ImageData = {
-  color: string | null;
-  width: number;
-  height: number;
-  thumbnail: Buffer;
-};
-
-export async function getImageData(url: string): Promise<ImageData> {
-  const image = await Jimp.read(url);
-  const { width, height } = image.bitmap;
-
-  const thumbnail = await image
-    .resize(500, Jimp.AUTO)
-    .quality(80)
-    .getBufferAsync(Jimp.MIME_JPEG);
-
-  return {
-    color: await getPrimaryColor(url),
-    width,
-    height,
-    thumbnail,
-  };
-}
-
 export async function reparse(media: Media) {
   const filename = storage().getFilenameFromURL(media.url);
 
@@ -90,7 +52,7 @@ export async function reparse(media: Media) {
 
   const buffer = await storage().download(media.url);
 
-  const { width, height, color, thumbnail } = await getImageData(media.url);
+  const { width, height, color, thumbnail } = await getImageData(buffer);
 
   const { url: thumbnailUrl } = await storage().upload(
     thumbnail,
@@ -110,16 +72,6 @@ export async function reparse(media: Media) {
     size: buffer.length,
     fileHash,
   };
-}
-
-export async function getPrimaryColor(url: string): Promise<string | null> {
-  try {
-    const color: [number, number, number] = await getColor(url);
-    return `#${color.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
-  } catch (e) {
-    log("Failed to get primary color", e);
-    return null;
-  }
 }
 
 export async function deleteURL(url: string | null) {

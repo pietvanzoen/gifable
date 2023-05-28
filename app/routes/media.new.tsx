@@ -16,11 +16,10 @@ import SubmitButton from "~/components/SubmitButton";
 import { db } from "~/utils/db.server";
 import { getUser, requireUserId } from "~/utils/session.server";
 import {
-  storeURL,
-  getImageData,
   storeBuffer,
   makeThumbnailFilename,
   getMediaLabels,
+  downloadUrl,
 } from "~/utils/media.server";
 import bytes from "bytes";
 import { useEffect, useState } from "react";
@@ -33,6 +32,7 @@ import style from "~/styles/new.css";
 import { MediaSchema } from "~/utils/validators";
 import { formatBytes } from "~/utils/format";
 import classNames from "classnames";
+import { getImageData } from "~/utils/image.server";
 
 const fileFields = MediaSchema.extend({
   uploadType: z.literal("file"),
@@ -84,14 +84,13 @@ export async function action({ request }: ActionArgs) {
   let mediaUrl: string;
   let size: number;
 
+  const buffer =
+    uploadType === "url"
+      ? await downloadUrl(result.data.url)
+      : Buffer.from(await result.data.file.arrayBuffer());
+
   try {
-    const resp =
-      uploadType === "url"
-        ? await storeURL(result.data.url, userFilename)
-        : await storeBuffer(
-            Buffer.from(await result.data.file.arrayBuffer()),
-            userFilename
-          );
+    const resp = await storeBuffer(buffer, userFilename);
     mediaUrl = resp.url;
     fileHash = resp.hash;
     size = resp.size;
@@ -105,7 +104,7 @@ export async function action({ request }: ActionArgs) {
     throw error;
   }
 
-  const { thumbnail, ...imageData } = await getImageData(mediaUrl);
+  const { thumbnail, ...imageData } = await getImageData(buffer);
 
   const thumbnailFilename = makeThumbnailFilename(userFilename);
 
