@@ -3,11 +3,13 @@ import { useIsSubmitting } from "remix-validated-form";
 type SubmitButtonProps = {
   formId?: string;
   children?: React.ReactNode;
+  submitText?: string;
 };
 
 export default function SubmitButton({
   formId,
   children,
+  submitText = "Submitting...",
   ...buttonProps
 }: SubmitButtonProps = {}) {
   const isSubmitting = useIsSubmitting(formId);
@@ -18,7 +20,7 @@ export default function SubmitButton({
       disabled={isSubmitting}
       {...buttonProps}
     >
-      {isSubmitting ? "Submitting..." : children || "Submit"}
+      {isSubmitting ? submitText : children || "Submit"}
     </button>
   );
 }

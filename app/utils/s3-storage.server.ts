@@ -2,7 +2,6 @@ import { fetch } from "fetch-h2";
 import * as Minio from "minio";
 import { debug } from "debug";
 import path from "node:path";
-import assert from "node:assert";
 import env from "./env.server";
 import hasha from "hasha";
 const debugLog = debug("app:s3-storage");

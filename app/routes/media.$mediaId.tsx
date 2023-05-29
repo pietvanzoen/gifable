@@ -10,9 +10,13 @@ import {
   useRouteError,
   useSearchParams,
 } from "@remix-run/react";
+import { withZod } from "@remix-validated-form/with-zod";
 import { useState } from "react";
 import { forbidden, notFound, useHydrated } from "remix-utils";
+import { ValidatedForm } from "remix-validated-form";
+import { z } from "zod";
 import DialogModal from "~/components/DialogModal";
+import SubmitButton from "~/components/SubmitButton";
 import { useToast } from "~/components/Toast";
 
 import { db } from "~/utils/db.server";
@@ -41,7 +45,7 @@ export async function action({ params, request }: ActionArgs) {
     throw forbidden({ message: "You can't do that" });
   }
 
-  switch (form.get("intent") as string) {
+  switch (form.get("subaction") as string) {
     case "reparse":
       if (!user.isAdmin) {
         throw forbidden({ message: "You can't do that" });
@@ -252,11 +256,14 @@ export default function MediaRoute() {
       {user.isAdmin ? (
         <center>
           <br />
-          <form method="post" style={{ display: "inline-block" }}>
-            <button name="intent" type="submit" value="reparse">
-              🔁 Reparse
-            </button>
-          </form>
+          <ValidatedForm
+            subaction="reparse"
+            validator={withZod(z.object({}))}
+            method="post"
+            style={{ display: "inline-block" }}
+          >
+            <SubmitButton submitText="Reparsing...">🔁 Reparse</SubmitButton>
+          </ValidatedForm>
         </center>
       ) : null}
     </>
@@ -276,7 +283,7 @@ function DeleteButton({ media }: { media: Pick<Media, "id" | "url"> }) {
         }}
       >
         <button
-          name="intent"
+          name="subaction"
           type="submit"
           value="delete"
           aria-label="Delete media"
@@ -292,21 +299,22 @@ function DeleteButton({ media }: { media: Pick<Media, "id" | "url"> }) {
           <br />
           This action cannot be undone.
         </p>
-
-        <form method="post">
-          <button formMethod="dialog" aria-label="Cancel delete">
+        <form method="dialog" style={{ display: "inline-block" }}>
+          <button type="submit" aria-label="Cancel delete">
             🚫 Cancel
           </button>
-          &nbsp;&nbsp;
-          <button
-            name="intent"
-            type="submit"
-            value="delete"
-            aria-label="Delete media"
-          >
-            🗑️ Delete
-          </button>
         </form>
+        &nbsp;&nbsp;
+        <ValidatedForm
+          subaction="delete"
+          validator={withZod(z.object({}))}
+          style={{ display: "inline-block" }}
+          method="post"
+        >
+          <SubmitButton aria-label="Delete media" submitText="Deleting...">
+            🗑️ Delete
+          </SubmitButton>
+        </ValidatedForm>
       </DialogModal>
     </>
   );
