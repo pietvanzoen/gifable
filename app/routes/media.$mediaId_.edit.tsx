@@ -20,6 +20,8 @@ import { requireUser } from "~/utils/session.server";
 import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { MediaSchema } from "~/utils/validators";
 import FormInput from "~/components/FormInput";
+import { useState } from "react";
+import SuggestedText from "~/components/SuggestedText";
 
 const validator = withZod(MediaSchema);
 
@@ -64,15 +66,30 @@ export async function loader({ params }: LoaderArgs) {
   if (!media) {
     throw notFound({ message: "Media not found" });
   }
-  const terms = await getMediaLabels();
-  return json({ media, terms });
+  const [[matchingMedia], terms] = await Promise.all([
+    db.media.findMany({
+      where: {
+        fileHash: media.fileHash,
+        id: { not: media.id },
+        AND: [{ altText: { not: "" } }, { altText: { not: null } }],
+      },
+      select: { url: true, altText: true, labels: true },
+      take: 1,
+    }),
+    getMediaLabels(),
+  ]);
+
+  return json({ media, terms, matchingMedia });
 }
 
 export default function MediaRoute() {
-  const { media, terms } = useLoaderData<typeof loader>();
+  const { media, terms, matchingMedia } = useLoaderData<typeof loader>();
   const filename = media.url.split("/").pop();
 
-  const { url = "", labels = "", altText = "", width, height, color } = media;
+  const { url = "", width, height, color } = media;
+  const [altText, setAltText] = useState(media.altText || "");
+  const [labels, setLabels] = useState(media.labels || "");
+
   const title = url.split("/").pop();
 
   return (
@@ -97,8 +114,8 @@ export default function MediaRoute() {
         validator={validator}
         defaultValues={{
           filename,
-          labels: labels || "",
-          altText: altText || "",
+          labels,
+          altText,
         }}
         method="post"
         noValidate={useHydrated()}
@@ -114,12 +131,25 @@ export default function MediaRoute() {
             help="Changing the filename will break the existing url."
             required
           />
-          <MediaLabelsInput terms={terms || []} />
+          <MediaLabelsInput terms={terms || []} defaultValue={labels} />
+          <SuggestedText
+            text={matchingMedia?.labels}
+            currentText={labels}
+            label="labels"
+            onClick={setLabels}
+          />
           <FormInput
             type="textarea"
             name="altText"
             label="Alt text"
+            defaultValue={altText}
             help="Provide a descriptive alternative text (alt text) for the image. Alt text is used to convey the content of an image to folks who are visually impaired or unable to view the image."
+          />
+          <SuggestedText
+            text={matchingMedia?.altText}
+            currentText={altText}
+            label="alt text"
+            onClick={setAltText}
           />
         </fieldset>
       </ValidatedForm>

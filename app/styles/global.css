@@ -149,6 +149,10 @@ a[aria-current="page"]:hover {
   color: var(--accent);
 }
 
+textarea {
+  resize: vertical;
+}
+
 input.field-error {
   border-color: var(--accent);
 }
