@@ -51,7 +51,7 @@ export async function getPrimaryColor(image: Jimp): Promise<Color | null> {
       r,
       g,
       b,
-      hex: [r, g, b].reduce((acc, c) => acc + c.toString(16), "#"),
+      hex: `#${[r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")}`,
     };
   } catch (e) {
     log("Failed to get primary color", e);
