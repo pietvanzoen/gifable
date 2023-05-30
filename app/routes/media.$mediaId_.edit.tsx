@@ -15,7 +15,7 @@ import { ValidatedForm, validationError } from "remix-validated-form";
 import SubmitButton from "~/components/SubmitButton";
 
 import { db } from "~/utils/db.server";
-import { getMediaLabels } from "~/utils/media.server";
+import { getMediaLabels, getMediaSuggestions } from "~/utils/media.server";
 import { rename } from "~/utils/media.server";
 import { requireUser } from "~/utils/session.server";
 import MediaLabelsInput from "~/components/MediaLabelsInput";
@@ -74,23 +74,17 @@ export async function loader({ params }: LoaderArgs) {
   if (!media) {
     throw notFound({ message: "Media not found" });
   }
-  const [matchingMedia, terms] = await Promise.all([
-    db.media.findMany({
-      where: {
-        fileHash: media.fileHash,
-        id: { not: media.id },
-        AND: [{ altText: { not: "" } }, { altText: { not: null } }],
-      },
-      select: { url: true, altText: true, labels: true },
-      take: 5,
-    }),
+
+  const [suggestions, terms] = await Promise.all([
+    getMediaSuggestions(media),
     getMediaLabels(),
   ]);
 
-  const { altText } = matchingMedia.find(({ altText }) => altText) || {};
-  const { labels } = matchingMedia.find(({ labels }) => labels) || {};
-
-  return json({ media, terms, suggestions: { labels, altText } });
+  return json({
+    media,
+    terms,
+    suggestions,
+  });
 }
 
 export default function MediaRoute() {
@@ -210,22 +204,26 @@ function SuggestedText({
   onClick: (text: string) => void;
   label: string;
 }) {
-  if (!useHydrated()) return null;
-  if (currentText) return null;
+  const isHydrated = useHydrated();
+  if (currentText === text) return null;
   if (!text) return null;
   return (
     <small>
       <strong>Suggested {label}:</strong> <em>{text}</em>
-      &nbsp;&nbsp;
-      <button
-        type="button"
-        className="link"
-        aria-label={`Use suggested ${label} "${text}"`}
-        title={`Use suggested ${label} "${text}"`}
-        onClick={() => onClick(text)}
-      >
-        Use suggestion
-      </button>{" "}
+      {isHydrated && (
+        <>
+          &nbsp;&nbsp;
+          <button
+            type="button"
+            className="link"
+            aria-label={`Use suggested ${label} "${text}"`}
+            title={`Use suggested ${label} "${text}"`}
+            onClick={() => onClick(text)}
+          >
+            Use suggestion
+          </button>{" "}
+        </>
+      )}
     </small>
   );
 }

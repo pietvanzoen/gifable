@@ -188,3 +188,40 @@ export async function getMediaLabels(
 
   return labelsCache.get(cacheKey);
 }
+
+export async function getMediaSuggestions(
+  media: Pick<Media, "id" | "fileHash" | "altText" | "labels">
+) {
+  const suggestionsWhere = {
+    fileHash: media.fileHash,
+    id: { not: media.id },
+  };
+
+  const [[altTextMedia], [labelsMedia]] = await Promise.all([
+    media.altText
+      ? [null]
+      : db.media.findMany({
+          where: {
+            ...suggestionsWhere,
+            AND: [{ altText: { not: "" } }, { altText: { not: null } }],
+          },
+          select: { altText: true },
+          take: 1,
+        }),
+    media.labels
+      ? [null]
+      : db.media.findMany({
+          where: {
+            ...suggestionsWhere,
+            AND: [{ labels: { not: "" } }, { labels: { not: null } }],
+          },
+          select: { labels: true },
+          take: 1,
+        }),
+  ]);
+
+  return {
+    altText: altTextMedia?.altText,
+    labels: labelsMedia?.labels,
+  };
+}
