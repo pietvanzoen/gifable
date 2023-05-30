@@ -1,5 +1,5 @@
 import type { Media } from "@prisma/client";
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
@@ -7,6 +7,7 @@ import {
   Link,
   useLoaderData,
   useRouteError,
+  useSearchParams,
 } from "@remix-run/react";
 import { withZod } from "@remix-validated-form/with-zod";
 import { forbidden, notFound, useHydrated } from "remix-utils";
@@ -21,9 +22,16 @@ import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { MediaSchema } from "~/utils/validators";
 import FormInput from "~/components/FormInput";
 import { useState } from "react";
-import SuggestedText from "~/components/SuggestedText";
+import { makeTitle } from "~/utils/meta";
+import { getTitle } from "~/utils/media";
 
 const validator = withZod(MediaSchema);
+
+export function meta({ data }: V2_MetaArgs<typeof loader>) {
+  return [
+    { title: makeTitle([`Edit info for ${getTitle(data?.media?.url)}`]) },
+  ];
+}
 
 export async function action({ params, request }: ActionArgs) {
   const user = await requireUser(request);
@@ -66,7 +74,7 @@ export async function loader({ params }: LoaderArgs) {
   if (!media) {
     throw notFound({ message: "Media not found" });
   }
-  const [[matchingMedia], terms] = await Promise.all([
+  const [matchingMedia, terms] = await Promise.all([
     db.media.findMany({
       where: {
         fileHash: media.fileHash,
@@ -74,16 +82,21 @@ export async function loader({ params }: LoaderArgs) {
         AND: [{ altText: { not: "" } }, { altText: { not: null } }],
       },
       select: { url: true, altText: true, labels: true },
-      take: 1,
+      take: 5,
     }),
     getMediaLabels(),
   ]);
 
-  return json({ media, terms, matchingMedia });
+  const { altText } = matchingMedia.find(({ altText }) => altText) || {};
+  const { labels } = matchingMedia.find(({ labels }) => labels) || {};
+
+  return json({ media, terms, suggestions: { labels, altText } });
 }
 
 export default function MediaRoute() {
-  const { media, terms, matchingMedia } = useLoaderData<typeof loader>();
+  const { media, terms, suggestions } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const isNew = searchParams.get("new") === "true";
   const filename = media.url.split("/").pop();
 
   const { url = "", width, height, color } = media;
@@ -94,21 +107,6 @@ export default function MediaRoute() {
 
   return (
     <div>
-      <h2>
-        <center>Edit {title}</center>
-      </h2>
-      <figure>
-        <center>
-          <img
-            src={url}
-            alt={labels || ""}
-            width={width || 300}
-            height={height || 200}
-            style={{ backgroundColor: color || "#ccc" }}
-          />
-        </center>
-      </figure>
-
       <ValidatedForm
         id="edit-form"
         validator={validator}
@@ -122,22 +120,48 @@ export default function MediaRoute() {
       >
         <fieldset>
           <legend>
-            <h2>Edit info</h2>
+            <h2>{isNew ? "Add" : "Edit"} info</h2>
           </legend>
+          <h3>
+            <center>{title}</center>
+          </h3>
+          <figure>
+            <center>
+              <img
+                src={url}
+                alt={labels || ""}
+                width={width || 300}
+                height={height || 200}
+                style={{ backgroundColor: color || "#ccc", maxWidth: "300px" }}
+              />
+            </center>
+          </figure>
+          <br />
+
+          {isNew && (
+            <p>
+              Add more info about this image. You can edit this later if you
+              want.
+            </p>
+          )}
+
           <FormInput
-            type="text"
+            type={isNew ? "hidden" : "text"}
             name="filename"
             label="Filename"
             help="Changing the filename will break the existing url."
             required
           />
+
+          <hr />
           <MediaLabelsInput terms={terms || []} defaultValue={labels} />
           <SuggestedText
-            text={matchingMedia?.labels}
+            text={suggestions.labels}
             currentText={labels}
             label="labels"
             onClick={setLabels}
           />
+          <hr />
           <FormInput
             type="textarea"
             name="altText"
@@ -146,28 +170,63 @@ export default function MediaRoute() {
             help="Provide a descriptive alternative text (alt text) for the image. Alt text is used to convey the content of an image to folks who are visually impaired or unable to view the image."
           />
           <SuggestedText
-            text={matchingMedia?.altText}
+            text={suggestions?.altText}
             currentText={altText}
             label="alt text"
             onClick={setAltText}
           />
+          <hr />
+          <center>
+            <Link
+              to={`/media/${media.id}`}
+              aria-label="Cancel edit"
+              className="button"
+            >
+              {isNew ? "⏭️ Skip for now" : "🚫 Cancel"}
+            </Link>
+            &nbsp;
+            <SubmitButton
+              formId="edit-form"
+              aria-label="Save edits"
+              submitText="Saving..."
+            >
+              ✅ Save
+            </SubmitButton>
+          </center>
         </fieldset>
       </ValidatedForm>
-
-      <center>
-        <Link
-          to={`/media/${media.id}`}
-          aria-label="Cancel edit"
-          className="button"
-        >
-          🚫 Cancel
-        </Link>
-        &nbsp;
-        <SubmitButton formId="edit-form" aria-label="Save edits">
-          ✅ Save
-        </SubmitButton>
-      </center>
     </div>
+  );
+}
+
+function SuggestedText({
+  text,
+  currentText,
+  onClick,
+  label,
+}: {
+  text: string | null | undefined;
+  currentText: string | null | undefined;
+  onClick: (text: string) => void;
+  label: string;
+}) {
+  if (!useHydrated()) return null;
+  if (currentText) return null;
+  if (!text) return null;
+  return (
+    <small>
+      <strong>Suggested {label}:</strong> <em>{text}</em>
+      &nbsp;&nbsp;
+      <button
+        type="button"
+        className="link"
+        aria-label={`Use suggested ${label} "${text}"`}
+        title={`Use suggested ${label} "${text}"`}
+        onClick={() => onClick(text)}
+      >
+        Use suggestion
+      </button>{" "}
+    </small>
   );
 }
 

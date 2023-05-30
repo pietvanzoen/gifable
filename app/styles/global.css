@@ -153,6 +153,12 @@ textarea {
   resize: vertical;
 }
 
+.field input:last-child,
+.field textarea:last-child,
+.field select:last-child {
+  margin-bottom: 0;
+}
+
 input.field-error {
   border-color: var(--accent);
 }

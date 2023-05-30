@@ -23,7 +23,6 @@ import {
 } from "~/utils/media.server";
 import bytes from "bytes";
 import { useEffect, useState } from "react";
-import MediaLabelsInput from "~/components/MediaLabelsInput";
 import { getTitle } from "~/utils/media";
 import { makeTitle } from "~/utils/meta";
 import Alert from "~/components/Alert";
@@ -127,7 +126,7 @@ export async function action({ request }: ActionArgs) {
     },
   });
 
-  return redirect(`/media/${media.id}`);
+  return redirect(`/media/${media.id}/edit?new=true`);
 }
 
 export async function loader({ request }: LoaderArgs) {
@@ -287,15 +286,12 @@ export default function NewMediaRoute() {
             )}
           </div>
         </div>
-        <MediaLabelsInput terms={data.terms || []} />
-        <FormInput
-          type="textarea"
-          name="altText"
-          label="Alt text"
-          help="Provide a descriptive alternative text (alt text) for the image. Alt text is used to convey the content of an image to folks who are visually impaired or unable to view the image."
-        />
-        <Alert>{actionData?.formError}</Alert>
-        <SubmitButton aria-label="Submit">✅ Submit</SubmitButton>
+
+        <br />
+        <center>
+          <Alert>{actionData?.formError}</Alert>
+          <SubmitButton aria-label="Upload media">📸 Upload</SubmitButton>
+        </center>
       </fieldset>
     </ValidatedForm>
   );
