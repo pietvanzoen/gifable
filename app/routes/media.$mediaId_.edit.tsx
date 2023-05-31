@@ -5,6 +5,7 @@ import { json } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   Link,
+  useActionData,
   useLoaderData,
   useRouteError,
   useSearchParams,
@@ -24,6 +25,8 @@ import FormInput from "~/components/FormInput";
 import { useState } from "react";
 import { makeTitle } from "~/utils/meta";
 import { getTitle } from "~/utils/media";
+import { conflict } from "~/utils/request.server";
+import Alert from "~/components/Alert";
 
 const validator = withZod(MediaSchema);
 
@@ -56,7 +59,19 @@ export async function action({ params, request }: ActionArgs) {
   const currentFilename = media.url.split("/").pop();
   if (currentFilename !== result.data.filename) {
     const newFilename = `${user.username}/${result.data.filename}`;
-    renameData = await rename(media, newFilename);
+    try {
+      renameData = await rename(media, newFilename);
+    } catch (error: any) {
+      if (error?.message === "File already exists") {
+        return conflict({
+          repopulateFields: result.data,
+          fieldErrors: {
+            filename: `Filename ${result.data.filename} already exists`,
+          },
+        });
+      }
+      throw error;
+    }
   }
 
   await db.media.update({
@@ -90,6 +105,7 @@ export async function loader({ params }: LoaderArgs) {
 export default function MediaRoute() {
   const { media, terms, suggestions } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
+  const actionData = useActionData<typeof action>();
   const isNew = searchParams.get("new") === "true";
   const filename = media.url.split("/").pop();
 
@@ -104,11 +120,13 @@ export default function MediaRoute() {
       <ValidatedForm
         id="edit-form"
         validator={validator}
-        defaultValues={{
-          filename,
-          labels,
-          altText,
-        }}
+        defaultValues={
+          actionData?.repopulateFields || {
+            filename,
+            labels,
+            altText,
+          }
+        }
         method="post"
         noValidate={useHydrated()}
       >
@@ -170,6 +188,7 @@ export default function MediaRoute() {
             onClick={setAltText}
           />
           <hr />
+          <Alert>{actionData?.formError}</Alert>
           <center>
             <Link
               to={`/media/${media.id}`}

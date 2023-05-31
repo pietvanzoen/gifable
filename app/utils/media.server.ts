@@ -93,6 +93,13 @@ export async function rename(
   if (!filename) {
     return null;
   }
+
+  const exists = await storage().exists(newFilename);
+
+  if (exists) {
+    throw new Error("File already exists");
+  }
+
   const requests = [storage().rename(filename, newFilename)];
 
   const thumbnailFilename = storage().getFilenameFromURL(
