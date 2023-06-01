@@ -363,6 +363,7 @@ $RECYCLE.BIN/
 
 .env
 .env.test
+.env.e2e
 prisma/*.db*
 build/
 public/build/
@@ -370,3 +371,5 @@ public/css/simple.min.css
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+playwright/.auth

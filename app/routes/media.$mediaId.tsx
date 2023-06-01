@@ -146,7 +146,7 @@ export default function MediaRoute() {
           </tr>
           <tr role="presentation">
             <th tabIndex={-1}>Labels</th>
-            <td tabIndex={-1}>
+            <td tabIndex={-1} data-testid="labels">
               {labels?.split(",").map((text, i: number) => {
                 const term = text.trim().toLowerCase();
                 return (
@@ -165,7 +165,9 @@ export default function MediaRoute() {
           </tr>
           <tr role="presentation">
             <th tabIndex={-1}>Alt text</th>
-            <td tabIndex={-1}>{altText}</td>
+            <td tabIndex={-1} data-testid="alt-text">
+              {altText}
+            </td>
           </tr>
           <tr role="presentation">
             <th tabIndex={-1}>Size</th>

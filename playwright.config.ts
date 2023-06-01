@@ -1,16 +1,16 @@
 import { defineConfig, devices } from "@playwright/test";
+import env from "./e2e/utils/env";
 
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-require("dotenv").config({ path: ".env.test" });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: "./tests",
+  testDir: "./e2e/tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -32,9 +32,15 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
+
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup"],
     },
 
     //     {
@@ -54,7 +60,11 @@ export default defineConfig({
     // },
     {
       name: "Mobile Safari",
-      use: { ...devices["iPhone 12"] },
+      use: {
+        ...devices["iPhone 12"],
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup"],
     },
 
     /* Test against branded browsers. */
@@ -71,7 +81,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: "npm run start:test-server",
-    url: "http://127.0.0.1:3000",
+    url: env.require("APP_URL"),
     reuseExistingServer: !process.env.CI,
   },
 });
