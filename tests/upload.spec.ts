@@ -1,10 +1,9 @@
 import { test, expect } from "@playwright/test";
-import env from "e2e/utils/env";
 
 test("can upload file via URL and set labels and alt text", async ({
   page,
 }) => {
-  await page.goto(env.require("TEST_APP_URL"));
+  await page.goto("/");
   await page.getByRole("link", { name: "Add" }).click();
 
   await expect(page).toHaveTitle(/^Upload/);
