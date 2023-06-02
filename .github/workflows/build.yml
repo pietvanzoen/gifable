@@ -35,7 +35,6 @@ jobs:
     needs: install
     services:
       s3-mock:
-        # docker run -p 9090:9090 -p 9191:9191 -e initialBuckets=test -e debug=true -t adobe/s3mock
         image: adobe/s3mock
         ports:
           - 9090:9090
