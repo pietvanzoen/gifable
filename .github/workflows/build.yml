@@ -33,6 +33,27 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     needs: install
+    services:
+      s3-mock:
+        # docker run -p 9090:9090 -p 9191:9191 -e initialBuckets=test -e debug=true -t adobe/s3mock
+        image: adobe/s3mock
+        ports:
+          - 9090:9090
+          - 9191:9191
+        env:
+          initialBuckets: test
+          root: s3mock
+    env:
+      DATABASE_URL: file:./test.db
+      SESSION_SECRET: test
+      DEBUG: "app:*"
+      S3_ENDPOINT: localhost
+      S3_PORT: 9090
+      S3_ACCESS_KEY: test
+      S3_SECRET_KEY: test
+      S3_BUCKET: test
+      S3_USE_SSL: false
+      S3_STORAGE_BASE_URL: http://localhost:9090/s3mock
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -46,7 +67,7 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
-        run: echo "${{ secrets.ENV_TEST }}" > .env.test && npx playwright test
+        run: npx playwright test
       - uses: actions/upload-artifact@v3
         if: always()
         with:
