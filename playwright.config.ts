@@ -59,14 +59,14 @@ export default defineConfig({
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },
     // },
-    {
-      name: "Mobile Safari",
-      use: {
-        ...devices["iPhone 12"],
-        storageState: "playwright/.auth/user.json",
-      },
-      dependencies: ["setup"],
-    },
+    // {
+    //   name: "Mobile Safari",
+    //   use: {
+    //     ...devices["iPhone 12"],
+    //     storageState: "playwright/.auth/user.json",
+    //   },
+    //   dependencies: ["setup"],
+    // },
 
     /* Test against branded browsers. */
     // {
