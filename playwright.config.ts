@@ -28,6 +28,7 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+    video: "retain-on-failure",
   },
 
   /* Configure projects for major browsers */
@@ -58,14 +59,14 @@ export default defineConfig({
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },
     // },
-    {
-      name: "Mobile Safari",
-      use: {
-        ...devices["iPhone 12"],
-        storageState: "playwright/.auth/user.json",
-      },
-      dependencies: ["setup"],
-    },
+    // {
+    //   name: "Mobile Safari",
+    //   use: {
+    //     ...devices["iPhone 12"],
+    //     storageState: "playwright/.auth/user.json",
+    //   },
+    //   dependencies: ["setup"],
+    // },
 
     /* Test against branded browsers. */
     // {

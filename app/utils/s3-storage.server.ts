@@ -102,7 +102,7 @@ export default class S3Storage {
   }
 
   private makeFileURL(filePath: string) {
-    return new URL(filePath, this.storageBaseURL).toString();
+    return urljoin(this.storageBaseURL, filePath);
   }
 
   async download(
@@ -178,4 +178,11 @@ export default class S3Storage {
   async getHash(buffer: Buffer): Promise<string> {
     return hasha.async(buffer, { algorithm: "md5" });
   }
+}
+
+function urljoin(...parts: string[]) {
+  return parts
+    .map((part) => part.replace(/(^\/|\/$)/g, ""))
+    .filter(Boolean)
+    .join("/");
 }
