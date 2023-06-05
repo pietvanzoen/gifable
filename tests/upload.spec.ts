@@ -27,8 +27,8 @@ test("can upload file via URL and set labels and alt text", async ({
 
   await expect(page).toHaveTitle(new RegExp(`^${filename}`));
 
-  expect(page.getByTestId("labels")).toHaveText("e2e-test, shipit");
-  expect(page.getByTestId("alt-text")).toHaveText(
+  await expect(page.getByTestId("labels")).toHaveText("e2e-test, shipit");
+  await expect(page.getByTestId("alt-text")).toHaveText(
     "This shouldn't break production"
   );
 });
