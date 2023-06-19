@@ -39,7 +39,7 @@
     "quantize": "^1.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remix-utils": "^6.1.0",
+    "remix-utils": "^6.4.1",
     "remix-validated-form": "^4.6.11",
     "zod": "^3.21.4",
     "zustand": "^4.3.8"
