@@ -5,10 +5,10 @@ import {
   useRouteError,
   useSearchParams,
 } from "@remix-run/react";
-import { useHydrated } from "remix-utils";
+import { getClientIPAddress, useHydrated } from "remix-utils";
 
 import { db } from "~/utils/db.server";
-import { badRequest } from "~/utils/request.server";
+import { badRequest, tooManyRequests } from "~/utils/request.server";
 import { createUserSession, login, register } from "~/utils/session.server";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
@@ -20,6 +20,8 @@ import debug from "debug";
 import { UserSchema } from "~/utils/validators";
 import { makeTitle } from "~/utils/meta";
 import styles from "~/styles/login.css";
+import { rateLimiter } from "~/utils/rate-limiter.server";
+import { RateLimiterRes } from "rate-limiter-flexible";
 
 const log = debug("app:login");
 
@@ -42,12 +44,35 @@ export function meta() {
 }
 
 export async function action({ request }: ActionArgs) {
+  const authRateLimiter = rateLimiter({
+    keyPrefix: "auth",
+    points: 5,
+    duration: 60,
+  });
+
+  log("Handling login action");
+
   const form = await request.formData();
   const result = await validator.validate(form);
 
   if (result.error) return validationError(result.error, result.submittedData);
 
   const { loginType, username, password, redirectTo = "" } = result.data;
+
+  try {
+    await authRateLimiter.consume(getClientIPAddress(request) || username);
+  } catch (e) {
+    if (e instanceof RateLimiterRes) {
+      log("Rate limit exceeded for %s", username);
+      return tooManyRequests({
+        repopulateFields: result.submittedData,
+        formError: `Too many attempts. You can try again in ${Math.round(
+          e.msBeforeNext / 1000
+        )} seconds.`,
+      });
+    }
+    throw e;
+  }
 
   switch (loginType) {
     case "login": {
