@@ -8,7 +8,7 @@ import {
 import { getClientIPAddress, useHydrated } from "remix-utils";
 
 import { db } from "~/utils/db.server";
-import { badRequest, tooManyRequests } from "~/utils/request.server";
+import { badRequest } from "~/utils/request.server";
 import { createUserSession, login, register } from "~/utils/session.server";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
@@ -20,8 +20,7 @@ import debug from "debug";
 import { UserSchema } from "~/utils/validators";
 import { makeTitle } from "~/utils/meta";
 import styles from "~/styles/login.css";
-import { rateLimiter } from "~/utils/rate-limiter.server";
-import { RateLimiterRes } from "rate-limiter-flexible";
+import { isRateLimited, rateLimitError } from "~/utils/rate-limiter.server";
 
 const log = debug("app:login");
 
@@ -31,6 +30,18 @@ const validator = withZod(
     redirectTo: z.string().optional(),
   })
 );
+
+const LOGIN_RATE_LIMITER_OPTIONS = {
+  keyPrefix: "login",
+  points: 5,
+  duration: 60,
+};
+
+const REGISTER_RATE_LIMITER_OPTIONS = {
+  keyPrefix: "register",
+  points: 1,
+  duration: 60,
+};
 
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
@@ -44,12 +55,6 @@ export function meta() {
 }
 
 export async function action({ request }: ActionArgs) {
-  const authRateLimiter = rateLimiter({
-    keyPrefix: "auth",
-    points: 5,
-    duration: 60,
-  });
-
   log("Handling login action");
 
   const form = await request.formData();
@@ -59,30 +64,19 @@ export async function action({ request }: ActionArgs) {
 
   const { loginType, username, password, redirectTo = "" } = result.data;
 
-  try {
-    await authRateLimiter.consume(getClientIPAddress(request) || username);
-  } catch (e) {
-    if (e instanceof RateLimiterRes) {
-      log("Rate limit exceeded for %s", username);
-      return tooManyRequests({
-        repopulateFields: result.submittedData,
-        formError: `Too many attempts. You can try again in ${Math.round(
-          e.msBeforeNext / 1000
-        )} seconds.`,
-      });
-    }
-    throw e;
-  }
-
   switch (loginType) {
     case "login": {
       log("Logging in user %s", username);
+
+      const resp = await isRateLimited(username, LOGIN_RATE_LIMITER_OPTIONS);
+      if (resp) return rateLimitError(resp);
+
       const user = await login({ username, password });
       if (!user) {
         log("User %s not found", username);
         return badRequest({
           repopulateFields: result.submittedData,
-          formError: `Username/Password combination is incorrect`,
+          message: `Username/Password combination is incorrect`,
         });
       }
 
@@ -91,6 +85,12 @@ export async function action({ request }: ActionArgs) {
 
     case "register": {
       log("Registering user %s", username);
+      const resp = await isRateLimited(
+        getClientIPAddress(request) || username,
+        REGISTER_RATE_LIMITER_OPTIONS
+      );
+      if (resp) return rateLimitError(resp);
+
       const userExists = await db.user.findUnique({
         where: { username },
       });
@@ -98,7 +98,7 @@ export async function action({ request }: ActionArgs) {
         log("User %s already exists", username);
         return badRequest({
           repopulateFields: result.submittedData,
-          formError: `User with username ${username} already exists`,
+          message: `User with username ${username} already exists`,
         });
       }
 
@@ -109,7 +109,7 @@ export async function action({ request }: ActionArgs) {
         log("Failed to create user %s", username);
         return badRequest({
           repopulateFields: result.submittedData,
-          formError: `Something went wrong trying to create a new user.`,
+          message: `Something went wrong trying to create a new user.`,
         });
       }
 
@@ -120,7 +120,7 @@ export async function action({ request }: ActionArgs) {
       log("Invalid login type %s", loginType);
       return badRequest({
         repopulateFields: result.submittedData,
-        formError: `Login type invalid`,
+        message: `Login type invalid`,
       });
     }
   }
@@ -161,7 +161,7 @@ export default function Login() {
         />
         <FormInput name="username" label="Username" required />
         <FormInput name="password" label="Password" type="password" required />
-        <Alert>{actionData?.formError}</Alert>
+        <Alert>{actionData?.message}</Alert>
         <SubmitButton />
       </fieldset>
     </ValidatedForm>

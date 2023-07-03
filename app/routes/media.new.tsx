@@ -32,6 +32,13 @@ import { MediaSchema } from "~/utils/validators";
 import { formatBytes } from "~/utils/format";
 import classNames from "classnames";
 import { getImageData } from "~/utils/image.server";
+import { isRateLimited, rateLimitError } from "~/utils/rate-limiter.server";
+
+const UPLOAD_RATE_LIMITER_OPTIONS = {
+  keyPrefix: "upload",
+  points: 5,
+  duration: 60,
+};
 
 const fileFields = MediaSchema.extend({
   uploadType: z.literal("file"),
@@ -56,6 +63,12 @@ export function meta() {
 }
 
 export async function action({ request }: ActionArgs) {
+  const userId = await requireUserId(request);
+
+  const resp = await isRateLimited(userId, UPLOAD_RATE_LIMITER_OPTIONS);
+
+  if (resp) return rateLimitError(resp);
+
   const formData = await unstable_parseMultipartFormData(
     request,
     unstable_createMemoryUploadHandler({
@@ -66,8 +79,6 @@ export async function action({ request }: ActionArgs) {
       },
     })
   );
-
-  const userId = await requireUserId(request);
 
   const result = await validator.validate(formData);
   if (result.error) return validationError(result.error, result.submittedData);
@@ -97,7 +108,7 @@ export async function action({ request }: ActionArgs) {
     if (error?.message === "File already exists") {
       return conflict({
         repopulateFields: result.data,
-        formError: `Filename ${filename} already exists`,
+        message: `Filename ${filename} already exists`,
       });
     }
     throw error;
@@ -289,7 +300,7 @@ export default function NewMediaRoute() {
 
         <br />
         <center>
-          <Alert>{actionData?.formError}</Alert>
+          <Alert>{actionData?.message}</Alert>
           <SubmitButton aria-label="Upload media">📸 Upload</SubmitButton>
         </center>
       </fieldset>
