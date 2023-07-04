@@ -8,7 +8,7 @@ Gifable is a self hostable gif library manager.
 - Find your perfect gif quickly.
 - Upload gifs to your S3 compatible bucket.
 - Works with javascript disabled.
-- keyboard / accessibility friendly.
+- Keyboard / accessibility friendly.
 
 ## Running with docker
 
