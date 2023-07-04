@@ -130,7 +130,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push the Docker image
         run: |
           docker push ghcr.io/pietvanzoen/gifable:${{ steps.vars.outputs.sha_short }}
