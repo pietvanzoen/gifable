@@ -5,7 +5,7 @@ import {
   useRouteError,
   useSearchParams,
 } from "@remix-run/react";
-import { useHydrated } from "remix-utils";
+import { getClientIPAddress, useHydrated } from "remix-utils";
 
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -20,6 +20,7 @@ import debug from "debug";
 import { UserSchema } from "~/utils/validators";
 import { makeTitle } from "~/utils/meta";
 import styles from "~/styles/login.css";
+import { isRateLimited, rateLimitError } from "~/utils/rate-limiter.server";
 
 const log = debug("app:login");
 
@@ -29,6 +30,18 @@ const validator = withZod(
     redirectTo: z.string().optional(),
   })
 );
+
+const LOGIN_RATE_LIMITER_OPTIONS = {
+  keyPrefix: "login",
+  points: 5,
+  duration: 60,
+};
+
+const REGISTER_RATE_LIMITER_OPTIONS = {
+  keyPrefix: "register",
+  points: 1,
+  duration: 60,
+};
 
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
@@ -42,6 +55,8 @@ export function meta() {
 }
 
 export async function action({ request }: ActionArgs) {
+  log("Handling login action");
+
   const form = await request.formData();
   const result = await validator.validate(form);
 
@@ -52,12 +67,16 @@ export async function action({ request }: ActionArgs) {
   switch (loginType) {
     case "login": {
       log("Logging in user %s", username);
+
+      const resp = await isRateLimited(username, LOGIN_RATE_LIMITER_OPTIONS);
+      if (resp) return rateLimitError(resp);
+
       const user = await login({ username, password });
       if (!user) {
         log("User %s not found", username);
         return badRequest({
           repopulateFields: result.submittedData,
-          formError: `Username/Password combination is incorrect`,
+          message: `Username/Password combination is incorrect`,
         });
       }
 
@@ -66,6 +85,12 @@ export async function action({ request }: ActionArgs) {
 
     case "register": {
       log("Registering user %s", username);
+      const resp = await isRateLimited(
+        getClientIPAddress(request) || username,
+        REGISTER_RATE_LIMITER_OPTIONS
+      );
+      if (resp) return rateLimitError(resp);
+
       const userExists = await db.user.findUnique({
         where: { username },
       });
@@ -73,7 +98,7 @@ export async function action({ request }: ActionArgs) {
         log("User %s already exists", username);
         return badRequest({
           repopulateFields: result.submittedData,
-          formError: `User with username ${username} already exists`,
+          message: `User with username ${username} already exists`,
         });
       }
 
@@ -84,7 +109,7 @@ export async function action({ request }: ActionArgs) {
         log("Failed to create user %s", username);
         return badRequest({
           repopulateFields: result.submittedData,
-          formError: `Something went wrong trying to create a new user.`,
+          message: `Something went wrong trying to create a new user.`,
         });
       }
 
@@ -95,7 +120,7 @@ export async function action({ request }: ActionArgs) {
       log("Invalid login type %s", loginType);
       return badRequest({
         repopulateFields: result.submittedData,
-        formError: `Login type invalid`,
+        message: `Login type invalid`,
       });
     }
   }
@@ -136,7 +161,7 @@ export default function Login() {
         />
         <FormInput name="username" label="Username" required />
         <FormInput name="password" label="Password" type="password" required />
-        <Alert>{actionData?.formError}</Alert>
+        <Alert>{actionData?.message}</Alert>
         <SubmitButton />
       </fieldset>
     </ValidatedForm>
