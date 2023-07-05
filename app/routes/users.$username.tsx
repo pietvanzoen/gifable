@@ -1,14 +1,19 @@
 import type { Prisma } from "@prisma/client";
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs, V2_MetaArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import MediaList, { loadMedia, MEDIA_LIST_LINKS } from "~/components/MediaList";
 import QuickSearch from "~/components/QuickSearch";
 import { getMediaLabels } from "~/utils/media.server";
+import { makeTitle } from "~/utils/meta";
 import { requireUserId } from "~/utils/session.server";
 
 export function links() {
   return MEDIA_LIST_LINKS;
+}
+
+export function meta({ data }: V2_MetaArgs<typeof loader>) {
+  return [{ title: makeTitle([`${data?.username}'s gifs`]) }];
 }
 
 export async function loader({ request, params }: LoaderArgs) {
