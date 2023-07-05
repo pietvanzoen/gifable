@@ -6,18 +6,15 @@ import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 
-import styles from "~/styles/search.css";
-import MediaList from "~/components/MediaList";
+import MediaList, { loadMedia, MEDIA_LIST_LINKS } from "~/components/MediaList";
 import { getMediaLabels } from "~/utils/media.server";
 import { useEffect, useState } from "react";
-import { useHydrated } from "remix-utils";
 import { makeTitle } from "~/utils/meta";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
 import { ValidatedForm } from "remix-validated-form";
 import classNames from "classnames";
-
-const PAGE_SIZE = 42;
+import QuickSearch from "~/components/QuickSearch";
 
 type SelectOptions = "" | "all" | "not-mine";
 
@@ -28,7 +25,7 @@ const searchValidator = withZod(
 );
 
 export function links() {
-  return [{ rel: "stylesheet", href: styles }];
+  return MEDIA_LIST_LINKS;
 }
 
 export function meta({ location }: V2_MetaArgs<typeof loader>) {
@@ -67,53 +64,33 @@ export async function loader({ request }: LoaderArgs) {
   const select = (params.get("select") || "").trim();
 
   const where: Prisma.MediaWhereInput = {};
+  const labelsWhere: Prisma.MediaWhereInput = {};
+
   if (search) {
     where.labels = { contains: search };
   }
   if (select === "") {
     where.userId = userId;
+    labelsWhere.userId = userId;
   }
   if (select === "not-mine") {
     where.userId = { not: userId };
+    labelsWhere.userId = { not: userId };
   }
 
-  const [user, mediaCount, totalMediaCount, media, labels] = await Promise.all([
-    db.user.findUnique({
-      where: { id: userId },
-      select: { preferredLabels: true },
-    }),
-    db.media.count({ where }),
-    select === "" ? db.media.count({ where: { userId } }) : null,
-    db.media.findMany({
-      take: page * PAGE_SIZE,
-      where,
-      select: {
-        id: true,
-        url: true,
-        thumbnailUrl: true,
-        labels: true,
-        width: true,
-        height: true,
-        color: true,
-        altText: true,
-        user: {
-          select: {
-            username: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    getMediaLabels({
-      limit: 100,
-      userId:
-        select === ""
-          ? userId
-          : select === "not-mine"
-          ? { not: userId }
-          : undefined,
-    }),
-  ]);
+  const [{ media, count: mediaCount }, user, totalMediaCount, labels] =
+    await Promise.all([
+      loadMedia({ where, page }),
+      db.user.findUnique({
+        where: { id: userId },
+        select: { preferredLabels: true },
+      }),
+      select === "" ? db.media.count({ where: { userId } }) : null,
+      getMediaLabels({
+        limit: 100,
+        where: labelsWhere,
+      }),
+    ]);
 
   return json({
     user,
@@ -201,9 +178,18 @@ export default function MediaRoute() {
         <QuickSearch
           labels={labels || []}
           preferredLabels={user?.preferredLabels || ""}
-          currentSearch={search}
-          currentSelect={select}
         />
+        <center>
+          <Link
+            prefetch="intent"
+            to="/media/random"
+            aria-label="Suprise me! Go to random media"
+          >
+            <small>
+              <strong>Suprise me!</strong>
+            </small>
+          </Link>
+        </center>
         <br />
       </header>
 
@@ -211,7 +197,6 @@ export default function MediaRoute() {
         media={media}
         showUser={select !== ""}
         mediaCount={mediaCount}
-        pageSize={PAGE_SIZE}
         page={page}
       />
 
@@ -236,97 +221,6 @@ export default function MediaRoute() {
       )}
     </>
   );
-}
-
-function QuickSearch({
-  labels,
-  currentSearch,
-  preferredLabels = "",
-  currentSelect,
-}: {
-  labels: [string, number][];
-  preferredLabels?: string;
-  currentSearch: string;
-  currentSelect: SelectOptions;
-}) {
-  const limit = 6;
-  const isHydrated = useHydrated();
-  const [showAllLabels, setShowAllLabels] = useState(false);
-
-  const preferredLabelsList = preferredLabels
-    .split(",")
-    .filter(Boolean)
-    .map((s) => [s.trim(), 0]);
-
-  const sortedLabels = [...labels].sort((a, b) => b[1] - a[1]);
-
-  const labelsList = showAllLabels
-    ? labels
-    : preferredLabelsList.concat([...sortedLabels]).slice(0, limit);
-
-  const maxCount = sortedLabels[0]?.[1] || 0;
-
-  return (
-    <center role="group" aria-labelledby="quick-search-header">
-      <small>
-        {labelsList.length ? (
-          <>
-            <strong id="quick-search-header">Search for label:</strong>&nbsp;
-          </>
-        ) : null}
-        <span id="quick-search-labels">
-          {labelsList.map(([label, count], i) => (
-            <span key={`${label}-${count}`}>
-              {i > 0 && ", "}
-              <Link
-                aria-current={currentSearch === label ? "page" : "false"}
-                onClick={() => setShowAllLabels(false)}
-                to={`/?search=${label}&select=${currentSelect}`}
-                aria-label={`Search for media with label "${label}"`}
-                style={
-                  showAllLabels
-                    ? { fontSize: getFontSize(count as number, maxCount) }
-                    : undefined
-                }
-              >
-                {label}
-              </Link>
-              {showAllLabels ? <small> ({count})</small> : null}
-            </span>
-          ))}
-        </span>
-        {labels.length > limit && isHydrated && (
-          <>
-            &nbsp;&nbsp;
-            <button
-              className="link"
-              aria-label="Toggle show more labels"
-              aria-expanded={showAllLabels}
-              aria-controls="quick-search-labels"
-              onClick={() => setShowAllLabels((s) => !s)}
-            >
-              <strong>{showAllLabels ? "show less" : "show more"}</strong>
-            </button>
-          </>
-        )}
-        <br />
-        <Link
-          prefetch="intent"
-          to="/media/random"
-          aria-label="Suprise me! Go to random media"
-        >
-          <strong>Suprise me!</strong>
-        </Link>
-      </small>
-    </center>
-  );
-}
-
-function getFontSize(count: number, max: number) {
-  const minSize = 1;
-  const maxSize = 1.8;
-  const size = minSize + (maxSize - minSize) * (count / max);
-  return `${size}em`;
 }
 
 export function ErrorBoundary() {

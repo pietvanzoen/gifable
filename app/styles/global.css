@@ -45,6 +45,11 @@ header > nav a {
   display: none !important;
 }
 
+main > header > h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
 .mobile-nav {
   margin: 0;
   background-color: transparent;

@@ -2,7 +2,7 @@ import { payloadTooLarge } from "./request.server";
 import bytes from "bytes";
 import { storage } from "./s3-storage.server";
 import { debug } from "debug";
-import type { Media } from "@prisma/client";
+import type { Media, Prisma } from "@prisma/client";
 import { db } from "./db.server";
 import { LRUCache } from "lru-cache";
 import ms from "ms";
@@ -166,8 +166,8 @@ global.labelsCache =
   });
 
 export async function getMediaLabels(
-  options?: TermsOptions & { userId?: string | { not: string } }
-) {
+  options?: TermsOptions & { where?: Prisma.MediaWhereInput }
+): Promise<LabelsList> {
   const cacheKey = JSON.stringify(options);
 
   const cached = labelsCache.get(cacheKey);
@@ -176,11 +176,10 @@ export async function getMediaLabels(
     return cached;
   }
 
-  const { userId, ...termsOptions } = options || {};
+  const { where, ...termsOptions } = options || {};
 
   log("Fetching labels", { cacheKey });
 
-  const where = userId ? { userId } : {};
   const media = await db.media.findMany({
     where: {
       ...where,
@@ -193,7 +192,7 @@ export async function getMediaLabels(
 
   labelsCache.set(cacheKey, getCommonLabelsTerms(media, termsOptions));
 
-  return labelsCache.get(cacheKey);
+  return labelsCache.get(cacheKey) || [];
 }
 
 export async function getMediaSuggestions(

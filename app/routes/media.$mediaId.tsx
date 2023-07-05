@@ -184,7 +184,11 @@ export default function MediaRoute() {
           {isMine ? null : (
             <tr role="presentation">
               <th tabIndex={-1}>User</th>
-              <td tabIndex={-1}>{media.user.username}</td>
+              <td tabIndex={-1}>
+                <Link to={`/users/${media.user.username}`}>
+                  {media.user.username}
+                </Link>
+              </td>
             </tr>
           )}
           {user.isAdmin ? (

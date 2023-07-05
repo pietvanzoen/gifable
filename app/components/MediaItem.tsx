@@ -18,6 +18,7 @@ export default function MediaItem(props: MediaItemProps) {
   const isHydrated = useHydrated();
   const { showUser, isPlaying, setPlayingId, media, ...restProps } = props;
   const { id, url, thumbnailUrl, width, height, color, altText } = media;
+  const { username } = media.user;
   const title = getTitle(url);
   return (
     <figure id={props.id} className="media" {...restProps}>
@@ -45,7 +46,11 @@ export default function MediaItem(props: MediaItemProps) {
       </div>
       <figcaption>
         {title}
-        {showUser ? ` by ${props.media.user.username}` : null}
+        {showUser && (
+          <>
+            by <Link to={`/users/${username}`}>{username}</Link>
+          </>
+        )}
       </figcaption>
     </figure>
   );

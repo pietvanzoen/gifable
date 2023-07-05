@@ -1,23 +1,59 @@
-import type { Media } from "@prisma/client";
+import type { Media, Prisma } from "@prisma/client";
 import { useEffect, useState } from "react";
 import type { MediaItemProps } from "./MediaItem";
 import MediaItem from "./MediaItem";
 
 import { Link } from "react-router-dom";
 import { useNavigation, useSearchParams } from "@remix-run/react";
-import { useHydrated } from "remix-utils";
+import { promiseHash, useHydrated } from "remix-utils";
+import { db } from "~/utils/db.server";
+import styles from "~/styles/search.css";
+
+const PAGE_SIZE = 42;
+
+export const MEDIA_LIST_LINKS = [{ rel: "stylesheet", href: styles }];
+
+export async function loadMedia({
+  where,
+  page = 1,
+}: {
+  where: Prisma.MediaWhereInput;
+  page: number;
+}) {
+  return promiseHash({
+    count: db.media.count({ where }),
+    media: db.media.findMany({
+      take: page * PAGE_SIZE,
+      where,
+      select: {
+        id: true,
+        url: true,
+        thumbnailUrl: true,
+        labels: true,
+        width: true,
+        height: true,
+        color: true,
+        altText: true,
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+  });
+}
 
 export default function MediaList({
   media,
   mediaCount,
   page,
-  pageSize,
   showUser = false,
 }: {
   media: MediaItemProps["media"][];
   mediaCount?: number;
   page: number;
-  pageSize: number;
   showUser: boolean;
 }) {
   const [playingId, setPlayingId] = useState<Media["id"]>("");
@@ -59,7 +95,7 @@ export default function MediaList({
       <div className="results" role="feed">
         {media.map((data, i) => (
           <MediaItem
-            id={i === previousPage * pageSize - 3 ? "load-more" : undefined}
+            id={i === previousPage * PAGE_SIZE - 3 ? "load-more" : undefined}
             key={data.id}
             media={data}
             showUser={showUser}
@@ -100,7 +136,7 @@ function LoadMoreButton({ params }: { params: URLSearchParams }) {
   return (
     <Link
       className="button"
-      to={`/?${params}${isHydrated ? "" : "#load-more"}`}
+      to={`?${params}${isHydrated ? "" : "#load-more"}`}
       preventScrollReset={true}
       replace={true}
       aria-disabled={isLoading}
