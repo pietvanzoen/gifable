@@ -48,7 +48,7 @@ export default function MediaItem(props: MediaItemProps) {
         {title}
         {showUser && (
           <>
-            by <Link to={`/users/${username}`}>{username}</Link>
+            &nbsp;by <Link to={`/users/${username}`}>{username}</Link>
           </>
         )}
       </figcaption>
