@@ -1,4 +1,5 @@
 import type { User } from "@prisma/client";
+import { Link } from "@remix-run/react";
 
 export function UserMangement({
   users,
@@ -22,7 +23,8 @@ export function UserMangement({
             return (
               <tr key={id}>
                 <td>
-                  {username} {isAdmin ? "(admin)" : null}
+                  <Link to={`/users/${username}`}>{username}</Link>{" "}
+                  {isAdmin ? "(admin)" : null}
                 </td>
                 <td>
                   {lastLogin ? (
