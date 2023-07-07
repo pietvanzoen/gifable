@@ -62,7 +62,6 @@ export function ChangePasswordForm() {
           value={CHANGE_PASSWORD_INTENT}
           required
         />
-        <FormInput name="username" type="hidden" />
         <FormInput
           name="newPassword"
           type="password"

@@ -4,6 +4,7 @@ import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import MediaList, { loadMedia, MEDIA_LIST_LINKS } from "~/components/MediaList";
 import QuickSearch from "~/components/QuickSearch";
+import { db } from "~/utils/db.server";
 import { getMediaLabels } from "~/utils/media.server";
 import { makeTitle } from "~/utils/meta";
 import { requireUserId } from "~/utils/session.server";
@@ -23,6 +24,18 @@ export async function loader({ request, params }: LoaderArgs) {
   const search = (queryParams.get("search") || "").trim();
 
   const { username } = params;
+
+  const user = await db.user.findUnique({
+    where: { username },
+    select: {
+      id: true,
+      username: true,
+    },
+  });
+
+  if (!user) {
+    throw new Response("Not found", { status: 404 });
+  }
 
   const where: Prisma.MediaWhereInput = {
     user: { username },

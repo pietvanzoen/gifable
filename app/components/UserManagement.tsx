@@ -15,6 +15,7 @@ export function UserMangement({
           <tr>
             <th>Username</th>
             <th>Last Login</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -35,6 +36,9 @@ export function UserMangement({
                       })}
                     </time>
                   ) : null}
+                </td>
+                <td>
+                  <Link to={`/users/${username}/edit`}>Edit</Link>
                 </td>
               </tr>
             );
