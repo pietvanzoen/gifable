@@ -256,7 +256,7 @@ export default function MediaRoute() {
           {isMine ? "👯 Duplicate" : "📥 Add to my collection"}
         </Link>
         &nbsp;
-        {isMine && <DeleteButton media={media} />}
+        {(isMine || user.isAdmin) && <DeleteButton media={media} />}
       </center>
 
       {user.isAdmin ? (
