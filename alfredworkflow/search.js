@@ -83,7 +83,7 @@ async function cacheURL(url) {
 
 async function fetchResults(search = "") {
   const url = `${GIFABLE_BASE_URL}/api/media?search=${search}`;
-  headers = {
+  const headers = {
     authorization: `Bearer ${GIFABLE_TOKEN}`,
     Accept: "application/json",
   };
@@ -94,7 +94,7 @@ async function fetchResults(search = "") {
   console.error(`Got response ${resp.status}`);
 
   if (!resp.ok) {
-    throw new Error(json.message);
+    throw new Error(resp.message);
   }
 
   const json = await resp.json();
@@ -122,16 +122,4 @@ function downloadURL(url) {
   });
 }
 
-function chunk(arr, size) {
-  const chunked_arr = [];
-  let index = 0;
-  while (index < arr.length) {
-    chunked_arr.push(arr.slice(index, size + index));
-    index += size;
-  }
-  return chunked_arr;
-}
-
-
 main();
-

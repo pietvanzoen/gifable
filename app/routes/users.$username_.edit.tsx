@@ -12,7 +12,7 @@ import {
 import { useToast } from "~/components/Toast";
 import { db } from "~/utils/db.server";
 import { makeTitle } from "~/utils/meta";
-import { requireUser, requireUserId } from "~/utils/session.server";
+import { requireUser } from "~/utils/session.server";
 
 export function meta({ data }: V2_MetaArgs<typeof loader>) {
   return [{ title: makeTitle([`Edit ${data?.user?.username}`]) }];
