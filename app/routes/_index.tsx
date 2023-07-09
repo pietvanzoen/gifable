@@ -222,7 +222,3 @@ export default function MediaRoute() {
     </>
   );
 }
-
-export function ErrorBoundary() {
-  return <div className="notice">I did a whoopsies.</div>;
-}

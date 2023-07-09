@@ -18,6 +18,8 @@ import type { Theme } from "./components/ThemeStyles";
 import Head from "./components/Head";
 import NavigationLoader from "./components/NavigationLoader";
 import Header from "./components/Header";
+import debug from "debug";
+const logError = debug("app:rootError");
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -30,11 +32,17 @@ export async function loader({ request }: LoaderArgs) {
   });
 }
 
-function Document({ children }: { children: React.ReactNode }) {
+function Document({
+  title,
+  children,
+}: {
+  children: React.ReactNode;
+  title?: string;
+}) {
   const data = useLoaderData<typeof loader>();
   return (
     <html lang="en">
-      <Head theme={data?.user?.theme as Theme} />
+      <Head theme={data?.user?.theme as Theme} title={title} />
       <body>
         <Header showNav={Boolean(data?.user)} />
 
@@ -42,16 +50,18 @@ function Document({ children }: { children: React.ReactNode }) {
 
         <footer>
           <small>
-            <p>
-              Version:{" "}
-              <a
-                href={`https://github.com/pietvanzoen/gifable/tree/${
-                  data?.buildSHA === "dev" ? "main" : data?.buildSHA
-                }`}
-              >
-                {data?.buildSHA}
-              </a>
-            </p>
+            {data?.buildSHA && (
+              <p>
+                Version:{" "}
+                <a
+                  href={`https://github.com/pietvanzoen/gifable/tree/${
+                    data?.buildSHA === "dev" ? "main" : data?.buildSHA
+                  }`}
+                >
+                  {data?.buildSHA}
+                </a>
+              </p>
+            )}
 
             <div>
               <a
@@ -94,6 +104,7 @@ export default function App() {
 
 export function ErrorBoundary() {
   let error = useRouteError();
+  logError(error);
   if (isRouteErrorResponse(error)) {
     return (
       <Document title={`${error.status} ${error.statusText}`}>
@@ -105,22 +116,14 @@ export function ErrorBoundary() {
         </div>
       </Document>
     );
-  } else if (error instanceof Error) {
-    return (
-      <Document title="Uh-oh!">
-        <div className="notice">
-          <h1>Error</h1>
-          <p>{error.message}</p>
-          <p>The stack trace is:</p>
-          <pre>{error.stack}</pre>
-        </div>
-      </Document>
-    );
   } else {
     return (
-      <Document title="Uh-oh!">
-        <h1>Unknown Error</h1>
-        <p>Something went wrong.</p>
+      <Document title="Something went wrong">
+        <center>
+          <h1>🙈 Whoops, something went wrong</h1>
+          <img src="/images/500.jpg" alt="500 error" width="300" />
+          <p>Sorry about that. Please try again.</p>
+        </center>
       </Document>
     );
   }

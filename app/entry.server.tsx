@@ -10,6 +10,8 @@ import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import debug from "debug";
+const log = debug("app:entry");
 
 const ABORT_DELAY = 5_000;
 
@@ -105,10 +107,11 @@ function handleBrowserRequest(
           pipe(body);
         },
         onShellError(error: unknown) {
+          log("shell error", error);
           reject(error);
         },
         onError(error: unknown) {
-          console.error(error);
+          log(error);
           responseStatusCode = 500;
         },
       }

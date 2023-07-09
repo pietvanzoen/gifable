@@ -1,5 +1,6 @@
 import { Links, Meta } from "@remix-run/react";
 import type { LinkHTMLAttributes } from "react";
+import { makeTitle } from "~/utils/meta";
 import type { Theme } from "./ThemeStyles";
 import ThemeStyles from "./ThemeStyles";
 
@@ -108,7 +109,13 @@ const LINKS = [
   },
 ];
 
-export default function Head({ theme }: { theme: Theme }) {
+export default function Head({
+  theme,
+  title,
+}: {
+  theme: Theme;
+  title?: string;
+}) {
   return (
     <head>
       <meta charSet="utf-8" />
@@ -120,6 +127,7 @@ export default function Head({ theme }: { theme: Theme }) {
         <link key={i} {...link} />
       ))}
       <Meta />
+      {title && <title>{makeTitle([title])}</title>}
       <Links />
       <ThemeStyles theme={theme || "system"} />
     </head>
