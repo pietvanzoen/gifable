@@ -34,6 +34,7 @@ export async function loadMedia({
         height: true,
         color: true,
         altText: true,
+        fileHash: true,
         user: {
           select: {
             username: true,

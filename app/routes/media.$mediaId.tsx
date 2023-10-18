@@ -120,7 +120,7 @@ export default function MediaRoute() {
       <figure>
         <center>
           <img
-            src={url}
+            src={`${url}?hash=${media.fileHash}`}
             alt={labels || ""}
             width={width || 300}
             height={height || 200}
@@ -242,6 +242,14 @@ export default function MediaRoute() {
               ✏️ Edit info
             </Link>
             &nbsp;
+            <Link
+              to={`/media/${media.id}/replace`}
+              className="button"
+              aria-label="Replace media"
+            >
+              🔄 Replace
+            </Link>
+            <br />
           </>
         )}
         <Link

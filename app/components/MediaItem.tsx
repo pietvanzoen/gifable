@@ -6,7 +6,14 @@ import { getTitle } from "~/utils/media";
 export type MediaItemProps = {
   media: Pick<
     Media,
-    "id" | "url" | "thumbnailUrl" | "width" | "height" | "color" | "altText"
+    | "id"
+    | "url"
+    | "thumbnailUrl"
+    | "width"
+    | "height"
+    | "color"
+    | "altText"
+    | "fileHash"
   > & { user: Pick<User, "username"> };
   isPlaying: boolean;
   id?: string;
@@ -17,16 +24,19 @@ export type MediaItemProps = {
 export default function MediaItem(props: MediaItemProps) {
   const isHydrated = useHydrated();
   const { showUser, isPlaying, setPlayingId, media, ...restProps } = props;
-  const { id, url, thumbnailUrl, width, height, color, altText } = media;
+  const { id, url, thumbnailUrl, width, height, color, altText, fileHash } =
+    media;
   const { username } = media.user;
   const title = getTitle(url);
+  const thumb = `${thumbnailUrl}?hash=${fileHash}`;
+  const image = `${url}?hash=${fileHash}`;
   return (
     <figure id={props.id} className="media" {...restProps}>
       <div className="img-wrapper">
         <Link prefetch="intent" to={`/media/${id}`} aria-label={`View media`}>
           <img
             loading="lazy"
-            src={isPlaying || !thumbnailUrl ? url : thumbnailUrl}
+            src={isPlaying || !thumbnailUrl ? image : thumb}
             alt={altText || ""}
             width={width || 300}
             height={height || 200}
