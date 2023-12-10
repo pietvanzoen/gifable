@@ -1,7 +1,8 @@
-import type { ActionArgs } from "@remix-run/node";
+import { json, type ActionArgs } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   useActionData,
+  useLoaderData,
   useRouteError,
   useSearchParams,
 } from "@remix-run/react";
@@ -21,6 +22,7 @@ import { UserSchema } from "~/utils/validators";
 import { makeTitle } from "~/utils/meta";
 import styles from "~/styles/login.css";
 import { isRateLimited, rateLimitError } from "~/utils/rate-limiter.server";
+import env from "~/utils/env.server";
 
 const log = debug("app:login");
 
@@ -84,6 +86,14 @@ export async function action({ request }: ActionArgs) {
     }
 
     case "register": {
+      if (env.get("DISABLE_SIGNUP")) {
+        log("Signup is disabled");
+        return badRequest({
+          repopulateFields: result.submittedData,
+          message: `Signup is disabled`,
+        });
+      }
+
       log("Registering user %s", username);
       const resp = await isRateLimited(
         getClientIPAddress(request) || username,
@@ -126,13 +136,22 @@ export async function action({ request }: ActionArgs) {
   }
 }
 
+export function loader() {
+  return json({
+    allowSignup: !env.get("DISABLE_SIGNUP"),
+  });
+}
+
 export default function Login() {
+  const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
   const defaultValues = actionData?.repopulateFields || {
     redirectTo: searchParams.get("redirectTo") || "/",
     loginType: "login",
   };
+
+  const title = data.allowSignup ? "Login or Register" : "Login";
 
   return (
     <ValidatedForm
@@ -143,22 +162,33 @@ export default function Login() {
     >
       <fieldset>
         <legend>
-          <h1>Login or Register?</h1>
+          <h1>{title}</h1>
         </legend>
         <FormInput label="Redirect to" type="hidden" name="redirectTo" />
-        <FormInput
-          name="loginType"
-          label="Login"
-          type="radio"
-          value="login"
-          checked
-        />
-        <FormInput
-          name="loginType"
-          label="Register"
-          type="radio"
-          value="register"
-        />
+        {data.allowSignup ? (
+          <>
+            <FormInput
+              name="loginType"
+              label="Login"
+              type="radio"
+              value="login"
+              checked
+            />
+            <FormInput
+              name="loginType"
+              label="Register"
+              type="radio"
+              value="register"
+            />
+          </>
+        ) : (
+          <FormInput
+            name="loginType"
+            label="Login"
+            type="hidden"
+            value="login"
+          />
+        )}
         <FormInput name="username" label="Username" required />
         <FormInput name="password" label="Password" type="password" required />
         <Alert>{actionData?.message}</Alert>
