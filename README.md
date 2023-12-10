@@ -34,3 +34,7 @@ docker run -d \
   -e DATABASE_URL="file:/data/gifable.db" \
   ghcr.io/pietvanzoen/gifable:latest
 ```
+
+## Configuration
+
+See `.env.example` for all available configuration options.
