@@ -9,7 +9,7 @@
     "build": "remix build",
     "dev": "DEBUG=app:* remix dev",
     "predev": "prisma generate && npm run install:css",
-    "prestart": "prisma migrate deploy",
+    "prestart": "prisma migrate deploy && node ./seed-admin.mjs",
     "start": "remix-serve build",
     "typecheck": "tsc",
     "test": "jest app",
