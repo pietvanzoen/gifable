@@ -344,3 +344,26 @@ dialog.toast[open] {
   vertical-align: middle;
   margin-right: 0.5em;
 }
+
+body > footer {
+  font-size: 0.8rem;
+}
+
+footer > menu {
+  margin: 0 0 1rem 0;
+  list-style: none;
+  text-align: center;
+  white-space: nowrap;
+  padding: 0;
+  font-size: 0;
+}
+footer > menu li {
+  line-height: 1;
+  font-size: 0.8rem;
+  border-right: 1px solid var(--border);
+  padding: 0 1em;
+  display: inline-block;
+}
+footer > menu li:last-child {
+  border-right: none;
+}
