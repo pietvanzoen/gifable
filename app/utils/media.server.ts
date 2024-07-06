@@ -7,9 +7,10 @@ import { db } from "./db.server";
 import { LRUCache } from "lru-cache";
 import ms from "ms";
 import { getImageData } from "./image.server";
+import envServer from "./env.server";
 const log = debug("app:media-helpers");
 
-const MAX_FILE_SIZE = bytes("10MB");
+const MAX_FILE_SIZE = bytes(envServer.get('MAX_FILE_SIZE') ?? "10MB");
 
 type UploadOutput = {
   url: string;
