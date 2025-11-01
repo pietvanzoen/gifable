@@ -19,4 +19,8 @@ export default {
   get buildSHA() {
     return BUILD_SHA;
   },
+
+  get appUrl() {
+    return this.require("APP_URL");
+  },
 };

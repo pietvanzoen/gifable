@@ -12,6 +12,61 @@ const log = debug("app:media-helpers");
 
 const MAX_FILE_SIZE = bytes(envServer.get('MAX_FILE_SIZE') ?? "10MB");
 
+export function getFullProxyImageUrl(mediaId: string): string {
+  const appUrl = envServer.appUrl.replace(/\/$/, ""); // Remove trailing slash
+  return `${appUrl}/media/${mediaId}/image`;
+}
+
+export function getFullProxyThumbnailUrl(mediaId: string): string {
+  const appUrl = envServer.appUrl.replace(/\/$/, ""); // Remove trailing slash
+  return `${appUrl}/media/${mediaId}/thumbnail`;
+}
+
+/**
+ * Generate a Matrix Content (mxc://) URI for a media item
+ * Format: mxc://<server-name>/<media-id>
+ *
+ * This allows Matrix clients to reference media from this Gifable instance
+ * in a federated way. The media ID is the Gifable UUID.
+ *
+ * @param mediaId - The Gifable media UUID
+ * @returns The MXC URI string
+ */
+export function getMxcUri(mediaId: string): string {
+  const appUrl = envServer.appUrl;
+  const serverName = new URL(appUrl).hostname;
+  return `mxc://${serverName}/${mediaId}`;
+}
+
+/**
+ * Convert an MXC URI to an HTTP URL that can be used to download the media
+ * This is useful for clients that need to display Matrix media
+ *
+ * @param mxcUri - The MXC URI (e.g., "mxc://example.com/abc123")
+ * @returns The HTTP download URL, or null if the URI is invalid or from a different server
+ */
+export function mxcUriToHttpUrl(mxcUri: string): string | null {
+  if (!mxcUri.startsWith("mxc://")) {
+    return null;
+  }
+
+  const parts = mxcUri.slice(6).split("/"); // Remove "mxc://" prefix
+  if (parts.length !== 2) {
+    return null;
+  }
+
+  const [serverName, mediaId] = parts;
+  const appUrl = envServer.appUrl;
+  const expectedServerName = new URL(appUrl).hostname;
+
+  // Only convert URIs from our own server
+  if (serverName !== expectedServerName) {
+    return null;
+  }
+
+  return `${appUrl.replace(/\/$/, "")}/_matrix/media/v3/download/${serverName}/${mediaId}`;
+}
+
 type UploadOutput = {
   url: string;
   size: number;

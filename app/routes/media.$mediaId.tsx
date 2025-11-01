@@ -22,8 +22,8 @@ import { useToast } from "~/components/Toast";
 import { db } from "~/utils/db.server";
 import { formatBytes, formatDate } from "~/utils/format";
 import { copyToClipboard } from "~/utils/helpers.client";
-import { getTitle } from "~/utils/media";
-import { deleteURL, reparse } from "~/utils/media.server";
+import { getTitle, getProxyImageUrl } from "~/utils/media";
+import { deleteURL, reparse, getFullProxyImageUrl } from "~/utils/media.server";
 import { makeTitle } from "~/utils/meta";
 import { requireUser } from "~/utils/session.server";
 
@@ -86,11 +86,12 @@ export async function loader({ request, params }: LoaderArgs) {
       status: 404,
     });
   }
-  return json({ user, media });
+  const fullProxyUrl = getFullProxyImageUrl(media.id);
+  return json({ user, media, fullProxyUrl });
 }
 
 export default function MediaRoute() {
-  const { user, media } = useLoaderData<typeof loader>();
+  const { user, media, fullProxyUrl } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const isMine = media.userId === user.id;
 
@@ -120,7 +121,7 @@ export default function MediaRoute() {
       <figure>
         <center>
           <img
-            src={`${url}?hash=${media.fileHash}`}
+            src={`${getProxyImageUrl(media.id)}?hash=${media.fileHash}`}
             alt={labels || ""}
             width={width || 300}
             height={height || 200}
@@ -131,7 +132,7 @@ export default function MediaRoute() {
 
       <Outlet />
 
-      {useHydrated() && <ShareButtons media={media} />}
+      {useHydrated() && <ShareButtons media={media} fullProxyUrl={fullProxyUrl} />}
 
       <table style={{ width: "100%" }} role="grid" aria-labelledby="meta-title">
         <caption id="meta-title">
@@ -141,7 +142,7 @@ export default function MediaRoute() {
           <tr role="presentation">
             <th tabIndex={0}>URL</th>
             <td tabIndex={-1} style={{ wordBreak: "break-all" }}>
-              <a href={url}>{url}</a>
+              <a href={fullProxyUrl}>{fullProxyUrl}</a>
             </td>
           </tr>
           <tr role="presentation">
@@ -334,8 +335,8 @@ function DeleteButton({ media }: { media: Pick<Media, "id" | "url"> }) {
   );
 }
 
-function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
-  const { url, altText } = media;
+function ShareButtons({ media, fullProxyUrl }: { media: Pick<Media, "url" | "altText">; fullProxyUrl: string }) {
+  const { altText } = media;
 
   const toast = useToast();
 
@@ -348,7 +349,7 @@ function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
         <button
           type="button"
           aria-label="Copy URL to clipboard"
-          onClick={() => copyToClipboard(url, () => toast("Copied URL"))}
+          onClick={() => copyToClipboard(fullProxyUrl, () => toast("Copied URL"))}
         >
           🔗 Copy URL
         </button>
@@ -367,7 +368,7 @@ function ShareButtons({ media }: { media: Pick<Media, "url" | "altText"> }) {
           type="button"
           aria-label="Copy Markdown to clipboard"
           onClick={() =>
-            copyToClipboard(`![${altText || ""}](${url})`, () =>
+            copyToClipboard(`![${altText || ""}](${fullProxyUrl})`, () =>
               toast("Copied markdown")
             )
           }

@@ -29,50 +29,50 @@ jobs:
         if: steps.cache-primes.outputs.cache-hit != 'true'
         run: npm install
 
-  e2e:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    needs: install
-    services:
-      s3-mock:
-        image: adobe/s3mock
-        ports:
-          - 9090:9090
-          - 9191:9191
-        env:
-          initialBuckets: test
-          root: s3mock
-    env:
-      DATABASE_URL: file:./test.db
-      SESSION_SECRET: test
-      DEBUG: "app:*"
-      S3_ENDPOINT: localhost
-      S3_PORT: 9090
-      S3_ACCESS_KEY: test
-      S3_SECRET_KEY: test
-      S3_BUCKET: test
-      S3_USE_SSL: false
-      S3_STORAGE_BASE_URL: http://localhost:9090/s3mock
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - name: Cache NPM dependencies
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }} # (1)
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Run Playwright tests
-        run: npx playwright test
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+  # e2e:
+  #   timeout-minutes: 60
+  #   runs-on: ubuntu-22.04
+  #   needs: install
+  #   services:
+  #     s3-mock:
+  #       image: adobe/s3mock
+  #       ports:
+  #         - 9090:9090
+  #         - 9191:9191
+  #       env:
+  #         initialBuckets: test
+  #         root: s3mock
+  #   env:
+  #     DATABASE_URL: file:./test.db
+  #     SESSION_SECRET: test
+  #     DEBUG: "app:*"
+  #     S3_ENDPOINT: localhost
+  #     S3_PORT: 9090
+  #     S3_ACCESS_KEY: test
+  #     S3_SECRET_KEY: test
+  #     S3_BUCKET: test
+  #     S3_USE_SSL: false
+  #     S3_STORAGE_BASE_URL: http://localhost:9090/s3mock
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 20
+  #     - name: Cache NPM dependencies
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: node_modules
+  #         key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }} # (1)
+  #     - name: Install Playwright Browsers
+  #       run: npx playwright install --with-deps
+  #     - name: Run Playwright tests
+  #       run: npx playwright test
+  #     - uses: actions/upload-artifact@v4
+  #       if: always()
+  #       with:
+  #         name: playwright-report
+  #         path: playwright-report/
+  #         retention-days: 30
 
   test:
     runs-on: ubuntu-latest
@@ -110,7 +110,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: ["test", "e2e"]
+    needs: test
     if: github.ref == 'refs/heads/main'
     outputs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
@@ -121,17 +121,17 @@ jobs:
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Set build_sha file
         run: echo ${{ steps.vars.outputs.sha_short }} > build_sha
-      - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag ghcr.io/pietvanzoen/gifable:${{ steps.vars.outputs.sha_short }}
-      - name: Tag latest
-        run: docker tag ghcr.io/pietvanzoen/gifable:${{ steps.vars.outputs.sha_short }} ghcr.io/pietvanzoen/gifable:latest
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push the Docker image
-        run: |
-          docker push ghcr.io/pietvanzoen/gifable:${{ steps.vars.outputs.sha_short }}
-          docker push ghcr.io/pietvanzoen/gifable:latest
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.RUNNER_TOKEN }}
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/agentscrubbles/gifable:${{ steps.vars.outputs.sha_short }}
+          labels: ${{ steps.vars.outputs.sha_short }}

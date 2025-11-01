@@ -1,7 +1,7 @@
 import type { Media, User } from "@prisma/client";
 import { Link } from "@remix-run/react";
 import { useHydrated } from "remix-utils";
-import { getTitle } from "~/utils/media";
+import { getTitle, getProxyImageUrl, getProxyThumbnailUrl } from "~/utils/media";
 
 export type MediaItemProps = {
   media: Pick<
@@ -28,8 +28,8 @@ export default function MediaItem(props: MediaItemProps) {
     media;
   const { username } = media.user;
   const title = getTitle(url);
-  const thumb = `${thumbnailUrl}?hash=${fileHash}`;
-  const image = `${url}?hash=${fileHash}`;
+  const thumb = `${getProxyThumbnailUrl(id)}?hash=${fileHash}`;
+  const image = `${getProxyImageUrl(id)}?hash=${fileHash}`;
   return (
     <figure id={props.id} className="media" {...restProps}>
       <div className="img-wrapper">

@@ -2,6 +2,7 @@ import type { LoaderArgs } from "@remix-run/node";
 import type { Prisma } from "@prisma/client";
 
 import { db } from "~/utils/db.server";
+import { getFullProxyImageUrl, getFullProxyThumbnailUrl } from "~/utils/media.server";
 
 import { unauthorized } from "remix-utils";
 
@@ -49,7 +50,14 @@ export async function loader({ request }: LoaderArgs) {
     orderBy: { createdAt: "desc" },
   });
 
-  return new Response(JSON.stringify({ data }), {
+  // Transform to use full proxy URLs
+  const transformedData = data.map((item) => ({
+    ...item,
+    url: getFullProxyImageUrl(item.id),
+    thumbnailUrl: getFullProxyThumbnailUrl(item.id),
+  }));
+
+  return new Response(JSON.stringify({ data: transformedData }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",

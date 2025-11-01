@@ -24,7 +24,7 @@ import { MediaSchema } from "~/utils/validators";
 import FormInput from "~/components/FormInput";
 import { useState } from "react";
 import { makeTitle } from "~/utils/meta";
-import { getTitle } from "~/utils/media";
+import { getTitle, getProxyImageUrl } from "~/utils/media";
 import { conflict } from "~/utils/request.server";
 import Alert from "~/components/Alert";
 
@@ -44,7 +44,7 @@ export async function action({ params, request }: ActionArgs) {
   if (result.error) return validationError(result.error, result.submittedData);
 
   const { mediaId: id } = params;
-  const { labels, altText } = result.data;
+  const { labels, altText, isPublic } = result.data;
 
   const [media] = await db.media.findMany({
     where: { id, userId: user.id },
@@ -76,7 +76,7 @@ export async function action({ params, request }: ActionArgs) {
 
   await db.media.update({
     where: { id },
-    data: { labels, altText, ...renameData },
+    data: { labels, altText, isPublic, ...renameData },
   });
 
   return redirect(`/media/${id}`);
@@ -140,7 +140,7 @@ export default function MediaRoute() {
           <figure>
             <center>
               <img
-                src={url}
+                src={getProxyImageUrl(media.id)}
                 alt={labels || ""}
                 width={width || 300}
                 height={height || 200}
@@ -187,6 +187,16 @@ export default function MediaRoute() {
             label="alt text"
             onClick={setAltText}
           />
+          <hr />
+          <label htmlFor="isPublic">
+            <input
+              type="checkbox"
+              id="isPublic"
+              name="isPublic"
+              defaultChecked={media.isPublic}
+            />
+            Public (allow access via shared links)
+          </label>
           <hr />
           <Alert>{actionData?.formError}</Alert>
           <center>

@@ -14,4 +14,8 @@ export const MediaSchema = z.object({
   filename: z.string().regex(FILENAME_REGEX),
   labels: z.string().trim().optional(),
   altText: z.string().trim().optional(),
+  isPublic: z
+    .string()
+    .optional()
+    .transform((val) => val === "on"),
 });
